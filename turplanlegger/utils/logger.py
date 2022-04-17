@@ -26,4 +26,3 @@ class Logger:
                 logging.StreamHandler(stdout)
             ]
         )
-

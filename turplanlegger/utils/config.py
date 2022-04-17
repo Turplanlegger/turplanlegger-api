@@ -19,11 +19,9 @@ class Config:
         self.config.from_pyfile('/etc/turplanlegger/turplanlegger.conf')
 
         # Database
-        self.config['DATABASE_HOST'] = self.conf_ent('DATABASE_HOST')
-        self.config['DATABASE_INSTANCE'] = self.conf_ent('DATABASE_INSTANCE')
-        self.config['DATABASE_PASSWORD'] = self.conf_ent('DATABASE_PASSWORD')
-        self.config['DATABASE_MAX_RETRIES'] = self.conf_ent(
-            'DATABASE_MAX_RETRIES', 5)
+        self.config['DATABASE_URI'] = self.conf_ent('DATABASE_URI')
+        self.config['DATABASE_NAME'] = self.conf_ent('DATABASE_NAME')
+        self.config['DATABASE_MAX_RETRIES'] = self.conf_ent('DATABASE_MAX_RETRIES', 5)
 
         # Logging
         self.config['LOG_FILE'] = self.conf_ent(

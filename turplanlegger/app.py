@@ -26,9 +26,8 @@ def create_app(config_override: Dict[str, Any] = None,
     handlers.register(app)
 
     db.init_db(app)
-    soap.init_client(app)
 
-    from turplanlegger.views import api
-    app.register_blueprint(api)
+    # from turplanlegger.views import api
+    # app.register_blueprint(api)
 
     return app
