@@ -11,7 +11,6 @@ handlers = ExceptionHandlers()
 config = Config()
 logger = Logger()
 db = Database()
-soap = Soap()
 
 
 def create_app(config_override: Dict[str, Any] = None,

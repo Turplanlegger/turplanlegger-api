@@ -16,7 +16,7 @@ class Config:
         from flask import Config
         self.config = Config('/')
 
-        self.config.from_pyfile('/etc/marvalapi/marvalapi.conf')
+        self.config.from_pyfile('/etc/turplanlegger/turplanlegger.conf')
 
         # Database
         self.config['DATABASE_HOST'] = self.conf_ent('DATABASE_HOST')
