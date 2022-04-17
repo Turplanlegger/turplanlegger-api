@@ -3,7 +3,6 @@ from typing import Any, Dict
 from flask import Flask
 
 from turplanlegger.database.base import Database
-from turplanlegger.database.suds import Soap
 from turplanlegger.exceptions import ExceptionHandlers
 from turplanlegger.utils.config import Config
 from turplanlegger.utils.logger import Logger
