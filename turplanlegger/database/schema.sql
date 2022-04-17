@@ -4,10 +4,12 @@ CREATE TABLE IF NOT EXISTS users (
     last_name text NOT NULL,
     email text NOT NULL
 );
+
 CREATE TABLE IF NOT EXISTS routes (
     id int PRIMARY KEY,
     route text ARRAY
 );
+
 CREATE TABLE IF NOT EXISTS trips (
     id int PRIMARY KEY,
     name text NOT NULL,
