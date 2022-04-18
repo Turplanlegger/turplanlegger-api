@@ -58,6 +58,9 @@ class List:
     def create(self) -> 'List':
         return List.get_list(db.create_list(self))
 
+    def add_list_items(self, items: list) -> bool:
+        return db.add_list_items(self.id, items)
+
     # def __repr__(self) -> str:
     #     return 'List(id={!r}, request_id={!r}, content={!r}, type_id={!r}, author={!r}, create_time={!r}'.format(
     #         self.id, self.request_id, self.content, self.type_id, self.author, self.create_time

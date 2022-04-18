@@ -10,7 +10,7 @@ from . import lists  # noqa isort:skip
 
 @api.before_request
 def before_request():
-    if request.method in ['POST', 'PUT'] and not request.is_json:
+    if request.method in ['PATCH', 'POST', 'PUT'] and not request.is_json:
         raise ApiError("POST and PUT requests must set 'Content-type' to "
                        "'application/json'", 415)
 

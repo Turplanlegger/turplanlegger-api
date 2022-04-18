@@ -30,3 +30,22 @@ def add_list():
         raise ApiError(str(e), 500)
 
     return jsonify(list.serialize), 200
+
+
+@api.route('/list/<list_id>/add', methods=['PATCH'])
+def add_list_items(list_id):
+
+    items = request.json.get('items')
+
+    if not items:
+        raise ApiError('must supply items to add as JSON list', 400)
+
+    list = List.find_list(list_id)
+
+    if not list:
+        raise ApiError('list not found', 404)
+
+    if list.add_list_items(items):
+        return jsonify(status='ok')
+    else:
+        raise ApiError('failed to add items')

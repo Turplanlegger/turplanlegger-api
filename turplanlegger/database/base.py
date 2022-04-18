@@ -71,7 +71,7 @@ class Database:
         select = """
             SELECT * FROM lists WHERE id = %s
         """
-        return self._fetchone(select, id)
+        return self._fetchone(select, [id])
 
     def create_list(self, list):
         insert = """
@@ -80,6 +80,15 @@ class Database:
             RETURNING *
         """
         return self._insert(insert, vars(list))
+
+    def add_list_items(self, id, items):
+        update = """
+            UPDATE lists
+            SET items=ARRAY(SELECT DISTINCT UNNEST(items || %(items)s))
+            WHERE id=%(id)s
+            RETURNING *
+        """
+        return self._updateone(update, {'id': id, 'items': items}, returning=True)
 
     # Helpers
     def _insert(self, query, vars):
@@ -100,6 +109,16 @@ class Database:
         self._log(cursor, query, vars)
         cursor.execute(query, vars)
         return cursor.fetchone()
+
+    def _updateone(self, query, vars, returning=False):
+        """
+        Update, with optional return.
+        """
+        cursor = self.conn.cursor()
+        self._log(cursor, query, vars)
+        cursor.execute(query, vars)
+        self.conn.commit()
+        return cursor.fetchone() if returning else None
 
     def _log(self, cursor, query, vars):
         self.logger.debug('{stars}\n{query}\n{stars}'.format(
