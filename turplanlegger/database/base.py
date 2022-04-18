@@ -16,12 +16,13 @@ class Database:
         self.dbname = app.config.get('DATABASE_NAME')
         self.max_retries = app.config.get('DATABASE_MAX_RETRIES', 5)
 
-        conn = self.connect()
+        self.conn = self.connect()
+        self.logger.debug('Database connected')
 
         with app.open_resource('database/schema.sql') as f:
             try:
-                conn.cursor().execute(f.read())
-                conn.commit()
+                self.conn.cursor().execute(f.read())
+                self.conn.commit()
             except Exception as e:
                 raise
                 self.logger.exception(e)
@@ -58,9 +59,48 @@ class Database:
         db.close()
 
     def destroy(self):
-        conn = self.connect()
+        conn = self.conn
         cursor = conn.cursor()
-        for table in ['trips', 'routes', 'users']:
+        for table in ['trips', 'lists', 'users', 'routes']:
             cursor.execute(f'DROP TABLE IF EXISTS {table}')
         conn.commit()
         conn.close()
+
+    # Lists
+    def get_list(self, id):
+        select = """
+            SELECT * FROM lists WHERE id = %s
+        """
+        return self._fetchone(select, id)
+
+    def create_list(self, list):
+        insert = """
+            INSERT INTO lists (name, type, items, items_checked, owner)
+            VALUES (%(name)s, %(type)s, %(items)s, %(items_checked)s, %(owner)s)
+            RETURNING *
+        """
+        return self._insert(insert, vars(list))
+
+    # Helpers
+    def _insert(self, query, vars):
+        """
+        Insert, with return.
+        """
+        cursor = self.conn.cursor()
+        self._log(cursor, query, vars)
+        cursor.execute(query, vars)
+        self.conn.commit()
+        return cursor.fetchone()
+
+    def _fetchone(self, query, vars):
+        """
+        Return none or one row.
+        """
+        cursor = self.conn.cursor()
+        self._log(cursor, query, vars)
+        cursor.execute(query, vars)
+        return cursor.fetchone()
+
+    def _log(self, cursor, query, vars):
+        self.logger.debug('{stars}\n{query}\n{stars}'.format(
+            stars='*' * 40, query=cursor.mogrify(query, vars).decode('utf-8')))

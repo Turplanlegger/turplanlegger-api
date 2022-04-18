@@ -27,7 +27,7 @@ def create_app(config_override: Dict[str, Any] = None,
 
     db.init_db(app)
 
-    # from turplanlegger.views import api
-    # app.register_blueprint(api)
+    from turplanlegger.views import api
+    app.register_blueprint(api)
 
     return app
