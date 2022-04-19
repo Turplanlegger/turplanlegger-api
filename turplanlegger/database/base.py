@@ -75,20 +75,19 @@ class Database:
 
     def create_list(self, list):
         insert = """
-            INSERT INTO lists (name, type, items, items_checked, owner)
-            VALUES (%(name)s, %(type)s, %(items)s, %(items_checked)s, %(owner)s)
+            INSERT INTO lists (name, type, owner)
+            VALUES (%(name)s, %(type)s, %(owner)s)
             RETURNING *
         """
         return self._insert(insert, vars(list))
 
-    def add_list_items(self, id, items):
-        update = """
-            UPDATE lists
-            SET items=ARRAY(SELECT DISTINCT UNNEST(items || %(items)s))
-            WHERE id=%(id)s
+    def add_list_item(self, item):
+        insert = """
+            INSERT INTO lists_items (content, checked, list, owner)
+            VALUES (%(content)s, %(checked)s, %(list)s, %(owner)s)
             RETURNING *
         """
-        return self._updateone(update, {'id': id, 'items': items}, returning=True)
+        return self._insert(insert, item)
 
     # Helpers
     def _insert(self, query, vars):

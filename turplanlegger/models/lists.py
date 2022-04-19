@@ -51,12 +51,42 @@ class List:
             'name': self.name,
             'type': self.type,
             'items': self.items,
-            'items_checked': self.items,
+            'items_checked': self.items_checked,
             'create_time': self.create_time
         }
 
     def create(self) -> 'List':
-        return List.get_list(db.create_list(self))
+        list = self.get_list(db.create_list(self))
+        print(list)
+        if self.items:
+            items = [
+                {
+                    'content':item,
+                    'checked': False,
+                    'list': list.id,
+                    'owner': list.owner
+                } for item in self.items
+            ]
+            items = [db.add_list_item(item) for item in items]
+            items = [self.get_list_item(item) for item in items]
+            list.items = items
+            print(list.items)
+
+        if self.items_checked:
+            items_checked = [
+                {
+                    'content':item,
+                    'checked': True,
+                    'list': list.id,
+                    'owner': list.owner
+                } for item in self.items_checked
+            ]
+            items_checked = [db.add_list_item(item) for item in items_checked]
+            items_checked = [self.get_list_item(item) for item in items_checked]
+            list.items_checked = items_checked
+            print(list.items_checked)
+
+        return list
 
     def add_list_items(self, items: list) -> bool:
         return db.add_list_items(self.id, items)
@@ -74,7 +104,7 @@ class List:
     def get_list(cls, rec) -> 'List':
         if isinstance(rec, dict):
             return List(
-                id=rec.get('id', 0),
+                id=rec.get('id', None),
                 owner=rec.get('owner', None),
                 name=rec.get('name', None),
                 type=rec.get('type', None),
@@ -88,7 +118,20 @@ class List:
                 owner=rec.owner,
                 name=rec.name,
                 type=rec.type,
-                items=rec.items,
-                items_checked=rec.items,
+                items=None,
+                items_checked=None,
                 create_time=rec.create_time
             )
+
+    def get_list_item(self, rec):
+        if isinstance(rec, dict):
+            return {
+                'id': rec.get('id', None),
+                'content': rec.get('owner', None)
+            }
+        elif isinstance(rec, tuple):
+            return {
+                'id': rec.id,
+                'content': rec.content
+            }
+

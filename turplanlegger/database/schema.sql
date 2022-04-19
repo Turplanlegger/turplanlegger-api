@@ -17,8 +17,15 @@ CREATE TABLE IF NOT EXISTS lists (
     id serial PRIMARY KEY,
     name text,
     type text,
-    items text ARRAY,
-    items_checked text ARRAY,
+    owner int REFERENCES users (id),
+    create_time timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS lists_items (
+    id serial PRIMARY KEY,
+    content text,
+    checked boolean,
+    list int REFERENCES lists (id),
     owner int REFERENCES users (id),
     create_time timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
