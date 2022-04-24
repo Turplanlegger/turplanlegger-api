@@ -1,20 +1,19 @@
 from datetime import datetime
-from typing import Any, Dict, List, Tuple, Union
+from typing import Dict, List
 
 from turplanlegger.app import db
+from turplanlegger.models.list_item import ListItem
 
 JSON = Dict[str, any]
 
 
-class List:
+class List:  # This class has to be renamed
 
-    def __init__(self, owner: int, name: str, type: str, **kwargs) -> None:
+    def __init__(self, owner: int, type: str, **kwargs) -> None:
         if not owner:
             raise ValueError('Missing mandatory field "owner"')
         if not isinstance(owner, int):
             raise TypeError('"owner" must be integer')
-        if not name:
-            raise ValueError('Missing mandatory field "name"')
         if not type:
             raise ValueError('Missing mandatory field "type"')
         if not isinstance(type, str):
@@ -22,11 +21,11 @@ class List:
 
         self.id = kwargs.get('id', 0)
         self.owner = owner
-        self.name = name
+        self.name = kwargs.get('name')
         self.type = type
         self.items = kwargs.get('items', [])
         self.items_checked = kwargs.get('items_checked', [])
-        self.create_time = datetime.now()
+        self.create_time = kwargs.get('create_time', None) or datetime.now()
 
     @classmethod
     def parse(cls, json: JSON) -> 'List':
@@ -50,55 +49,42 @@ class List:
             'owner': self.owner,
             'name': self.name,
             'type': self.type,
-            'items': self.items,
-            'items_checked': self.items_checked,
+            'items': [item.serialize for item in self.items],
+            'items_checked': [item.serialize for item in self.items_checked],
             'create_time': self.create_time
+        }
+
+    def parse_item(self, content, owner, checked=False):
+        return {
+            'content': content,
+            'checked': checked,
+            'list': owner,
+            'owner': self.owner
         }
 
     def create(self) -> 'List':
         list = self.get_list(db.create_list(self))
-        print(list)
         if self.items:
-            items = [
-                {
-                    'content':item,
-                    'checked': False,
-                    'list': list.id,
-                    'owner': list.owner
-                } for item in self.items
-            ]
-            items = [db.add_list_item(item) for item in items]
-            items = [self.get_list_item(item) for item in items]
-            list.items = items
-            print(list.items)
+            items = [ListItem(list.owner, list.id, False, item) for item in self.items]
+            items = [item.create() for item in items]
+            list.items, self.items = [items, items]
 
         if self.items_checked:
-            items_checked = [
-                {
-                    'content':item,
-                    'checked': True,
-                    'list': list.id,
-                    'owner': list.owner
-                } for item in self.items_checked
-            ]
+            items_checked = [self.parse_item(item, list.owner, True) for item in self.items_checked]
             items_checked = [db.add_list_item(item) for item in items_checked]
-            items_checked = [self.get_list_item(item) for item in items_checked]
-            list.items_checked = items_checked
-            print(list.items_checked)
+            list.items_checked, self.items_checked = [items_checked, items_checked]
 
         return list
+
+    def rename(self) -> 'List':
+        return db.rename_list(self.id, self.name)
 
     def add_list_items(self, items: list) -> bool:
         return db.add_list_items(self.id, items)
 
-    # def __repr__(self) -> str:
-    #     return 'List(id={!r}, request_id={!r}, content={!r}, type_id={!r}, author={!r}, create_time={!r}'.format(
-    #         self.id, self.request_id, self.content, self.type_id, self.author, self.create_time
-    #     )
-
     @staticmethod
     def find_list(id: int) -> 'List':
-        return(List.get_list(db.get_list(id)))
+        return List.get_list(db.get_list(id))
 
     @classmethod
     def get_list(cls, rec) -> 'List':
@@ -118,20 +104,7 @@ class List:
                 owner=rec.owner,
                 name=rec.name,
                 type=rec.type,
-                items=None,
-                items_checked=None,
+                items=ListItem.find_list_items(rec.id, checked=False),
+                items_checked=ListItem.find_list_items(rec.id, checked=True),
                 create_time=rec.create_time
             )
-
-    def get_list_item(self, rec):
-        if isinstance(rec, dict):
-            return {
-                'id': rec.get('id', None),
-                'content': rec.get('owner', None)
-            }
-        elif isinstance(rec, tuple):
-            return {
-                'id': rec.id,
-                'content': rec.content
-            }
-

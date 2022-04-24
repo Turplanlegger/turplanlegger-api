@@ -81,13 +81,39 @@ class Database:
         """
         return self._insert(insert, vars(list))
 
-    def add_list_item(self, item):
+    def rename_list(self, id, name):
+        update = """
+            UPDATE lists
+                SET name=%(name)s
+                WHERE id = %(id)s
+            RETURNING *
+        """
+        return self._updateone(update, {'id': id, 'name': name}, returning=True)
+
+    def create_list_iteam(self, list_item):
         insert = """
             INSERT INTO lists_items (content, checked, list, owner)
             VALUES (%(content)s, %(checked)s, %(list)s, %(owner)s)
             RETURNING *
         """
-        return self._insert(insert, item)
+        return self._insert(insert, vars(list_item))
+
+    def get_list_item(self, id):
+        select = """
+            SELECT * FROM lists_items WHERE id = %s
+        """
+        return self._fetchone(select, [id])
+
+    def get_list_items(self, list_id, checked=None):
+        select = """
+            SELECT * FROM lists_items WHERE list = %s
+        """
+        if checked is False:
+            select += ' AND checked = FALSE'
+        elif checked is True:
+            select += ' AND checked = TRUE'
+
+        return self._fetchall(select, [list_id])
 
     # Helpers
     def _insert(self, query, vars):
@@ -108,6 +134,15 @@ class Database:
         self._log(cursor, query, vars)
         cursor.execute(query, vars)
         return cursor.fetchone()
+
+    def _fetchall(self, query, vars):
+        """
+        Return none or multiple row.
+        """
+        cursor = self.conn.cursor()
+        self._log(cursor, query, vars)
+        cursor.execute(query, vars)
+        return cursor.fetchall()
 
     def _updateone(self, query, vars, returning=False):
         """

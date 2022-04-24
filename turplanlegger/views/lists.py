@@ -45,7 +45,25 @@ def add_list_items(list_id):
     if not list:
         raise ApiError('list not found', 404)
 
-    if list.add_list_items(items):
+    list.items = items
+
+    if list.add_list_items(list):
         return jsonify(status='ok')
     else:
         raise ApiError('failed to add items')
+
+
+@api.route('/list/<list_id>/rename', methods=['PATCH'])
+def rename_list(list_id):
+
+    list = List.find_list(list_id)
+
+    if not list:
+        raise ApiError('list not found', 404)
+
+    list.name = request.json.get('name', '')
+
+    if list.rename():
+        return jsonify(status='ok')
+    else:
+        raise ApiError('failed to rename list')
