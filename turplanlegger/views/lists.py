@@ -2,6 +2,8 @@ from flask import current_app, g, jsonify, request
 
 from turplanlegger.exceptions import ApiError
 from turplanlegger.models.lists import List
+from turplanlegger.models.list_item import ListItem
+
 
 from . import api
 
@@ -35,23 +37,36 @@ def add_list():
 @api.route('/list/<list_id>/add', methods=['PATCH'])
 def add_list_items(list_id):
 
-    items = request.json.get('items')
-
-    if not items:
-        raise ApiError('must supply items to add as JSON list', 400)
-
     list = List.find_list(list_id)
 
     if not list:
         raise ApiError('list not found', 404)
 
-    list.items = items
+    items, items_checked = request.json.get('items', []), request.json.get('items_checked', [])
+    try:
+        items = [ListItem(
+            owner=list.owner,
+            list=list.id,
+            checked=False,
+            content=item) for item in items]
+        items_checked = [ListItem(
+            owner=list.owner,
+            list=list.id,
+            checked=True,
+            content=item) for item in items_checked]
+    except (ValueError, TypeError) as e:
+        raise ApiError(str(e), 400)
 
-    if list.add_list_items(list):
-        return jsonify(status='ok')
-    else:
-        raise ApiError('failed to add items')
+    if not items or not items_checked:
+        raise ApiError('must supply items or items_checked to add as JSON list', 400)
 
+    try:
+        items = [item.create() for item in items]
+        items_checked = [item.create() for item in items_checked]
+    except Exception as e:
+        raise ApiError(str(e), 500)
+
+    return jsonify(status='ok', count_items=len(items), count_items_checked=len(items_checked))
 
 @api.route('/list/<list_id>/rename', methods=['PATCH'])
 def rename_list(list_id):

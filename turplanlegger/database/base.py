@@ -90,7 +90,7 @@ class Database:
         """
         return self._updateone(update, {'id': id, 'name': name}, returning=True)
 
-    def create_list_iteam(self, list_item):
+    def create_list_item(self, list_item):
         insert = """
             INSERT INTO lists_items (content, checked, list, owner)
             VALUES (%(content)s, %(checked)s, %(list)s, %(owner)s)

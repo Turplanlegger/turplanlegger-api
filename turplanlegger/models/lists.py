@@ -54,33 +54,30 @@ class List:  # This class has to be renamed
             'create_time': self.create_time
         }
 
-    def parse_item(self, content, owner, checked=False):
-        return {
-            'content': content,
-            'checked': checked,
-            'list': owner,
-            'owner': self.owner
-        }
-
     def create(self) -> 'List':
         list = self.get_list(db.create_list(self))
         if self.items:
-            items = [ListItem(list.owner, list.id, False, item) for item in self.items]
+            items = [ListItem(
+                owner=list.owner,
+                list=list.id,
+                checked=False,
+                content=item) for item in self.items]
             items = [item.create() for item in items]
             list.items, self.items = [items, items]
 
         if self.items_checked:
-            items_checked = [self.parse_item(item, list.owner, True) for item in self.items_checked]
-            items_checked = [db.add_list_item(item) for item in items_checked]
+            items_checked = [ListItem(
+                owner=list.owner,
+                list=list.id,
+                checked=True,
+                content=item) for item in self.items_checked]
+            items_checked = [item.create() for item in items_checked]
             list.items_checked, self.items_checked = [items_checked, items_checked]
 
         return list
 
     def rename(self) -> 'List':
         return db.rename_list(self.id, self.name)
-
-    def add_list_items(self, items: list) -> bool:
-        return db.add_list_items(self.id, items)
 
     @staticmethod
     def find_list(id: int) -> 'List':
