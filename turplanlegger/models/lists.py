@@ -89,6 +89,14 @@ class List:  # This class has to be renamed
     def find_list(id: int) -> 'List':  # Add a method for getting list without lists_items
         return List.get_list(db.get_list(id))
 
+    def change_owner(self, owner: int) -> 'List':
+        if self.owner == owner:
+            raise ValueError('new owner is same as old')
+
+        # A user object should be parsed/passed
+        # Return a boolean, don't get the list unless it's used
+        return List.get_list(db.change_list_owner(self.id, owner))
+
     @classmethod
     def get_list(cls, rec) -> 'List':
         if isinstance(rec, dict):

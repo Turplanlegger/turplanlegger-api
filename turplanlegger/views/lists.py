@@ -27,7 +27,7 @@ def delete_list(list_id):
         raise ApiError('list not found', 404)
 
     try:
-        list = list.delete()
+        list.delete()
     except Exception as e:
         raise ApiError(str(e), 500)
 
@@ -98,3 +98,26 @@ def rename_list(list_id):
         return jsonify(status='ok')
     else:
         raise ApiError('failed to rename list')
+
+
+@api.route('/list/<list_id>/owner', methods=['PATCH'])
+def change_list_owner(list_id):
+
+    list = List.find_list(list_id)
+
+    if not list:
+        raise ApiError('list not found', 404)
+
+    owner = request.json.get('owner', None)
+
+    if not owner:
+        raise ApiError('must supply owner as int', 400)
+
+    try:
+        list.change_owner(owner)
+    except ValueError as e:
+        raise ApiError(str(e), 400)
+    except Exception as e:
+        raise ApiError(str(e), 500)
+
+    return jsonify(status='ok')

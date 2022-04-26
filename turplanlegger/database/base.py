@@ -103,6 +103,15 @@ class Database:
         """
         return self._updateone(update, {'id': id, 'name': name}, returning=True)
 
+    def change_list_owner(self, id, owner):
+        update = """
+            UPDATE lists
+                SET owner=%(owner)s
+                WHERE id = %(id)s
+            RETURNING *
+        """
+        return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
+
     def create_list_item(self, list_item):
         insert = """
             INSERT INTO lists_items (content, checked, list, owner)
