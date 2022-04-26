@@ -1,9 +1,8 @@
 from flask import current_app, g, jsonify, request
 
 from turplanlegger.exceptions import ApiError
-from turplanlegger.models.lists import List
 from turplanlegger.models.list_item import ListItem
-
+from turplanlegger.models.lists import List
 
 from . import api
 
@@ -19,6 +18,22 @@ def get_list(list_id):
         raise ApiError('not found', 404)
 
 
+@api.route('/list/<list_id>', methods=['DELETE'])
+def delete_list(list_id):
+
+    list = List.find_list(list_id)
+
+    if not list:
+        raise ApiError('list not found', 404)
+
+    try:
+        list = list.delete()
+    except Exception as e:
+        raise ApiError(str(e), 500)
+
+    return jsonify(status='ok')
+
+
 @api.route('/list', methods=['POST'])
 def add_list():
     try:
@@ -31,10 +46,10 @@ def add_list():
     except Exception as e:
         raise ApiError(str(e), 500)
 
-    return jsonify(list.serialize), 200
+    return jsonify(list.serialize)
 
 
-@api.route('/list/<list_id>/add', methods=['PATCH'])
+@api.route('/list/<list_id>/add', methods=['PATCH'])  # Consider using PUT instead of delete
 def add_list_items(list_id):
 
     list = List.find_list(list_id)
@@ -67,6 +82,7 @@ def add_list_items(list_id):
         raise ApiError(str(e), 500)
 
     return jsonify(status='ok', count_items=len(items), count_items_checked=len(items_checked))
+
 
 @api.route('/list/<list_id>/rename', methods=['PATCH'])
 def rename_list(list_id):

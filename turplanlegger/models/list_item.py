@@ -59,6 +59,13 @@ class ListItem:
     def create(self) -> 'ListItem':
         return self.get_list_item(db.create_list_item(self))
 
+    @staticmethod
+    def delete_list_items(list_id: int):
+        return(db.delete_list_items_all(list_id))
+
+    def delete(self) -> bool:
+        return db.delete_list_item(self.id)
+
     # def rename(self) -> 'List':
     #     return db.rename_list(self.id, self.name)
 

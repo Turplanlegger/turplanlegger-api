@@ -67,10 +67,14 @@ class Database:
         conn.close()
 
     # Lists
-    def get_list(self, id):
+    def get_list(self, id, deleted=False):
         select = """
             SELECT * FROM lists WHERE id = %s
         """
+        if deleted:
+            select += ' AND deleted = TRUE'
+        else:
+            select += ' AND deleted = FALSE'
         return self._fetchone(select, [id])
 
     def create_list(self, list):
@@ -80,6 +84,15 @@ class Database:
             RETURNING *
         """
         return self._insert(insert, vars(list))
+
+    def delete_list(self, id):
+        update = """
+            UPDATE lists
+                SET deleted=TRUE, delete_time=CURRENT_TIMESTAMP
+                WHERE id = %(id)s AND deleted = FALSE
+            RETURNING deleted
+        """
+        return self._updateone(update, {'id': id}, returning=True)
 
     def rename_list(self, id, name):
         update = """
@@ -98,16 +111,43 @@ class Database:
         """
         return self._insert(insert, vars(list_item))
 
-    def get_list_item(self, id):
+    def delete_list_item(self, id):
+        update = """
+            UPDATE lists_items_
+                SET deleted=TRUE, delete_time=CURRENT_TIMESTAMP
+                WHERE id = %(id)s AND deleted = FALSE
+            RETURNING deleted
+        """
+        return self._updateone(update, {'id': id}, returning=True)
+
+    def delete_list_items_all(self, list_id):
+        update = """
+            UPDATE lists_items
+                SET deleted=TRUE, delete_time=CURRENT_TIMESTAMP
+                WHERE list = %(list_id)s AND deleted = FALSE
+        """
+        return self._updateone(update, {'list_id': list_id})
+
+    def get_list_item(self, id, deleted=False):
         select = """
             SELECT * FROM lists_items WHERE id = %s
         """
+        if deleted:
+            select += ' AND deleted = TRUE'
+        else:
+            select += ' AND deleted = FALSE'
         return self._fetchone(select, [id])
 
-    def get_list_items(self, list_id, checked=None):
+    def get_list_items(self, list_id, checked=None, deleted=False):
         select = """
             SELECT * FROM lists_items WHERE list = %s
         """
+
+        if deleted:
+            select += ' AND deleted = TRUE'
+        else:
+            select += ' AND deleted = FALSE'
+
         if checked is False:
             select += ' AND checked = FALSE'
         elif checked is True:
@@ -147,6 +187,16 @@ class Database:
     def _updateone(self, query, vars, returning=False):
         """
         Update, with optional return.
+        """
+        cursor = self.conn.cursor()
+        self._log(cursor, query, vars)
+        cursor.execute(query, vars)
+        self.conn.commit()
+        return cursor.fetchone() if returning else None
+
+    def _deleteone(self, query, vars, returning=False):
+        """
+        Delete, with optional return.
         """
         cursor = self.conn.cursor()
         self._log(cursor, query, vars)

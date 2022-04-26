@@ -76,11 +76,17 @@ class List:  # This class has to be renamed
 
         return list
 
+    def delete(self) -> bool:
+        if self.items or self.items_checked:
+            ListItem.delete_list_items(self.id)
+
+        return db.delete_list(self.id)
+
     def rename(self) -> 'List':
         return db.rename_list(self.id, self.name)
 
     @staticmethod
-    def find_list(id: int) -> 'List':
+    def find_list(id: int) -> 'List':  # Add a method for getting list without lists_items
         return List.get_list(db.get_list(id))
 
     @classmethod
