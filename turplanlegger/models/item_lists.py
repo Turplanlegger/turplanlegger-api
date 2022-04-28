@@ -2,12 +2,12 @@ from datetime import datetime
 from typing import Dict, List
 
 from turplanlegger.app import db
-from turplanlegger.models.list_item import ListItem
+from turplanlegger.models.list_items import ListItem
 
 JSON = Dict[str, any]
 
 
-class List:  # This class has to be renamed
+class ItemList:  # This class has to be renamed
 
     def __init__(self, owner: int, type: str, **kwargs) -> None:
         if not owner:
@@ -28,12 +28,12 @@ class List:  # This class has to be renamed
         self.create_time = kwargs.get('create_time', None) or datetime.now()
 
     @classmethod
-    def parse(cls, json: JSON) -> 'List':
+    def parse(cls, json: JSON) -> 'ItemList':
         if not isinstance(json.get('items', []), list):
             raise TypeError('"items" must be list')
         if not isinstance(json.get('items_checked', []), list):
             raise TypeError('"items_checked" must be list')
-        return List(
+        return ItemList(
             id=json.get('id', 0),
             owner=json.get('owner', None),
             name=json.get('name', None),
@@ -43,7 +43,7 @@ class List:  # This class has to be renamed
         )
 
     @property
-    def serialize(self) -> Dict[str, any]:
+    def serialize(self) -> JSON:
         return {
             'id': self.id,
             'owner': self.owner,
@@ -54,53 +54,53 @@ class List:  # This class has to be renamed
             'create_time': self.create_time
         }
 
-    def create(self) -> 'List':
-        list = self.get_list(db.create_list(self))
+    def create(self) -> 'ItemList':
+        item_list = self.get_item_list(db.create_item_list(self))
         if self.items:
             items = [ListItem(
-                owner=list.owner,
-                list=list.id,
+                owner=item_list.owner,
+                item_list=item_list.id,
                 checked=False,
                 content=item) for item in self.items]
             items = [item.create() for item in items]
-            list.items, self.items = [items, items]
+            item_list.items, self.items = [items, items]
 
         if self.items_checked:
             items_checked = [ListItem(
-                owner=list.owner,
-                list=list.id,
+                owner=item_list.owner,
+                item_list=item_list.id,
                 checked=True,
                 content=item) for item in self.items_checked]
             items_checked = [item.create() for item in items_checked]
-            list.items_checked, self.items_checked = [items_checked, items_checked]
+            item_list.items_checked, self.items_checked = [items_checked, items_checked]
 
-        return list
+        return item_list
 
     def delete(self) -> bool:
         if self.items or self.items_checked:
             ListItem.delete_list_items(self.id)
 
-        return db.delete_list(self.id)
+        return db.delete_item_list(self.id)
 
-    def rename(self) -> 'List':
-        return db.rename_list(self.id, self.name)
+    def rename(self) -> 'ItemList':
+        return db.rename_item_list(self.id, self.name)
 
     @staticmethod
-    def find_list(id: int) -> 'List':  # Add a method for getting list without lists_items
-        return List.get_list(db.get_list(id))
+    def find_item_list(id: int) -> 'ItemList':  # Add a method for getting list without lists_items
+        return ItemList.get_item_list(db.get_item_list(id))
 
-    def change_owner(self, owner: int) -> 'List':
+    def change_owner(self, owner: int) -> 'ItemList':
         if self.owner == owner:
             raise ValueError('new owner is same as old')
 
         # A user object should be parsed/passed
         # Return a boolean, don't get the list unless it's used
-        return List.get_list(db.change_list_owner(self.id, owner))
+        return ItemList.get_item_list(db.change_item_list_owner(self.id, owner))
 
     @classmethod
-    def get_list(cls, rec) -> 'List':
+    def get_item_list(cls, rec) -> 'ItemList':
         if isinstance(rec, dict):
-            return List(
+            return ItemList(
                 id=rec.get('id', None),
                 owner=rec.get('owner', None),
                 name=rec.get('name', None),
@@ -110,7 +110,7 @@ class List:  # This class has to be renamed
                 create_time=rec.get('created', None)
             )
         elif isinstance(rec, tuple):
-            return List(
+            return ItemList(
                 id=rec.id,
                 owner=rec.owner,
                 name=rec.name,

@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS routes (
     delete_time timestamp without time zone
 );
 
-CREATE TABLE IF NOT EXISTS lists (
+CREATE TABLE IF NOT EXISTS item_lists (
     id serial PRIMARY KEY,
     name text,
     type text,
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS lists_items (
     id serial PRIMARY KEY,
     content text,
     checked boolean DEFAULT FALSE,
-    list int REFERENCES lists (id),
+    item_list int REFERENCES item_lists (id),
     owner int REFERENCES users (id),
     create_time timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted boolean DEFAULT FALSE,
