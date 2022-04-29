@@ -34,3 +34,13 @@ Create a config directory and file:
 export FLASK_APP=turplanlegger FLASK_ENV=development
 flask run --debugger --port 8080 --with-threads --reload
 ```
+
+## Docker
+
+### Install docker
+https://docs.docker.com/get-docker/
+
+### Start development instance
+```bash
+docker-compose up
+```
