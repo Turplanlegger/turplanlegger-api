@@ -61,15 +61,15 @@ class Database:
     def destroy(self):
         conn = self.conn
         cursor = conn.cursor()
-        for table in ['trips', 'lists', 'users', 'routes']:
+        for table in ['trips', 'item_lists', 'users', 'routes']:
             cursor.execute(f'DROP TABLE IF EXISTS {table}')
         conn.commit()
         conn.close()
 
-    # Lists
-    def get_list(self, id, deleted=False):
+    # Item List
+    def get_item_list(self, id, deleted=False):
         select = """
-            SELECT * FROM lists WHERE id = %s
+            SELECT * FROM item_lists WHERE id = %s
         """
         if deleted:
             select += ' AND deleted = TRUE'
@@ -77,65 +77,65 @@ class Database:
             select += ' AND deleted = FALSE'
         return self._fetchone(select, [id])
 
-    def create_list(self, list):
+    def create_item_list(self, item_list):
         insert = """
-            INSERT INTO lists (name, type, owner)
+            INSERT INTO item_lists (name, type, owner)
             VALUES (%(name)s, %(type)s, %(owner)s)
             RETURNING *
         """
-        return self._insert(insert, vars(list))
+        return self._insert(insert, vars(item_list))
 
-    def delete_list(self, id):
+    def delete_item_list(self, id):
         update = """
-            UPDATE lists
+            UPDATE item_lists
                 SET deleted=TRUE, delete_time=CURRENT_TIMESTAMP
                 WHERE id = %(id)s AND deleted = FALSE
             RETURNING deleted
         """
         return self._updateone(update, {'id': id}, returning=True)
 
-    def rename_list(self, id, name):
+    def rename_item_list(self, id, name):
         update = """
-            UPDATE lists
+            UPDATE item_lists
                 SET name=%(name)s
                 WHERE id = %(id)s
             RETURNING *
         """
         return self._updateone(update, {'id': id, 'name': name}, returning=True)
 
-    def change_list_owner(self, id, owner):
+    def change_item_list_owner(self, id, owner):
         update = """
-            UPDATE lists
+            UPDATE item_lists
                 SET owner=%(owner)s
                 WHERE id = %(id)s
             RETURNING *
         """
         return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
 
-    def create_list_item(self, list_item):
+    def create_list_item(self, item_list_item):
         insert = """
-            INSERT INTO lists_items (content, checked, list, owner)
-            VALUES (%(content)s, %(checked)s, %(list)s, %(owner)s)
+            INSERT INTO lists_items (content, checked, item_list, owner)
+            VALUES (%(content)s, %(checked)s, %(item_list)s, %(owner)s)
             RETURNING *
         """
-        return self._insert(insert, vars(list_item))
+        return self._insert(insert, vars(item_list_item))
 
     def delete_list_item(self, id):
         update = """
-            UPDATE lists_items_
+            UPDATE lists_items
                 SET deleted=TRUE, delete_time=CURRENT_TIMESTAMP
                 WHERE id = %(id)s AND deleted = FALSE
             RETURNING deleted
         """
         return self._updateone(update, {'id': id}, returning=True)
 
-    def delete_list_items_all(self, list_id):
+    def delete_list_items_all(self, item_list_id):
         update = """
             UPDATE lists_items
                 SET deleted=TRUE, delete_time=CURRENT_TIMESTAMP
-                WHERE list = %(list_id)s AND deleted = FALSE
+                WHERE item_list = %(item_list_id)s AND deleted = FALSE
         """
-        return self._updateone(update, {'list_id': list_id})
+        return self._updateone(update, {'item_list_id': item_list_id})
 
     def get_list_item(self, id, deleted=False):
         select = """
@@ -147,9 +147,9 @@ class Database:
             select += ' AND deleted = FALSE'
         return self._fetchone(select, [id])
 
-    def get_list_items(self, list_id, checked=None, deleted=False):
+    def get_list_items(self, item_list_id, checked=None, deleted=False):
         select = """
-            SELECT * FROM lists_items WHERE list = %s
+            SELECT * FROM lists_items WHERE item_list = %s
         """
 
         if deleted:
@@ -162,7 +162,7 @@ class Database:
         elif checked is True:
             select += ' AND checked = TRUE'
 
-        return self._fetchall(select, [list_id])
+        return self._fetchall(select, [item_list_id])
 
     # Helpers
     def _insert(self, query, vars):

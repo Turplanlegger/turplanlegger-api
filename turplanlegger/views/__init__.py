@@ -5,7 +5,7 @@ from turplanlegger.utils.response import absolute_url
 
 api = Blueprint('api', __name__)  # noqa isort:skip
 
-from . import lists  # noqa isort:skip
+from . import item_lists  # noqa isort:skip
 
 
 @api.before_request
