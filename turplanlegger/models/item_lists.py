@@ -11,13 +11,16 @@ class ItemList:  # This class has to be renamed
 
     def __init__(self, owner: int, type: str, **kwargs) -> None:
         if not owner:
-            raise ValueError('Missing mandatory field "owner"')
+            raise ValueError("missing mandatory field 'owner'")
         if not isinstance(owner, int):
-            raise TypeError('"owner" must be integer')
+            raise TypeError("'owner' must be integer")
         if not type:
-            raise ValueError('Missing mandatory field "type"')
+            raise ValueError("missing mandatory field 'type'")
         if not isinstance(type, str):
-            raise TypeError('"type" must be string')
+            raise TypeError("'type' must be string")
+
+        if len(kwargs.get('name', '')) > 512:
+            raise ValueError("'name' is too long")
 
         self.id = kwargs.get('id', 0)
         self.owner = owner
@@ -29,17 +32,34 @@ class ItemList:  # This class has to be renamed
 
     @classmethod
     def parse(cls, json: JSON) -> 'ItemList':
-        if not isinstance(json.get('items', []), list):
-            raise TypeError('"items" must be list')
-        if not isinstance(json.get('items_checked', []), list):
-            raise TypeError('"items_checked" must be list')
+        name = json.get('name', None)
+        if len(name) > 512:
+            raise ValueError("'name' is too long")
+
+        items = json.get('items', [])
+        if not isinstance(items, list):
+            raise TypeError("'items' must be JSON list")
+        for i, item in enumerate(items):
+            print(i)
+            print(item)
+            print(len(item))
+            if len(item) > 512:
+                raise ValueError(f"item {i+1}:'{item}' is too long, max 512 char")
+
+        items_checked = json.get('items_checked', [])
+        if not isinstance(items_checked, list):
+            raise TypeError("'items_checed' must be JSON list")
+        for i, item in enumerate(items_checked):
+            if len(item) > 512:
+                raise ValueError(f"checked item {i+1}:'{item}' is too long, max 512 char")
+
         return ItemList(
-            id=json.get('id', 0),
+            id=json.get('id', None),
             owner=json.get('owner', None),
             name=json.get('name', None),
             type=json.get('type', None),
-            items=json.get('items', []),
-            items_checked=json.get('items_checked', [])
+            items=items,
+            items_checked=items_checked
         )
 
     @property
