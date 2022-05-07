@@ -8,9 +8,9 @@ services:
       - '80:8080'
     volumes:
       - ./:/turplanlegger
-    depends_on: 
+    depends_on:
       - turplanleggerdb
-    links: 
+    links:
       - turplanleggerdb
 
   turplanleggerdb:
