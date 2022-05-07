@@ -164,6 +164,43 @@ class Database:
 
         return self._fetchall(select, [item_list_id])
 
+    # Route
+    def get_route(self, id, deleted=False):
+        select = """
+            SELECT * FROM routes WHERE id = %s
+        """
+        if deleted:
+            select += ' AND deleted = TRUE'
+        else:
+            select += ' AND deleted = FALSE'
+        return self._fetchone(select, [id])
+
+    def create_route(self, route):
+        insert = """
+            INSERT INTO routes (route, owner)
+            VALUES (%(route)s, %(owner)s)
+            RETURNING *
+        """
+        return self._insert(insert, vars(route))
+
+    def delete_route(self, id):
+        update = """
+            UPDATE routes
+                SET deleted=TRUE, delete_time=CURRENT_TIMESTAMP
+                WHERE id = %(id)s AND deleted = FALSE
+            RETURNING deleted
+        """
+        return self._updateone(update, {'id': id}, returning=True)
+
+    def change_route_owner(self, id, owner):
+        update = """
+            UPDATE routes
+                SET owner=%(owner)s
+                WHERE id = %(id)s
+            RETURNING *
+        """
+        return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
+
     # Helpers
     def _insert(self, query, vars):
         """
