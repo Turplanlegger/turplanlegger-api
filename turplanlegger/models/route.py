@@ -14,8 +14,6 @@ class Route:
             raise TypeError('"owner" must be integer')
         if not route:
             raise ValueError('Missing mandatory field "route"')
-        if not isinstance(route, JSON):
-            raise TypeError('"route" must be JSON')
 
         self.id = kwargs.get('id', 0)
         self.owner = owner
