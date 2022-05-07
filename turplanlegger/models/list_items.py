@@ -10,37 +10,43 @@ class ListItem:
 
     def __init__(self, owner: int, item_list: int, checked: bool, **kwargs) -> None:
         if not owner:
-            raise ValueError('Missing mandatory field "owner"')
+            raise ValueError("missing mandatory field 'owner'")
         if not isinstance(owner, int):
-            raise TypeError('"owner" must be integer')
+            raise TypeError("'owner' must be integer")
         if not item_list:
-            raise ValueError('Missing mandatory field "item_list"')
+            raise ValueError("missing mandatory field 'item_list'")
         if not isinstance(item_list, int):
-            raise TypeError('"item_list" must be integer')
-        # if not checked:
-        #     raise ValueError('Missing mandatory field "checked"')
+            raise TypeError("'item_list' must be integer")
         if not isinstance(checked, bool):
-            raise TypeError('"checked" must be boolean')
+            raise TypeError("'checked' must be boolean")
+
+        if len(kwargs.get('content', '')) > 512:
+            raise ValueError("'content' is too long")
 
         self.id = kwargs.get('id', 0)
         self.owner = owner
         self.item_list = item_list
         self.checked = checked
+
         self.content = kwargs.get('content')
         self.create_time = kwargs.get('create_time', None) or datetime.now()
 
     @classmethod
     def parse(cls, json: JSON) -> 'ListItem':
+        content = json.get('content', None)
+        if len(content) > 512:
+            raise ValueError("'content' is too long")
+
         return ListItem(
             id=json.get('id', None),
             owner=json.get('owner', None),
             item_list=json.get('item_list', None),
             checked=json.get('checked', False),
-            content=json.get('content', None),
+            content=content
         )
 
     @property
-    def serialize(self) -> Dict[str, any]:
+    def serialize(self) -> JSON:
         return {
             'id': self.id,
             'owner': self.owner,
