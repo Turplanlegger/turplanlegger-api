@@ -40,9 +40,6 @@ class ItemList:  # This class has to be renamed
         if not isinstance(items, list):
             raise TypeError("'items' must be JSON list")
         for i, item in enumerate(items):
-            print(i)
-            print(item)
-            print(len(item))
             if len(item) > 512:
                 raise ValueError(f"item {i+1}:'{item}' is too long, max 512 char")
 
