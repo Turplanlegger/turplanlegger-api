@@ -44,15 +44,15 @@ class Route:
         }
 
     def create(self) -> 'Route':
-        route = self.get_route(db.create_route(self))  #TODO create db.create_route method
+        route = self.get_route(db.create_route(self)) 
         return route
 
     def delete(self) -> bool:
         return db.delete_route(self.id)
 
     @staticmethod
-    def find_item_list(id: int) -> 'Route':
-        return Route.get_route(db.get_route(id)) #TODO create db.get_route method
+    def find_route(id: int) -> 'Route':
+        return Route.get_route(db.get_route(id)) 
 
     def change_owner(self, owner: int) -> 'Route':
         if self.owner == owner:
@@ -60,7 +60,7 @@ class Route:
 
         # A user object should be parsed/passed
         # Return a boolean, don't get the list unless it's used
-        return Route.get_route(db.change_route_owner(self.id, owner)) #TODO create db.change_route_owner method
+        return Route.get_route(db.change_route_owner(self.id, owner))
 
     @classmethod
     def get_route(cls, rec) -> 'Route':
