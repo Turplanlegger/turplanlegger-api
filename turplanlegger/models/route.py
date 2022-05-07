@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import Dict
 
+from turplanlegger.app import db
+
 JSON = Dict[str, any]
 
 class Route:
@@ -41,68 +43,40 @@ class Route:
             'create_time': self.create_time
         }
 
-    # def create(self) -> 'ItemList':
-    #     item_list = self.get_item_list(db.create_item_list(self))
-    #     if self.items:
-    #         items = [ListItem(
-    #             owner=item_list.owner,
-    #             item_list=item_list.id,
-    #             checked=False,
-    #             content=item) for item in self.items]
-    #         items = [item.create() for item in items]
-    #         item_list.items, self.items = [items, items]
+    def create(self) -> 'Route':
+        route = self.get_route(db.create_route(self))  #TODO create db.create_route method
+        return route
 
-    #     if self.items_checked:
-    #         items_checked = [ListItem(
-    #             owner=item_list.owner,
-    #             item_list=item_list.id,
-    #             checked=True,
-    #             content=item) for item in self.items_checked]
-    #         items_checked = [item.create() for item in items_checked]
-    #         item_list.items_checked, self.items_checked = [items_checked, items_checked]
+    def delete(self) -> bool:
+        return db.delete_route(self.id)
 
-    #     return item_list
+    @staticmethod
+    def find_item_list(id: int) -> 'Route':
+        return Route.get_route(db.get_route(id)) #TODO create db.get_route method
 
-    # def delete(self) -> bool:
-    #     if self.items or self.items_checked:
-    #         ListItem.delete_list_items(self.id)
+    def change_owner(self, owner: int) -> 'Route':
+        if self.owner == owner:
+            raise ValueError('new owner is same as old')
 
-    #     return db.delete_item_list(self.id)
+        # A user object should be parsed/passed
+        # Return a boolean, don't get the list unless it's used
+        return Route.get_route(db.change_route_owner(self.id, owner)) #TODO create db.change_route_owner method
 
-    # def rename(self) -> 'ItemList':
-    #     return db.rename_item_list(self.id, self.name)
-
-    # @staticmethod
-    # def find_item_list(id: int) -> 'ItemList':  # Add a method for getting list without lists_items
-    #     return ItemList.get_item_list(db.get_item_list(id))
-
-    # def change_owner(self, owner: int) -> 'ItemList':
-    #     if self.owner == owner:
-    #         raise ValueError('new owner is same as old')
-
-    #     # A user object should be parsed/passed
-    #     # Return a boolean, don't get the list unless it's used
-    #     return ItemList.get_item_list(db.change_item_list_owner(self.id, owner))
-
-    # @classmethod
-    # def get_item_list(cls, rec) -> 'ItemList':
-    #     if isinstance(rec, dict):
-    #         return ItemList(
-    #             id=rec.get('id', None),
-    #             owner=rec.get('owner', None),
-    #             name=rec.get('name', None),
-    #             type=rec.get('type', None),
-    #             items=rec.get('items', None),
-    #             items_checked=rec.get('items_checked', None),
-    #             create_time=rec.get('created', None)
-    #         )
-    #     elif isinstance(rec, tuple):
-    #         return ItemList(
-    #             id=rec.id,
-    #             owner=rec.owner,
-    #             name=rec.name,
-    #             type=rec.type,
-    #             items=ListItem.find_list_items(rec.id, checked=False),
-    #             items_checked=ListItem.find_list_items(rec.id, checked=True),
-    #             create_time=rec.create_time
-    #         )
+    @classmethod
+    def get_route(cls, rec) -> 'Route':
+        if isinstance(rec, dict):
+            return Route(
+                id=rec.get('id', None),
+                owner=rec.get('owner', None),
+                route=rec.get('route', None),
+                route_history=rec.get('route_history', None),
+                create_time=rec.get('created', None)
+            )
+        elif isinstance(rec, tuple):
+            return Route(
+                id=rec.id,
+                owner=rec.owner,
+                route=rec.route,
+                route_history=rec.route_history,
+                create_time=rec.create_time
+            )
