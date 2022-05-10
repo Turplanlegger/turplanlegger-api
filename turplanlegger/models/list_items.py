@@ -69,6 +69,9 @@ class ListItem:
     def delete_list_items(item_list_id: int):
         return(db.delete_list_items_all(item_list_id))
 
+    def transition_state(self):
+        return db.transition_list_item_state(self.id, False if self.checked else True)
+
     def delete(self) -> bool:
         return db.delete_list_item(self.id)
 

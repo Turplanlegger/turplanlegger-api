@@ -110,6 +110,32 @@ def rename_item_list(item_list_id):
         raise ApiError('failed to rename item_list')
 
 
+@api.route('/item_list/<item_list_id>/transition_check', methods=['PATCH'])
+def transition_list_item_state(item_list_id):
+
+    if not request.json.get('items', []):
+        raise ApiError('must supply items as a JSON list', 400)
+
+    item_list = ItemList.find_item_list(item_list_id)
+
+    if not item_list:
+        raise ApiError('item list not found', 404)
+
+    list_items = [item for item in item_list.items if item.id in request.json.get('items', [])]
+    list_items_checked = [item for item in item_list.items_checked if item.id in request.json.get('items', [])]
+
+    if not list_items and not list_items_checked:
+        raise ApiError(f'items not found in item_list {item_list.id}', 400)
+
+    try:
+        list_items = [item.transition_state() for item in list_items]
+        list_items_checked = [item.transition_state() for item in list_items_checked]
+    except Exception as e:
+        raise ApiError(str(e), 500)
+
+    return jsonify(status='ok')
+
+
 @api.route('/item_list/<item_list_id>/owner', methods=['PATCH'])
 def change_item_list_owner(item_list_id):
 

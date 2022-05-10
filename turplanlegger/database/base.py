@@ -137,6 +137,14 @@ class Database:
         """
         return self._updateone(update, {'item_list_id': item_list_id})
 
+    def transition_list_item_state(self, id: int, checked: bool):
+        update = """
+            UPDATE lists_items
+                SET checked=%(checked)s
+                WHERE id = %(id)s AND deleted = FALSE
+        """
+        return self._updateone(update, {'id': id, 'checked': checked})
+
     def get_list_item(self, id, deleted=False):
         select = """
             SELECT * FROM lists_items WHERE id = %s
