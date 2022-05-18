@@ -63,6 +63,7 @@ class Database:
         cursor = conn.cursor()
         for table in ['trips', 'item_lists', 'users', 'routes']:
             cursor.execute(f'DROP TABLE IF EXISTS {table} CASCADE')
+
         conn.commit()
         conn.close()
 
