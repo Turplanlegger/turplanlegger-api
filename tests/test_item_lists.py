@@ -14,10 +14,15 @@ class ItemListsTestCase(unittest.TestCase):
         self.client = self.app.test_client()
 
         # Users isn't implemented yet, so they have to be created manually for the time being
-        self.user = {
+        self.user1 = {
             'name': 'Ola',
             'last_name': 'Nordamnn',
             'email': 'ola.nordmann@norge.no'
+        }
+        self.user1 = {
+            'name': 'Kari',
+            'last_name': 'Nordamnn',
+            'email': 'kari.nordmann@norge.no'
         }
 
         self.item_list = {
@@ -29,11 +34,11 @@ class ItemListsTestCase(unittest.TestCase):
             ],
             'items_checked': [
                 'item four',
-                'item why would you add a checked one?!'
+                'item five'
             ],
             'owner': 1,
             'type': 'check'
-        }''
+        }
 
         self.empty_item_list = {
             'name': 'Empty test list',
@@ -41,6 +46,17 @@ class ItemListsTestCase(unittest.TestCase):
             'items_checked': [],
             'owner': 1,
             'type': 'check'
+        }
+
+        self.item_to_add = {
+             'items': [
+                'item one',
+                'item two',
+                'item three'
+            ],
+            'items_checked': [
+                'item four'
+            ]
         }
 
         self.headers = {
@@ -52,12 +68,48 @@ class ItemListsTestCase(unittest.TestCase):
         db.destroy()
 
     def test_create_list(self):
-        response = self.client.post('item_list', data=json.dumps(self.item_list), headers=self.headers)
+        response = self.client.post('/item_list', data=json.dumps(self.item_list), headers=self.headers)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['item_list']['name'], 'Empty test list')
         self.assertEqual(data['item_list']['owner'], 1) # Update to user created
+        self.assertEqual(data['item_list']['type'], 'check')
         self.assertIsInstance(data['item_list']['items'], list)
+        self.assertCountEqual(data['item_list']['items'], 3)
         self.assertEqual(data['item_list']['items'][0]['name'], 'item one')
-        self.assertEqual(data['item_list']['items'][0]['owner'], 1)
+        self.assertEqual(data['item_list']['items'][0]['owner'], data['item_list']['owner'])
         self.assertEqual(data['item_list']['items'][0]['item_list'], data['item_list']['id'])
+        self.assertEqual(data['item_list']['items'][1]['name'], 'item two')
+        self.assertEqual(data['item_list']['items'][1]['owner'], data['item_list']['owner'])
+        self.assertEqual(data['item_list']['items'][1]['item_list'], data['item_list']['id'])
+        self.assertEqual(data['item_list']['items'][2]['name'], 'item three')
+        self.assertEqual(data['item_list']['items'][2]['owner'], data['item_list']['owner'])
+        self.assertEqual(data['item_list']['items'][2]['item_list'], data['item_list']['id'])
+        self.assertIsInstance(data['item_list']['items_checked'], list)
+        self.assertCountEqual(data['item_list']['items_checked'], 2)
+        self.assertEqual(data['item_list']['items_checked'][0]['name'], 'item four')
+        self.assertEqual(data['item_list']['items_checked'][0]['owner'], data['item_list']['owner'])
+        self.assertEqual(data['item_list']['items_checked'][0]['item_list'], data['item_list']['id'])
+        self.assertEqual(data['item_list']['items_checked'][1]['name'], 'item five')
+        self.assertEqual(data['item_list']['items_checked'][1]['owner'], data['item_list']['owner'])
+        self.assertEqual(data['item_list']['items_checked'][1]['item_list'], data['item_list']['id'])
+
+
+    def test_add_to_list(self):
+        response = self.client.post('/item_list', data=json.dumps(self.empty_item_list), headers=self.headers)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))self.assertEqual(data['item_list']['name'], 'Empty test list')
+        self.assertEqual(data['item_list']['owner'], 1) # Update to user created
+        self.assertEqual(data['item_list']['type'], 'check')
+        self.assertIsInstance(data['item_list']['items'], list)
+        self.assertDictEqual(data['item_list']['items'], [])
+        self.assertEqual(data['item_list']['name'], 'Empty test list')
+        self.assertEqual(data['item_list']['owner'], 1) # Update to user created
+        self.assertEqual(data['item_list']['type'], 'check')
+        self.assertIsInstance(data['item_list']['items_checked'], list)
+        self.assertDictEqual(data['item_list']['items_checked'], [])
+
+        list_id = data['id']
+
+        response = self.client.patch(f'/item_list/{list_id}/add', data=json.dumps(self.item_to_add), headers=self.headers)
+
