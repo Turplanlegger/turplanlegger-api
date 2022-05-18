@@ -46,7 +46,11 @@ def add_item_list():
     except Exception as e:
         raise ApiError(str(e), 500)
 
-    return jsonify(item_list.serialize)
+    if item_list:
+        return jsonify(status='ok', id=item_list.id, item_list=item_list.serialize), 201
+    else:
+        raise ApiError('Creattion of item list failed', 500)
+
 
 
 @api.route('/item_list/<item_list_id>/add', methods=['PATCH'])
