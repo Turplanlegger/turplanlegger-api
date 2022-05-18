@@ -137,7 +137,7 @@ class Database:
         """
         return self._updateone(update, {'item_list_id': item_list_id})
 
-    def transition_list_item_state(self, id: int, checked: bool):
+    def toggle_list_item_check(self, id: int, checked: bool):
         update = """
             UPDATE lists_items
                 SET checked=%(checked)s

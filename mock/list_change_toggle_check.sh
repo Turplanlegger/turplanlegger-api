@@ -1,4 +1,4 @@
-curl -iXPATCH http://localhost:8080/item_list/9/transition_check \
+curl -iXPATCH http://localhost:8080/item_list/9/toggle_check \
 -H 'Content-Type: application/json' \
 -d '
     {
