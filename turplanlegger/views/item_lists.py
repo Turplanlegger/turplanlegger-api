@@ -49,7 +49,7 @@ def add_item_list():
     if item_list:
         return jsonify(status='ok', id=item_list.id, item_list=item_list.serialize), 201
     else:
-        raise ApiError('Creattion of item list failed', 500)
+        raise ApiError('Creation of item list failed', 500)
 
 
 
