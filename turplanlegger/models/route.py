@@ -25,10 +25,10 @@ class Route:
     @classmethod
     def parse(cls, json: JSON) -> 'Route':
         return Route(
-            id=json.get('id', 0),
+            id=json.get('id', None),
             owner=json.get('owner', None),
-            route=json.get('route'),
-            route_history=json.get('route_history'),
+            route=json.get('route', None),
+            route_history=json.get('route_history', []),
         )
 
     @property
