@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS routes (
     id serial PRIMARY KEY,
     route jsonb,
+    route_history jsonb ARRAY,
     owner int REFERENCES users (id),
     create_time timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted boolean DEFAULT FALSE,
