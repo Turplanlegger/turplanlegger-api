@@ -42,7 +42,7 @@ class Route:
         }
 
     def create(self) -> 'Route':
-        route = self.get_route(db.create_route(self)) 
+        route = self.get_route(db.create_route(self.route, self.owner)) 
         return route
 
     def delete(self) -> bool:

@@ -175,13 +175,13 @@ class Database:
             select += ' AND deleted = FALSE'
         return self._fetchone(select, [id])
 
-    def create_route(self, route):
+    def create_route(self, route, owner):
         insert = """
             INSERT INTO routes (route, owner)
             VALUES (%(route)s, %(owner)s)
             RETURNING *
         """
-        return self._insert(insert, vars(route))
+        return self._insert(insert, route, owner)
 
     def delete_route(self, id):
         update = """
