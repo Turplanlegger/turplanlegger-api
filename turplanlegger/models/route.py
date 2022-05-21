@@ -15,7 +15,7 @@ class Route:
         if not route:
             raise ValueError('Missing mandatory field "route"')
 
-        self.id = kwargs.get('id', 0)
+        self.id = kwargs.get('id', None)
         self.owner = owner
         self.route = kwargs.get('route')
         self.route_history = kwargs.get('route_history')
