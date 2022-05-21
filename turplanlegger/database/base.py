@@ -62,7 +62,7 @@ class Database:
         conn = self.conn
         cursor = conn.cursor()
         for table in ['trips', 'item_lists', 'users', 'routes']:
-            cursor.execute(f'DROP TABLE IF EXISTS {table}')
+            cursor.execute(f'DROP TABLE IF EXISTS {table} CASCADE')
         conn.commit()
         conn.close()
 
@@ -208,6 +208,15 @@ class Database:
             RETURNING *
         """
         return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
+
+    # User
+    def create_user(self, name, last_name, email):
+        insert = """
+            INSERT INTO users (name, last_name, email)
+            VALUES (%(name)s, %(last_name)s, %(email)s)
+            RETURNING *
+        """
+        return self._insert(insert, {'name': name, 'last_name': last_name, 'email': email})
 
     # Helpers
     def _insert(self, query, vars):

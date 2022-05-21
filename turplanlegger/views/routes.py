@@ -45,7 +45,7 @@ def add_route():
     except Exception as e:
         raise ApiError(str(e), 500)
 
-    return jsonify(route.serialize)
+    return jsonify(route.serialize), 201
 
 
 @api.route('/route/<route_id>/owner', methods=['PATCH'])
