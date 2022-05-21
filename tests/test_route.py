@@ -45,3 +45,15 @@ class RoutesTestCase(unittest.TestCase):
 
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['owner'], 1)
+
+    def test_get_route(self):
+        db.create_user(self.user1["name"], self.user1["last_name"], self.user1["email"])
+        post_response = self.client.post('/route', data=json.dumps(self.route), headers=self.headers)
+        post_response_data = json.loads(post_response.data.decode('utf-8'))
+        created_route_id = post_response_data['id']
+
+        get_repsponse = self.client.get(f'/route/{created_route_id}')
+        self.assertEqual(get_repsponse.status_code, 200)
+
+        get_response_data = json.loads(get_repsponse.data.decode('utf-8'))
+        self.assertEqual(get_response_data['route']['owner'], post_response_data['owner'])
