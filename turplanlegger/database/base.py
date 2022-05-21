@@ -189,7 +189,7 @@ class Database:
             VALUES (%(route)s, %(owner)s)
             RETURNING *
         """
-        return self._insert(insert, route, owner)
+        return self._insert(insert, {'route': route, 'owner': owner})
 
     def delete_route(self, id):
         update = """
