@@ -76,22 +76,22 @@ class ItemListsTestCase(unittest.TestCase):
         self.assertEqual(data['item_list']['owner'], 1)  # Update to user created
         self.assertEqual(data['item_list']['type'], 'check')
         self.assertIsInstance(data['item_list']['items'], list)
-        self.assertCountEqual(data['item_list']['items'], 3)
-        self.assertEqual(data['item_list']['items'][0]['name'], 'item one')
+        self.assertEqual(len(data['item_list']['items']), 3)
+        self.assertEqual(data['item_list']['items'][0]['content'], 'item one')
         self.assertEqual(data['item_list']['items'][0]['owner'], data['item_list']['owner'])
         self.assertEqual(data['item_list']['items'][0]['item_list'], data['item_list']['id'])
-        self.assertEqual(data['item_list']['items'][1]['name'], 'item two')
+        self.assertEqual(data['item_list']['items'][1]['content'], 'item two')
         self.assertEqual(data['item_list']['items'][1]['owner'], data['item_list']['owner'])
         self.assertEqual(data['item_list']['items'][1]['item_list'], data['item_list']['id'])
-        self.assertEqual(data['item_list']['items'][2]['name'], 'item three')
+        self.assertEqual(data['item_list']['items'][2]['content'], 'item three')
         self.assertEqual(data['item_list']['items'][2]['owner'], data['item_list']['owner'])
         self.assertEqual(data['item_list']['items'][2]['item_list'], data['item_list']['id'])
         self.assertIsInstance(data['item_list']['items_checked'], list)
-        self.assertCountEqual(data['item_list']['items_checked'], 2)
-        self.assertEqual(data['item_list']['items_checked'][0]['name'], 'item four')
+        self.assertEqual(len(data['item_list']['items_checked']), 2)
+        self.assertEqual(data['item_list']['items_checked'][0]['content'], 'item four')
         self.assertEqual(data['item_list']['items_checked'][0]['owner'], data['item_list']['owner'])
         self.assertEqual(data['item_list']['items_checked'][0]['item_list'], data['item_list']['id'])
-        self.assertEqual(data['item_list']['items_checked'][1]['name'], 'item five')
+        self.assertEqual(data['item_list']['items_checked'][1]['content'], 'item five')
         self.assertEqual(data['item_list']['items_checked'][1]['owner'], data['item_list']['owner'])
         self.assertEqual(data['item_list']['items_checked'][1]['item_list'], data['item_list']['id'])
 
@@ -104,12 +104,12 @@ class ItemListsTestCase(unittest.TestCase):
         self.assertEqual(data['item_list']['owner'], 1)  # Update to user created
         self.assertEqual(data['item_list']['type'], 'check')
         self.assertIsInstance(data['item_list']['items'], list)
-        self.assertDictEqual(data['item_list']['items'], [])
+        self.assertEqual(len(data['item_list']['items']), 0)
         self.assertEqual(data['item_list']['name'], 'Empty test list')
         self.assertEqual(data['item_list']['owner'], 1)  # Update to user created
         self.assertEqual(data['item_list']['type'], 'check')
         self.assertIsInstance(data['item_list']['items_checked'], list)
-        self.assertDictEqual(data['item_list']['items_checked'], [])
+        self.assertEqual(len(data['item_list']['items_checked']), 0)
 
     def test_get_list(self):
         response = self.client.post('/item_list', data=json.dumps(self.item_list), headers=self.headers)
@@ -126,25 +126,42 @@ class ItemListsTestCase(unittest.TestCase):
         self.assertEqual(data['item_list']['owner'], 1)  # Update to user created
         self.assertEqual(data['item_list']['type'], 'check')
         self.assertIsInstance(data['item_list']['items'], list)
-        self.assertCountEqual(data['item_list']['items'], 3)
-        self.assertEqual(data['item_list']['items'][0]['name'], 'item one')
+        self.assertEqual(len(data['item_list']['items']), 3)
+        self.assertEqual(data['item_list']['items'][0]['content'], 'item one')
         self.assertEqual(data['item_list']['items'][0]['owner'], data['item_list']['owner'])
         self.assertEqual(data['item_list']['items'][0]['item_list'], data['item_list']['id'])
-        self.assertEqual(data['item_list']['items'][1]['name'], 'item two')
+        self.assertEqual(data['item_list']['items'][1]['content'], 'item two')
         self.assertEqual(data['item_list']['items'][1]['owner'], data['item_list']['owner'])
         self.assertEqual(data['item_list']['items'][1]['item_list'], data['item_list']['id'])
-        self.assertEqual(data['item_list']['items'][2]['name'], 'item three')
+        self.assertEqual(data['item_list']['items'][2]['content'], 'item three')
         self.assertEqual(data['item_list']['items'][2]['owner'], data['item_list']['owner'])
         self.assertEqual(data['item_list']['items'][2]['item_list'], data['item_list']['id'])
         self.assertIsInstance(data['item_list']['items_checked'], list)
-        self.assertCountEqual(data['item_list']['items_checked'], 2)
-        self.assertEqual(data['item_list']['items_checked'][0]['name'], 'item four')
+        self.assertEqual(len(data['item_list']['items_checked']), 3)
+        self.assertEqual(data['item_list']['items_checked'][0]['content'], 'item four')
         self.assertEqual(data['item_list']['items_checked'][0]['owner'], data['item_list']['owner'])
         self.assertEqual(data['item_list']['items_checked'][0]['item_list'], data['item_list']['id'])
-        self.assertEqual(data['item_list']['items_checked'][1]['name'], 'item five')
+        self.assertEqual(data['item_list']['items_checked'][1]['content'], 'item five')
         self.assertEqual(data['item_list']['items_checked'][1]['owner'], data['item_list']['owner'])
         self.assertEqual(data['item_list']['items_checked'][1]['item_list'], data['item_list']['id'])
 
+    def test_list_not_found(self):
+        response = self.client.post('/item_list', data=json.dumps(self.item_list), headers=self.headers)
+
+        self.assertEqual(response.status_code, 201)
+
+        response = self.client.get(f'/item_list/2')
+        self.assertEqual(response.status_code, 404)
+
+    def test_delete_list(self):
+        response = self.client.post('/item_list', data=json.dumps(self.item_list), headers=self.headers)
+
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+        list_id = data['id']
+
+        response = self.client.delete(f'/item_list/{list_id}')
+        self.assertEqual(response.status_code, 200)
 
     def test_add_to_list(self):
         response = self.client.post('/item_list', data=json.dumps(self.empty_item_list), headers=self.headers)
@@ -163,20 +180,73 @@ class ItemListsTestCase(unittest.TestCase):
         response = self.client.get(f"/item_list/{created_data['id']}")
         self.assertEqual(response.status_code, 200)
 
-        self.assertEqual(added_data['count'], 1)
-        self.assertEqual(added_data['item_list']['name'], created_data['item_list']['name'])
-        self.assertEqual(added_data['item_list']['owner'], created_data['item_list']['owner'])  # Update to user created
-        self.assertEqual(added_data['item_list']['type'], created_data['item_list']['type'])
-        self.assertIsInstance(added_data['item_list']['items'], list)
-        self.assertCountEqual(added_data['item_list']['items'], 2)
-        self.assertEqual(added_data['item_list']['items'][0]['name'], 'item one')
-        self.assertEqual(added_data['item_list']['items'][0]['owner'], added_data['item_list']['owner'])
-        self.assertEqual(added_data['item_list']['items'][0]['item_list'], added_data['item_list']['id'])
-        self.assertEqual(added_data['item_list']['items'][1]['name'], 'item two')
-        self.assertEqual(added_data['item_list']['items'][1]['owner'], added_data['item_list']['owner'])
-        self.assertEqual(added_data['item_list']['items'][1]['item_list'], added_data['item_list']['id'])
-        self.assertIsInstance(added_data['item_list']['items_checked'], list)
-        self.assertCountEqual(added_data['item_list']['items_checked'], 1)
-        self.assertEqual(added_data['item_list']['items_checked'][0]['name'], 'item three')
-        self.assertEqual(added_data['item_list']['items_checked'][0]['owner'], added_data['item_list']['owner'])
-        self.assertEqual(added_data['item_list']['items_checked'][0]['item_list'], added_data['item_list']['id'])
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['item_list']['name'], created_data['item_list']['name'])
+        self.assertEqual(data['item_list']['owner'], created_data['item_list']['owner'])  # Update to user created
+        self.assertEqual(data['item_list']['type'], created_data['item_list']['type'])
+        self.assertIsInstance(data['item_list']['items'], list)
+        self.assertEqual(len(data['item_list']['items']), 2)
+        self.assertEqual(data['item_list']['items'][0]['content'], 'item one')
+        self.assertEqual(data['item_list']['items'][0]['owner'], data['item_list']['owner'])
+        self.assertEqual(data['item_list']['items'][0]['item_list'], data['item_list']['id'])
+        self.assertEqual(data['item_list']['items'][1]['content'], 'item two')
+        self.assertEqual(data['item_list']['items'][1]['owner'], data['item_list']['owner'])
+        self.assertEqual(data['item_list']['items'][1]['item_list'], data['item_list']['id'])
+        self.assertIsInstance(data['item_list']['items_checked'], list)
+        self.assertEqual(len(data['item_list']['items_checked']), 1)
+        self.assertEqual(data['item_list']['items_checked'][0]['content'], 'item three')
+        self.assertEqual(data['item_list']['items_checked'][0]['owner'], data['item_list']['owner'])
+        self.assertEqual(data['item_list']['items_checked'][0]['item_list'], data['item_list']['id'])
+
+    def test_rename_list(self):
+        response = self.client.post('/item_list', data=json.dumps(self.empty_item_list), headers=self.headers)
+
+        self.assertEqual(response.status_code, 201)
+        create_data = json.loads(response.data.decode('utf-8'))
+        list_id = create_data['id']
+
+        response = self.client.patch(f'/item_list/{list_id}/rename', data=json.dumps({'name': 'new list name'}), headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(f'/item_list/{list_id}')
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['item_list']['name'], 'new list name')
+
+    def test_change_list_owner(self):
+        response = self.client.post('/item_list', data=json.dumps(self.empty_item_list), headers=self.headers)
+
+        self.assertEqual(response.status_code, 201)
+        create_data = json.loads(response.data.decode('utf-8'))
+        list_id = create_data['id']
+
+        response = self.client.patch(f'/item_list/{list_id}/owner', data=json.dumps({'owner': 2}), headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(f'/item_list/{list_id}')
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['item_list']['owner'], 2)
+
+    def test_toggle_check(self):
+        response = self.client.post('/item_list', data=json.dumps(self.item_list), headers=self.headers)
+
+        self.assertEqual(response.status_code, 201)
+        create_data = json.loads(response.data.decode('utf-8'))
+        list_id = create_data['id']
+
+        toggle_list_items = [
+            create_data['item_list']['items'][0]['id'],
+            create_data['item_list']['items_checked'][0]['id']
+        ]
+
+        response = self.client.patch(f'/item_list/{list_id}/toggle_check', data=json.dumps({'items': toggle_list_items}), headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        
+        response = self.client.get(f'/item_list/{list_id}')
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(len(data['item_list']['items']), 3)
+        self.assertEqual(len(data['item_list']['items_checked']), 2)
