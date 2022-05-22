@@ -7,7 +7,8 @@ class ItemListsTestCase(unittest.TestCase):
 
     def setUp(self):
         config = {
-            'TESTING': True
+            'TESTING': True,
+            'LOG_LEVEL': 'INFO'
         }
 
         self.app = create_app(config)
@@ -19,7 +20,7 @@ class ItemListsTestCase(unittest.TestCase):
             'last_name': 'Nordamnn',
             'email': 'ola.nordmann@norge.no'
         }
-        self.user1 = {
+        self.user2 = {
             'name': 'Kari',
             'last_name': 'Nordamnn',
             'email': 'kari.nordmann@norge.no'
@@ -126,7 +127,7 @@ class ItemListsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
 
-        self.assertEqual(data['item_list']['name'], 'Empty test list')
+        self.assertEqual(data['item_list']['name'], 'Test list')
         self.assertEqual(data['item_list']['owner'], 1)  # Update to user created
         self.assertEqual(data['item_list']['type'], 'check')
         self.assertIsInstance(data['item_list']['items'], list)
@@ -141,7 +142,7 @@ class ItemListsTestCase(unittest.TestCase):
         self.assertEqual(data['item_list']['items'][2]['owner'], data['item_list']['owner'])
         self.assertEqual(data['item_list']['items'][2]['item_list'], data['item_list']['id'])
         self.assertIsInstance(data['item_list']['items_checked'], list)
-        self.assertEqual(len(data['item_list']['items_checked']), 3)
+        self.assertEqual(len(data['item_list']['items_checked']), 2)
         self.assertEqual(data['item_list']['items_checked'][0]['content'], 'item four')
         self.assertEqual(data['item_list']['items_checked'][0]['owner'], data['item_list']['owner'])
         self.assertEqual(data['item_list']['items_checked'][0]['item_list'], data['item_list']['id'])
