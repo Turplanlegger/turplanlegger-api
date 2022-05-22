@@ -1,7 +1,7 @@
 import json
 import unittest
 
-from turplanlegger.app import create_app  # ,  db
+from turplanlegger.app import create_app, db
 
 class ItemListsTestCase(unittest.TestCase):
 
@@ -24,6 +24,10 @@ class ItemListsTestCase(unittest.TestCase):
             'last_name': 'Nordamnn',
             'email': 'kari.nordmann@norge.no'
         }
+        
+        db.create_user(self.user1["name"], self.user1["last_name"], self.user1["email"])
+        db.create_user(self.user2["name"], self.user2["last_name"], self.user2["email"])
+
 
         self.item_list = {
             'name': 'Test list',
@@ -62,8 +66,8 @@ class ItemListsTestCase(unittest.TestCase):
             'Content-type': 'application/json'
         }
 
-    # def tearDown(self):
-        # db.destroy()
+    def tearDown(self):
+        db.destroy()
 
     def test_create_list(self):
         response = self.client.post('/item_list', data=json.dumps(self.item_list), headers=self.headers)
