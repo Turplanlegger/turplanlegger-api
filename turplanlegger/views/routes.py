@@ -14,7 +14,7 @@ def get_route(route_id):
     if route:
         return jsonify(status='ok', count=1, route=route.serialize)
     else:
-        raise ApiError('not found', 404)
+        raise ApiError('route not found', 404)
 
 
 @api.route('/route/<route_id>', methods=['DELETE'])
@@ -54,7 +54,7 @@ def change_route_owner(route_id):
     route = Route.find_route(route_id)
 
     if not route:
-        raise ApiError('route list not found', 404)
+        raise ApiError('route not found', 404)
 
     owner = request.json.get('owner', None)
 
