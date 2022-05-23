@@ -40,7 +40,7 @@ class RoutesTestCase(unittest.TestCase):
     def tearDown(self):
         db.destroy()
 
-    def test_create_route(self):
+    def test_add_route(self):
         response = self.client.post('/route', data=json.dumps(self.route), headers=self.headers)
 
         self.assertEqual(response.status_code, 201)
@@ -59,4 +59,23 @@ class RoutesTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['route']['owner'], self.route['owner'])
 
-    # TODO: get_route(route_id), delete_route(route_id), add_route, change_route_owner(route_id)
+    def test_delete_route(self):
+        response = self.client.post('/route', data=json.dumps(self.route), headers=self.headers)
+        data = json.loads(response.data.decode('utf-8'))
+        created_route_id = data['id']
+
+        response = self.client.delete(f'/route/{created_route_id}')
+        self.assertEqual(response.status_code, 200)
+
+    def test_change_route_owner(self):
+        response = self.client.post('/route', data=json.dumps(self.route), headers=self.headers)
+        data = json.loads(response.data.decode('utf-8'))
+        created_route_id = data['id']
+
+        response = self.client.patch(f'/route/{created_route_id}/owner', data=json.dumps({'owner': 2}), headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(f'/route/{created_route_id}')
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['route']['owner'], 2)
