@@ -1,8 +1,7 @@
 include VERSION
 include LICENSE
-include NOTICE
 include README.md
 exclude .gitignore
 global-exclude *.pyc
 include wsgi.py
-include turplanlegger/base/schema.sql
+include turplanlegger/database/schema.sql
