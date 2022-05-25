@@ -19,7 +19,7 @@ class Database:
         self.conn = self.connect()
         self.logger.debug('Database connected')
 
-        with app.open_resource('sql/schema.sql') as f:
+        with app.open_resource('database/schema.sql') as f:
             try:
                 self.conn.cursor().execute(f.read())
                 self.conn.commit()
