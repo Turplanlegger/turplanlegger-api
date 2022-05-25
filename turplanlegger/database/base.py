@@ -61,8 +61,9 @@ class Database:
     def destroy(self):
         conn = self.conn
         cursor = conn.cursor()
-        for table in ['trips', 'item_lists', 'users', 'routes']:
-            cursor.execute(f'DROP TABLE IF EXISTS {table}')
+        for table in ['trips', 'item_lists', 'lists_items', 'users', 'routes']:
+            cursor.execute(f'DROP TABLE IF EXISTS {table} CASCADE')
+
         conn.commit()
         conn.close()
 
@@ -189,7 +190,7 @@ class Database:
             VALUES (%(route)s, %(owner)s)
             RETURNING *
         """
-        return self._insert(insert, route, owner)
+        return self._insert(insert, {'route': route, 'owner': owner})
 
     def delete_route(self, id):
         update = """
@@ -208,6 +209,15 @@ class Database:
             RETURNING *
         """
         return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
+
+    # User
+    def create_user(self, name, last_name, email):
+        insert = """
+            INSERT INTO users (name, last_name, email)
+            VALUES (%(name)s, %(last_name)s, %(email)s)
+            RETURNING *
+        """
+        return self._insert(insert, {'name': name, 'last_name': last_name, 'email': email})
 
     # Helpers
     def _insert(self, query, vars):

@@ -5,6 +5,7 @@ from turplanlegger.app import db
 
 JSON = Dict[str, any]
 
+
 class Route:
 
     def __init__(self, owner: int, route: JSON, **kwargs) -> None:
@@ -15,12 +16,11 @@ class Route:
         if not route:
             raise ValueError('Missing mandatory field "route"')
 
-        self.id = kwargs.get('id', None)
         self.owner = owner
-        self.route = kwargs.get('route')
-        self.route_history = kwargs.get('route_history')
+        self.route = route
+        self.id = kwargs.get('id', None)
+        self.route_history = kwargs.get('route_history', [])
         self.create_time = kwargs.get('create_time', None) or datetime.now()
-
 
     @classmethod
     def parse(cls, json: JSON) -> 'Route':
@@ -67,7 +67,7 @@ class Route:
                 id=rec.get('id', None),
                 owner=rec.get('owner', None),
                 route=rec.get('route', None),
-                route_history=rec.get('route_history', None),
+                route_history=rec.get('route_history', []),
                 create_time=rec.get('created', None)
             )
         elif isinstance(rec, tuple):

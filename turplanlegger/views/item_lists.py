@@ -46,7 +46,11 @@ def add_item_list():
     except Exception as e:
         raise ApiError(str(e), 500)
 
-    return jsonify(item_list.serialize)
+    if item_list:
+        return jsonify(status='ok', id=item_list.id, item_list=item_list.serialize), 201
+    else:
+        raise ApiError('Creation of item list failed', 500)
+
 
 
 @api.route('/item_list/<item_list_id>/add', methods=['PATCH'])
@@ -128,8 +132,8 @@ def toggle_list_item_check(item_list_id):
         raise ApiError(f'items not found in item_list {item_list.id}', 400)
 
     try:
-        list_items = [item.toggle_state() for item in list_items]
-        list_items_checked = [item.toggle_state() for item in list_items_checked]
+        list_items = [item.toggle_check() for item in list_items]
+        list_items_checked = [item.toggle_check() for item in list_items_checked]
     except Exception as e:
         raise ApiError(str(e), 500)
 

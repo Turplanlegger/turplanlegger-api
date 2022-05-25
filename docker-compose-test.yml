@@ -3,11 +3,11 @@ services:
   flask:
     build: .
     container_name: turplanlegger
-    command: 'flask run --debugger -h 0.0.0.0 --port 8080 --with-threads --reload'
+    command: 'python3 -m unittest discover tests'
     ports:
       - '80:8080'
     volumes:
-      - ./:/
+      - ./:/turplanlegger
     depends_on:
       - turplanleggerdb
     links:
