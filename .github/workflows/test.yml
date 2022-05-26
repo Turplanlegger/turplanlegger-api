@@ -56,7 +56,10 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=50 --max-line-length=127 --statistics
     - name: Test with pytest
       id: test
-      env:
-        DATABASE_URL: postgres://postgres:postgres@localhost:5432/turplanlegger
       run: |
+        echo 'DATABASE_HOST="localhost > /etc/turplanlegger/turplanlegger.conf'
+        echo 'DATABASE_INSTANCE="turplanlegger"' >> /etc/turplanlegger/turplanlegger.conf
+        echo 'DATABASE_USERNAME="postgres"' >> /etc/turplanlegger/turplanlegger.conf
+        echo 'DATABASE_PASSWORD="postgres"' >> /etc/turplanlegger/turplanlegger.conf
+
         pytest tests/*.py
