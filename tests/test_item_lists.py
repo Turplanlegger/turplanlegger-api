@@ -3,6 +3,7 @@ import unittest
 
 from turplanlegger.app import create_app, db
 
+
 class ItemListsTestCase(unittest.TestCase):
 
     def setUp(self):
@@ -25,10 +26,9 @@ class ItemListsTestCase(unittest.TestCase):
             'last_name': 'Nordamnn',
             'email': 'kari.nordmann@norge.no'
         }
-        
+
         db.create_user(self.user1["name"], self.user1["last_name"], self.user1["email"])
         db.create_user(self.user2["name"], self.user2["last_name"], self.user2["email"])
-
 
         self.item_list = {
             'name': 'Test list',
@@ -248,7 +248,7 @@ class ItemListsTestCase(unittest.TestCase):
 
         response = self.client.patch(f'/item_list/{list_id}/toggle_check', data=json.dumps({'items': toggle_list_items}), headers=self.headers)
         self.assertEqual(response.status_code, 200)
-        
+
         response = self.client.get(f'/item_list/{list_id}')
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
