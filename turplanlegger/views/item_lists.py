@@ -52,7 +52,6 @@ def add_item_list():
         raise ApiError('Creation of item list failed', 500)
 
 
-
 @api.route('/item_list/<item_list_id>/add', methods=['PATCH'])
 def add_item_list_items(item_list_id):
 
