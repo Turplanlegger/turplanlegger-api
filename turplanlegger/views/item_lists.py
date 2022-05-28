@@ -1,4 +1,4 @@
-from flask import current_app, g, jsonify, request
+from flask import jsonify, request
 
 from turplanlegger.exceptions import ApiError
 from turplanlegger.models.item_lists import ItemList

@@ -155,7 +155,7 @@ class ItemListsTestCase(unittest.TestCase):
 
         self.assertEqual(response.status_code, 201)
 
-        response = self.client.get(f'/item_list/2')
+        response = self.client.get('/item_list/2')
         self.assertEqual(response.status_code, 404)
 
     def test_delete_list(self):
