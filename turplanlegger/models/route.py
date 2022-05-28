@@ -42,7 +42,7 @@ class Route:
         }
 
     def create(self) -> 'Route':
-        route = self.get_route(db.create_route(self.route, self.owner)) 
+        route = self.get_route(db.create_route(self.route, self.owner))
         return route
 
     def delete(self) -> bool:
@@ -50,7 +50,7 @@ class Route:
 
     @staticmethod
     def find_route(id: int) -> 'Route':
-        return Route.get_route(db.get_route(id)) 
+        return Route.get_route(db.get_route(id))
 
     def change_owner(self, owner: int) -> 'Route':
         if self.owner == owner:
