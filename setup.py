@@ -29,10 +29,10 @@ setuptools.setup(
     zip_safe=False,
     keywords='trip, planning',
     classifiers=[
-        'Development Status :: 1 - Planning',
+        'Development Status :: 2 - Pre-Alpha',
         'Environment :: Web Environment',
         'Framework :: Flask',
-        'Programming Language :: Python :: 3.9;',
+        'Programming Language :: Python :: 3.10;',
     ],
-    python_requires='>=3.9'
+    python_requires='>=3.10'
 )
