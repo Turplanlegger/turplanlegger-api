@@ -45,6 +45,13 @@ jobs:
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
         pip install .
+    - name: Configure app
+      run: |
+        mkdir -p /etc/turplanlegger
+        echo 'DATABASE_HOST="localhost"' > /etc/turplanlegger/turplanlegger.conf
+        echo 'DATABASE_INSTANCE="turplanlegger"' >> /etc/turplanlegger/turplanlegger.conf
+        echo 'DATABASE_USERNAME="postgres"' >> /etc/turplanlegger/turplanlegger.conf
+        echo 'DATABASE_PASSWORD="postgres"' >> /etc/turplanlegger/turplanlegger.conf
     - name: Pre-commit hooks
       id: hooks
       run: |
@@ -57,9 +64,4 @@ jobs:
     - name: Test with pytest
       id: test
       run: |
-        echo 'DATABASE_HOST="localhost"' > /etc/turplanlegger/turplanlegger.conf
-        echo 'DATABASE_INSTANCE="turplanlegger"' >> /etc/turplanlegger/turplanlegger.conf
-        echo 'DATABASE_USERNAME="postgres"' >> /etc/turplanlegger/turplanlegger.conf
-        echo 'DATABASE_PASSWORD="postgres"' >> /etc/turplanlegger/turplanlegger.conf
-
         pytest tests/*.py
