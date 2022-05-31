@@ -210,6 +210,43 @@ class Database:
         """
         return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
 
+    # Note
+    def get_note(self, id, deleted=False):
+        select = """
+            SELECT * FROM notes WHERE id = %s
+        """
+        if deleted:
+            select += ' AND deleted = TRUE'
+        else:
+            select += ' AND deleted = FALSE'
+        return self._fetchone(select, [id])
+
+    def create_note(self, note):
+        insert = """
+            INSERT INTO notes (owner, name, content)
+            VALUES (%(owner)s, %(name)s, %(content)s)
+            RETURNING *
+        """
+        return self._insert(insert, vars(note))
+
+    def delete_note(self, id):
+        update = """
+            UPDATE notes
+                SET deleted=TRUE, delete_time=CURRENT_TIMESTAMP
+                WHERE id = %(id)s AND deleted = FALSE
+            RETURNING deleted
+        """
+        return self._updateone(update, {'id': id}, returning=True)
+
+    def change_note_owner(self, id, owner):
+        update = """
+            UPDATE notes
+                SET owner=%(owner)s
+                WHERE id = %(id)s
+            RETURNING *
+        """
+        return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
+
     # User
     def create_user(self, name, last_name, email):
         insert = """
