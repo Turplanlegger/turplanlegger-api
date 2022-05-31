@@ -25,8 +25,8 @@ class RoutesTestCase(unittest.TestCase):
             'email': 'kari.nordmann@norge.no'
         }
 
-        db.create_user(self.user1["name"], self.user1["last_name"], self.user1["email"])
-        db.create_user(self.user2["name"], self.user2["last_name"], self.user2["email"])
+        db.create_user(self.user1['name'], self.user1['last_name'], self.user1['email'])
+        db.create_user(self.user2['name'], self.user2['last_name'], self.user2['email'])
 
         routeGeometry = ('{\"type\":\"LineString\",\"coordinates\":[[11.615295,60.603483],[11.638641,60.612921],'
                          '[11.6819,60.613258],[11.697693,60.601797],[11.712112,60.586622],[11.703873,60.574476],'

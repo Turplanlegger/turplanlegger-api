@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask
 
 
@@ -16,7 +18,9 @@ class Config:
         from flask import Config
         self.config = Config('/')
 
-        self.config.from_pyfile('/etc/turplanlegger/turplanlegger.conf')
+        config_path = os.getenv('TURPLANLEGGER_CONFIG_PATH', '/etc/turplanlegger/turplanlegger.conf')
+        print(config_path)
+        self.config.from_pyfile(config_path)
 
         # Database
         self.config['DATABASE_URI'] = self.conf_ent('DATABASE_URI')
@@ -24,8 +28,9 @@ class Config:
         self.config['DATABASE_MAX_RETRIES'] = self.conf_ent('DATABASE_MAX_RETRIES', 5)
 
         # Logging
+        log_path = os.getenv('TURPLANLEGGER_LOG_PATH', '/var/log/turplanlegger.log')
         self.config['LOG_FILE'] = self.conf_ent(
-            'LOG_FILE', '/var/log/turplanlegger.log')
+            'LOG_FILE', log_path)
         self.config['LOG_LEVEL'] = self.conf_ent('LOG_LEVEL', 'INFO')
 
         return self.config

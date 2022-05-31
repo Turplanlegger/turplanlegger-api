@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict
 
 from turplanlegger.app import db
 from turplanlegger.models.list_items import ListItem
