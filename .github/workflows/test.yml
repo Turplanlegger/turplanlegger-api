@@ -62,5 +62,6 @@ jobs:
       id: test
       env:
         TURPLANLEGGER_CONFIG_PATH: /home/runner/work/turplanlegger.conf
+        TURPLANLEGGER_LOG_PATH: /home/runner/work/turplanlegger.log
       run: |
         pytest tests/*.py
