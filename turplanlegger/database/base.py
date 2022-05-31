@@ -211,6 +211,10 @@ class Database:
         return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
 
     # User
+    def get_user(self, id):
+        select = 'SELECT * FROM users WHERE id = %s'
+        return self._fetchone(select, tuple(id))
+
     def create_user(self, name, last_name, email):
         insert = """
             INSERT INTO users (name, last_name, email)

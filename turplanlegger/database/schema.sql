@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS users (
     name text NOT NULL,
     last_name text NOT NULL,
     email text NOT NULL,
+    auth_method text NOT NULL,
     create_time timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted boolean DEFAULT FALSE,
     delete_time timestamp without time zone
