@@ -61,7 +61,7 @@ class Database:
     def destroy(self):
         conn = self.conn
         cursor = conn.cursor()
-        for table in ['trips', 'item_lists', 'lists_items', 'users', 'routes']:
+        for table in ['trips', 'item_lists', 'lists_items', 'users', 'routes', 'notes']:
             cursor.execute(f'DROP TABLE IF EXISTS {table} CASCADE')
 
         conn.commit()
