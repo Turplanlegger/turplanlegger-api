@@ -47,10 +47,8 @@ jobs:
         pip install .
     - name: Configure app
       run: |
-        echo ${{GITHUB_WORKSPACE}}
-        echo $GITHUB_WORKSPACE
-        echo 'DATABASE_URI="postgresql://postgres:postgres@localhost/turplanlegger?connect_timeout=10&application_name=turplanlegger"' > ${{GITHUB_WORKSPACE}}/turplanlegger.conf
-        echo 'DATABASE_NAME="turplanlegger"' >> ${{GITHUB_WORKSPACE}}/turplanlegger.conf
+        echo 'DATABASE_URI="postgresql://postgres:postgres@localhost/turplanlegger?connect_timeout=10&application_name=turplanlegger"' > $HOME/turplanlegger.conf
+        echo 'DATABASE_NAME="turplanlegger"' >> $HOME/turplanlegger.conf
     - name: Pre-commit hooks
       id: hooks
       run: |
@@ -63,6 +61,6 @@ jobs:
     - name: Test with pytest
       id: test
       env:
-        TURPLANLEGGER_CONFIG_PATH: ${{GITHUB_WORKSPACE}}/turplanlegger.conf
+        TURPLANLEGGER_CONFIG_PATH: $HOME/turplanlegger.conf
       run: |
         pytest tests/*.py
