@@ -1,4 +1,3 @@
-import string
 from typing import Dict
 
 from turplanlegger.app import db
@@ -8,14 +7,14 @@ JSON = Dict[str, any]
 
 class Note:
 
-    def __init__(self, owner: int, content: string, **kwargs) -> None:
+    def __init__(self, owner: int, content: str, **kwargs) -> None:
         if not owner:
             raise ValueError('Missing mandatory field "owner"')
         if not isinstance(owner, int):
             raise TypeError('"owner" must be integer')
         if not content:
             raise ValueError('Missing mandatory field "content"')
-        if not isinstance(content, string):
+        if not isinstance(content, str):
             raise TypeError('"content" must be string')
 
         self.owner = owner
