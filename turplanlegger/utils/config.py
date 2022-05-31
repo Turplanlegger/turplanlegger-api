@@ -1,3 +1,4 @@
+import os
 from flask import Flask
 
 
@@ -16,7 +17,8 @@ class Config:
         from flask import Config
         self.config = Config('/')
 
-        self.config.from_pyfile('/etc/turplanlegger/turplanlegger.conf')
+        config_path = os.getenv('TURPLANLEGGER_CONFIG_PATH', '/etc/turplanlegger/turplanlegger.conf')
+        self.config.from_pyfile(config_path)
 
         # Database
         self.config['DATABASE_URI'] = self.conf_ent('DATABASE_URI')
