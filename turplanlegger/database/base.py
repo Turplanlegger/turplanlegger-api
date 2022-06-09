@@ -256,6 +256,15 @@ class Database:
         """
         return self._updateone(update, {'id': id, 'name': name}, returning=True)
 
+    def update_note(self, id, content):
+        update = """
+            UPDATE notes
+                SET content=%(content)s
+                WHERE id = %(id)s
+            RETURNING *
+        """
+        return self._updateone(update, {'id': id, 'content': content}, returning=True)
+
     # User
     def create_user(self, name, last_name, email):
         insert = """

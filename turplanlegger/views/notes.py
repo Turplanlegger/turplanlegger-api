@@ -84,3 +84,18 @@ def rename_note(note_id):
         return jsonify(status='ok')
     else:
         raise ApiError('failed to rename note')
+
+@api.route('/note/<note_id>/update', methods=['PATCH'])
+def rename_note(note_id):
+
+    note = Note.find_note(note_id)
+
+    if not note:
+        raise ApiError('note not found', 404)
+
+    note.content = request.json.get('content', '')
+
+    if note.update():
+        return jsonify(status='ok')
+    else:
+        raise ApiError('failed to rename note')
