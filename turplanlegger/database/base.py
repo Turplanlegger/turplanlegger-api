@@ -247,6 +247,15 @@ class Database:
         """
         return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
 
+    def rename_note(self, id, name):
+        update = """
+            UPDATE notes
+                SET name=%(name)s
+                WHERE id = %(id)s
+            RETURNING *
+        """
+        return self._updateone(update, {'id': id, 'name': name}, returning=True)
+
     # User
     def create_user(self, name, last_name, email):
         insert = """

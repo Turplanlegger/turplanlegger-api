@@ -49,6 +49,9 @@ class Note:
     def delete(self) -> bool:
         return db.delete_note(self.id)
 
+    def rename(self) -> 'Note':
+        return db.rename_note(self.id, self.name)
+
     @staticmethod
     def find_note(id: int) -> 'Note':
         return Note.get_note(db.get_note(id))
