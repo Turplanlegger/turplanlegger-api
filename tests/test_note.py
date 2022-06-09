@@ -140,3 +140,23 @@ class NotesTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['message'], 'must supply owner as int')
+
+    def test_rename_note(self):
+        response = self.client.post('/note', data=json.dumps(self.note_full), headers=self.headers)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+
+        response = self.client.patch('/note/1/rename', data=json.dumps({'name': 'newlist'}), headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['status'], 'ok')
+
+    def test_update_note(self):
+        response = self.client.post('/note', data=json.dumps(self.note_full), headers=self.headers)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+
+        response = self.client.patch('/note/1/update', data=json.dumps({'content': 'newcontent'}), headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['status'], 'ok')
