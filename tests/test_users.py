@@ -94,7 +94,6 @@ class UsersTestCase(unittest.TestCase):
 
     def test_create_user_invalid_email(self):
         response = self.client.post('/user', data=json.dumps(self.user3), headers=self.headers)
-        data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(response.status_code, 400)
 
     def test_rename_user(self):
@@ -102,7 +101,11 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
 
-        response = self.client.patch(f'/user/{data["id"]}/rename', data=json.dumps({'name': 'Petter', 'last_name': 'Smart'}), headers=self.headers)
+        response = self.client.patch(
+            f'/user/{data["id"]}/rename',
+            data=json.dumps({'name': 'Petter', 'last_name': 'Smart'}),
+            headers=self.headers
+        )
         data = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(response.status_code, 200)

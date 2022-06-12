@@ -1,6 +1,6 @@
 import re
-
 from typing import Dict
+
 from turplanlegger.app import db
 
 JSON = Dict[str, any]

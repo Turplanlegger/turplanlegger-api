@@ -120,10 +120,10 @@ class RoutesTestCase(unittest.TestCase):
         created_route_id = data['id']
 
         response = self.client.patch(
-                f'/route/{created_route_id}/owner',
-                data=json.dumps({'owner': self.user2.id}),
-                headers=self.headers
-            )
+            f'/route/{created_route_id}/owner',
+            data=json.dumps({'owner': self.user2.id}),
+            headers=self.headers
+        )
         self.assertEqual(response.status_code, 200)
 
         response = self.client.get(f'/route/{created_route_id}')
@@ -137,10 +137,10 @@ class RoutesTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         response = self.client.patch(
-                '/route/2/owner',
-                data=json.dumps({'owner': self.user2.id}),
-                headers=self.headers
-            )
+            '/route/2/owner',
+            data=json.dumps({'owner': self.user2.id}),
+            headers=self.headers
+        )
         self.assertEqual(response.status_code, 404)
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['message'], 'route not found')

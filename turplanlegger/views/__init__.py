@@ -16,7 +16,6 @@ def before_request():
                        "'application/json'", 415)
 
 
-
 @api.route('/', methods=['GET'])
 def index():
     links = []

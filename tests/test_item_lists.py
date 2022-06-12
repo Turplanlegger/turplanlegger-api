@@ -215,10 +215,10 @@ class ItemListsTestCase(unittest.TestCase):
         list_id = create_data['id']
 
         response = self.client.patch(
-                f'/item_list/{list_id}/rename',
-                data=json.dumps({'name': 'new list name'}),
-                headers=self.headers
-            )
+            f'/item_list/{list_id}/rename',
+            data=json.dumps({'name': 'new list name'}),
+            headers=self.headers
+        )
         self.assertEqual(response.status_code, 200)
 
         response = self.client.get(f'/item_list/{list_id}')
@@ -234,10 +234,10 @@ class ItemListsTestCase(unittest.TestCase):
         list_id = create_data['id']
 
         response = self.client.patch(
-                f'/item_list/{list_id}/owner',
-                data=json.dumps({'owner': self.user2.id}),
-                headers=self.headers
-            )
+            f'/item_list/{list_id}/owner',
+            data=json.dumps({'owner': self.user2.id}),
+            headers=self.headers
+        )
         self.assertEqual(response.status_code, 200)
 
         response = self.client.get(f'/item_list/{list_id}')
