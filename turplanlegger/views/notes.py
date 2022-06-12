@@ -70,6 +70,7 @@ def change_note_owner(note_id):
 
     return jsonify(status='ok')
 
+
 @api.route('/note/<note_id>/rename', methods=['PATCH'])
 def rename_note(note_id):
 
@@ -84,6 +85,7 @@ def rename_note(note_id):
         return jsonify(status='ok')
     else:
         raise ApiError('failed to rename note')
+
 
 @api.route('/note/<note_id>/update', methods=['PATCH'])
 def update_note(note_id):

@@ -51,7 +51,7 @@ class Note:
 
     def rename(self) -> 'Note':
         return db.rename_note(self.id, self.name)
-    
+
     def update(self) -> 'Note':
         return db.update_note(self.id, self.content)
 

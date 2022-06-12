@@ -30,20 +30,20 @@ class NotesTestCase(unittest.TestCase):
 
         self.note_full = {
             'owner': 1,
-            'content': "Are er kul",
-            'name': "Best note ever"
+            'content': 'Are er kul',
+            'name': 'Best note ever'
         }
         self.note_no_name = {
             'owner': 1,
-            'content': "Are er kul",
+            'content': 'Are er kul',
         }
         self.note_no_content = {
             'owner': 1,
-            'name': "Best note ever",
+            'name': 'Best note ever',
         }
         self.note_no_owner = {
-            'content': "Are er kul",
-            'name': "Best note ever"
+            'content': 'Are er kul',
+            'name': 'Best note ever'
         }
         self.headers = {
             'Content-type': 'application/json'
