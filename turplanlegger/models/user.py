@@ -28,19 +28,23 @@ class User:
         if not auth_method:
             raise ValueError('Missing mandatory field \'auth_method\'')
 
+        id = kwargs.get('id', None)
+        if id and not isinstance(id, int):
+            raise TypeError('\'id\' must be int')
+
+        self.id = id
         self.name = name
         self.last_name = last_name
-        self.id = kwargs.get('id', None)
         self.email = email
         self.auth_method = auth_method
         self.deleted = kwargs.get('deleted', False)
-        self.deleted_time = kwargs.get('deleted_time', None)
+        self.delete_time = kwargs.get('delete_time', None)
         self.create_time = kwargs.get('create_time', None)
 
     @classmethod
     def parse(cls, json: JSON) -> 'User':
         email = json.get('email', None)
-        p = re.compile('^((\w[^\W]+)[\.\-]?){1,}\@(([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$')
+        p = re.compile('^[\\w.-]+@[\\w.-]+\\.\\w+$')
         if not p.match(email):
             raise ValueError('invalid email address')
 
@@ -59,10 +63,16 @@ class User:
             'last_name': self.last_name,
             'email': self.email,
             'auth_method': self.auth_method,
+            'create_time': self.create_time,
             'deleted': self.deleted,
-            'deleted_time': self.deleted_time,
-            'create_time': self.create_time
+            'delete_time': self.delete_time
         }
+
+    def create(self) -> 'User':
+        return self.get_user(db.create_user(self))
+
+    def delete(self) -> bool:
+        return db.delete_user(self.id)
 
     @staticmethod
     def find_user(id: int) -> 'User':
@@ -76,9 +86,9 @@ class User:
                 name=rec.get('name', None),
                 last_name=rec.get('last_name', None),
                 email=rec.get('email', None),
+                create_time=rec.get('created', None),
                 deleted=rec.get('deleted', False),
-                deleted_time=rec.get('deleted_time', None),
-                create_time=rec.get('created', None)
+                delete_time=rec.get('delete_time', None)
             )
         elif isinstance(rec, tuple):
             return User(
@@ -87,7 +97,7 @@ class User:
                 last_name=rec.last_name,
                 email=rec.email,
                 auth_method=rec.auth_method,
+                create_time=rec.create_time,
                 deleted=rec.deleted,
-                deleted_time=rec.deleted_time,
-                create_time=rec.create_time
+                delete_time=rec.delete_time
             )

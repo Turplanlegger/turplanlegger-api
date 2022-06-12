@@ -211,17 +211,32 @@ class Database:
         return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
 
     # User
-    def get_user(self, id):
+    def get_user(self, id, deleted=False):
         select = 'SELECT * FROM users WHERE id = %s'
-        return self._fetchone(select, tuple(id))
 
-    def create_user(self, name, last_name, email):
+        if deleted:
+            select += ' AND deleted = TRUE'
+        else:
+            select += ' AND deleted = FALSE'
+
+        return self._fetchone(select, (id,))
+
+    def create_user(self, user):
         insert = """
-            INSERT INTO users (name, last_name, email)
-            VALUES (%(name)s, %(last_name)s, %(email)s)
+            INSERT INTO users (name, last_name, email, auth_method)
+            VALUES (%(name)s, %(last_name)s, %(email)s, %(auth_method)s)
             RETURNING *
         """
-        return self._insert(insert, {'name': name, 'last_name': last_name, 'email': email})
+        return self._insert(insert, vars(user))
+
+    def delete_user(self, id):
+        update = """
+            UPDATE users
+                SET deleted=TRUE, delete_time=CURRENT_TIMESTAMP
+                WHERE id = %s AND deleted = FALSE
+            RETURNING deleted
+        """
+        return self._updateone(update, (id,), returning=True)
 
     # Helpers
     def _insert(self, query, vars):
