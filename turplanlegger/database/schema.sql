@@ -58,5 +58,5 @@ CREATE TABLE IF NOT EXISTS notes (
     owner int REFERENCES users (id),
     create_time timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted boolean DEFAULT FALSE,
-    delete_time timestamp without time zone
+    deleted_time timestamp without time zone
 );

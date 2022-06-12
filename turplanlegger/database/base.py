@@ -219,7 +219,7 @@ class Database:
             select += ' AND deleted = TRUE'
         else:
             select += ' AND deleted = FALSE'
-        return self._fetchone(select, [id])
+        return self._fetchone(select, (id,))
 
     def create_note(self, note):
         insert = """
@@ -232,7 +232,7 @@ class Database:
     def delete_note(self, id):
         update = """
             UPDATE notes
-                SET deleted=TRUE, delete_time=CURRENT_TIMESTAMP
+                SET deleted=TRUE, deleted_time=CURRENT_TIMESTAMP
                 WHERE id = %(id)s AND deleted = FALSE
             RETURNING deleted
         """

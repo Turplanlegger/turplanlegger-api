@@ -58,25 +58,28 @@ class NotesTestCase(unittest.TestCase):
 
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['owner'], 1)
+        self.assertEqual(data['content'], 'Are er kul')
+        self.assertEqual(data['name'], 'Best note ever')
 
     def test_add_note_no_owner(self):
         response = self.client.post('/note', data=json.dumps(self.note_no_owner), headers=self.headers)
         self.assertEqual(response.status_code, 400)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['message'], 'Missing mandatory field "owner"')
+        self.assertEqual(data['message'], 'Missing mandatory field \'owner\'')
 
     def test_get_note(self):
         response = self.client.post('/note', data=json.dumps(self.note_full), headers=self.headers)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
-        created_note_id = data['id']
 
-        response = self.client.get(f'/note/{created_note_id}')
+        response = self.client.get(f'/note/{data["id"]}')
         self.assertEqual(response.status_code, 200)
 
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['note']['owner'], self.note_full['owner'])
+        self.assertEqual(data['note']['content'], self.note_full['content'])
+        self.assertEqual(data['note']['name'], self.note_full['name'])
 
     def test_get_note_not_found(self):
         response = self.client.post('/note', data=json.dumps(self.note_full), headers=self.headers)
@@ -91,10 +94,15 @@ class NotesTestCase(unittest.TestCase):
         response = self.client.post('/note', data=json.dumps(self.note_full), headers=self.headers)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
-        created_note_id = data['id']
 
-        response = self.client.delete(f'/note/{created_note_id}')
+        response = self.client.delete(f'/note/{data["id"]}')
         self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(f'/note/{data["id"]}')
+        self.assertEqual(response.status_code, 404)
+
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['message'], 'note not found')
 
     def test_delete_note_not_found(self):
         response = self.client.post('/note', data=json.dumps(self.note_full), headers=self.headers)
@@ -110,13 +118,12 @@ class NotesTestCase(unittest.TestCase):
         response = self.client.post('/note', data=json.dumps(self.note_full), headers=self.headers)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
-        created_note_id = data['id']
 
-        response = self.client.patch(f'/note/{created_note_id}/owner',
+        response = self.client.patch(f'/note/{data["id"]}/owner',
                                      data=json.dumps({'owner': 2}), headers=self.headers)
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get(f'/note/{created_note_id}')
+        response = self.client.get(f'/note/{data["id"]}')
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['note']['owner'], 2)
