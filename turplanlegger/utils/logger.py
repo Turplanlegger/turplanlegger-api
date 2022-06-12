@@ -18,11 +18,16 @@ class Logger:
             log_level = 'DEBUG'
             log_format = ('%(asctime)s - %(name)s[%(process)d]: %(levelname)s '
                           '- %(message)s [in %(pathname)s:%(lineno)d]')
+
+        handlers = [
+            logging.StreamHandler(stdout)
+        ]
+
+        if app.config.get('LOG_TO_FILE'):
+            handlers.append(logging.FileHandler(app.config.get('LOG_FILE')))
+
         logging.basicConfig(
             level=log_level,
             format=log_format,
-            handlers=[
-                logging.FileHandler(app.config.get('LOG_FILE')),
-                logging.StreamHandler(stdout)
-            ]
+            handlers=handlers
         )

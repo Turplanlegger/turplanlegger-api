@@ -22,3 +22,4 @@ RUN mkdir /etc/turplanlegger && touch /etc/turplanlegger/turplanlegger.conf
 RUN echo 'DATABASE_URI="host=turplanleggerdb dbname=postgres user=user password=pass"' >> /etc/turplanlegger/turplanlegger.conf
 RUN echo 'DATABASE_NAME="postgres"' >> /etc/turplanlegger/turplanlegger.conf
 RUN echo 'DATABASE_MAX_RETRIES=5' >> /etc/turplanlegger/turplanlegger.conf
+RUN echo 'LOG_TO_FILE=True' >> /etc/turplanlegger/turplanlegger.conf
