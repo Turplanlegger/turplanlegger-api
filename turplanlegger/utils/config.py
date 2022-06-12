@@ -1,4 +1,5 @@
 import os
+from os.path import exists
 
 from flask import Flask
 
@@ -18,9 +19,16 @@ class Config:
         from flask import Config
         self.config = Config('/')
 
+        # Read default config
+        current_dir_path = os.path.dirname(os.path.abspath(__file__))
+        default_config_path = current_dir_path + '/default_config.py'
+        self.config.from_pyfile(default_config_path)
+
+        # Override config if other configfile exists
         config_path = os.getenv('TURPLANLEGGER_CONFIG_PATH', '/etc/turplanlegger/turplanlegger.conf')
-        print(config_path)
-        self.config.from_pyfile(config_path)
+        file_exists = exists(config_path)
+        if (file_exists):
+            self.config.from_pyfile(config_path)
 
         # Database
         self.config['DATABASE_URI'] = self.conf_ent('DATABASE_URI')
