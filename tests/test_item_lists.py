@@ -2,6 +2,7 @@ import json
 import unittest
 
 from turplanlegger.app import create_app, db
+from turplanlegger.models.user import User
 
 
 class ItemListsTestCase(unittest.TestCase):
@@ -15,20 +16,22 @@ class ItemListsTestCase(unittest.TestCase):
         self.app = create_app(config)
         self.client = self.app.test_client()
 
-        # Users isn't implemented yet, so they have to be created manually for the time being
-        self.user1 = {
-            'name': 'Ola',
-            'last_name': 'Nordamnn',
-            'email': 'ola.nordmann@norge.no'
-        }
-        self.user2 = {
-            'name': 'Kari',
-            'last_name': 'Nordamnn',
-            'email': 'kari.nordmann@norge.no'
-        }
-
-        db.create_user(self.user1["name"], self.user1["last_name"], self.user1["email"])
-        db.create_user(self.user2["name"], self.user2["last_name"], self.user2["email"])
+        self.user1 = User.create(
+            User(
+                name='Ola',
+                last_name='Nordamnn',
+                email='old.nordmann@norge.no',
+                auth_method='basic'
+            )
+        )
+        self.user2 = User.create(
+            User(
+                name='Kari',
+                last_name='Nordamnn',
+                email='kari.nordmann@norge.no',
+                auth_method='basic'
+            )
+        )
 
         self.item_list = {
             'name': 'Test list',
@@ -41,7 +44,7 @@ class ItemListsTestCase(unittest.TestCase):
                 'item four',
                 'item five'
             ],
-            'owner': 1,
+            'owner': self.user1.id,
             'type': 'check'
         }
 
@@ -49,7 +52,7 @@ class ItemListsTestCase(unittest.TestCase):
             'name': 'Empty test list',
             'items': [],
             'items_checked': [],
-            'owner': 1,
+            'owner': self.user1.id,
             'type': 'check'
         }
 
@@ -78,7 +81,7 @@ class ItemListsTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(data['item_list']['name'], 'Test list')
-        self.assertEqual(data['item_list']['owner'], 1)  # Update to user created
+        self.assertEqual(data['item_list']['owner'], self.user1.id)
         self.assertEqual(data['item_list']['type'], 'check')
         self.assertIsInstance(data['item_list']['items'], list)
         self.assertEqual(len(data['item_list']['items']), 3)
@@ -106,12 +109,12 @@ class ItemListsTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(data['item_list']['name'], 'Empty test list')
-        self.assertEqual(data['item_list']['owner'], 1)  # Update to user created
+        self.assertEqual(data['item_list']['owner'], self.user1.id)
         self.assertEqual(data['item_list']['type'], 'check')
         self.assertIsInstance(data['item_list']['items'], list)
         self.assertEqual(len(data['item_list']['items']), 0)
         self.assertEqual(data['item_list']['name'], 'Empty test list')
-        self.assertEqual(data['item_list']['owner'], 1)  # Update to user created
+        self.assertEqual(data['item_list']['owner'], 1)
         self.assertEqual(data['item_list']['type'], 'check')
         self.assertIsInstance(data['item_list']['items_checked'], list)
         self.assertEqual(len(data['item_list']['items_checked']), 0)
@@ -128,7 +131,7 @@ class ItemListsTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(data['item_list']['name'], 'Test list')
-        self.assertEqual(data['item_list']['owner'], 1)  # Update to user created
+        self.assertEqual(data['item_list']['owner'], self.user1.id)
         self.assertEqual(data['item_list']['type'], 'check')
         self.assertIsInstance(data['item_list']['items'], list)
         self.assertEqual(len(data['item_list']['items']), 3)
@@ -188,7 +191,7 @@ class ItemListsTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(data['item_list']['name'], created_data['item_list']['name'])
-        self.assertEqual(data['item_list']['owner'], created_data['item_list']['owner'])  # Update to user created
+        self.assertEqual(data['item_list']['owner'], created_data['item_list']['owner'])
         self.assertEqual(data['item_list']['type'], created_data['item_list']['type'])
         self.assertIsInstance(data['item_list']['items'], list)
         self.assertEqual(len(data['item_list']['items']), 2)
@@ -211,7 +214,11 @@ class ItemListsTestCase(unittest.TestCase):
         create_data = json.loads(response.data.decode('utf-8'))
         list_id = create_data['id']
 
-        response = self.client.patch(f'/item_list/{list_id}/rename', data=json.dumps({'name': 'new list name'}), headers=self.headers)
+        response = self.client.patch(
+                f'/item_list/{list_id}/rename',
+                data=json.dumps({'name': 'new list name'}),
+                headers=self.headers
+            )
         self.assertEqual(response.status_code, 200)
 
         response = self.client.get(f'/item_list/{list_id}')
@@ -226,13 +233,17 @@ class ItemListsTestCase(unittest.TestCase):
         create_data = json.loads(response.data.decode('utf-8'))
         list_id = create_data['id']
 
-        response = self.client.patch(f'/item_list/{list_id}/owner', data=json.dumps({'owner': 2}), headers=self.headers)
+        response = self.client.patch(
+                f'/item_list/{list_id}/owner',
+                data=json.dumps({'owner': self.user2.id}),
+                headers=self.headers
+            )
         self.assertEqual(response.status_code, 200)
 
         response = self.client.get(f'/item_list/{list_id}')
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['item_list']['owner'], 2)
+        self.assertEqual(data['item_list']['owner'], self.user2.id)
 
     def test_toggle_check(self):
         response = self.client.post('/item_list', data=json.dumps(self.item_list), headers=self.headers)

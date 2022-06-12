@@ -33,7 +33,7 @@ class User:
             raise ValueError('Missing mandatory field \'auth_method\'')
 
         id = kwargs.get('id', None)
-        if id and not isinstance(id, int):
+        if id is not None and not isinstance(id, int):
             raise TypeError('\'id\' must be int')
 
         self.id = id
