@@ -15,7 +15,6 @@ class RoutesTestCase(unittest.TestCase):
         self.app = create_app(config)
         self.client = self.app.test_client()
 
-
         self.user1 = User.create(
             User(
                 name='Ola',

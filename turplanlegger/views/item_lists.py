@@ -1,4 +1,4 @@
-from flask import current_app, g, jsonify, request
+from flask import jsonify, request
 
 from turplanlegger.exceptions import ApiError
 from turplanlegger.models.item_lists import ItemList
@@ -50,7 +50,6 @@ def add_item_list():
         return jsonify(status='ok', id=item_list.id, item_list=item_list.serialize), 201
     else:
         raise ApiError('Creation of item list failed', 500)
-
 
 
 @api.route('/item_list/<item_list_id>/add', methods=['PATCH'])

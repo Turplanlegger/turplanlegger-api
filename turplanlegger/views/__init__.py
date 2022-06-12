@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, g, jsonify, request
+from flask import Blueprint, current_app, jsonify, request
 
 from turplanlegger.exceptions import ApiError
 from turplanlegger.utils.response import absolute_url
