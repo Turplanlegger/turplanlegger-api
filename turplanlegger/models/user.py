@@ -8,7 +8,11 @@ JSON = Dict[str, any]
 
 class User:
 
-    def __init__(self, name: str, last_name: str, email: str, auth_method: str, **kwargs) -> None:
+    def __init__(self, name: str, last_name: str, email: str, auth_method: str,
+                 private: bool = False, **kwargs) -> None:
+
+        if not isinstance(private, bool):
+            raise TypeError('\'private\' must be boolean')
 
         if not name:
             raise ValueError('Missing mandatory field \'name\'')
@@ -37,6 +41,7 @@ class User:
         self.last_name = last_name
         self.email = email
         self.auth_method = auth_method
+        self.private = private
         self.deleted = kwargs.get('deleted', False)
         self.delete_time = kwargs.get('delete_time', None)
         self.create_time = kwargs.get('create_time', None)
@@ -52,7 +57,8 @@ class User:
             name=json.get('name', None),
             last_name=json.get('last_name', None),
             email=email,
-            auth_method=json.get('auth_method', None)
+            auth_method=json.get('auth_method', None),
+            private=json.get('private', False)
         )
 
     @property
@@ -63,6 +69,7 @@ class User:
             'last_name': self.last_name,
             'email': self.email,
             'auth_method': self.auth_method,
+            'private': self.private,
             'create_time': self.create_time,
             'deleted': self.deleted,
             'delete_time': self.delete_time
@@ -71,8 +78,14 @@ class User:
     def create(self) -> 'User':
         return self.get_user(db.create_user(self))
 
+    def rename(self) -> 'User':
+        return self.get_user(db.rename_user(self))
+
     def delete(self) -> bool:
         return db.delete_user(self.id)
+
+    def toggle_private(self):
+        return db.toggle_private_user(self.id, False if self.private else True)
 
     @staticmethod
     def find_user(id: int) -> 'User':
@@ -86,6 +99,8 @@ class User:
                 name=rec.get('name', None),
                 last_name=rec.get('last_name', None),
                 email=rec.get('email', None),
+                auth_method=rec.get('auth_method', None),
+                private=rec.get('private', None),
                 create_time=rec.get('created', None),
                 deleted=rec.get('deleted', False),
                 delete_time=rec.get('delete_time', None)
@@ -97,6 +112,7 @@ class User:
                 last_name=rec.last_name,
                 email=rec.email,
                 auth_method=rec.auth_method,
+                private=rec.private,
                 create_time=rec.create_time,
                 deleted=rec.deleted,
                 delete_time=rec.delete_time

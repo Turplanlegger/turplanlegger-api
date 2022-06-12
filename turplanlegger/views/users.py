@@ -37,7 +37,7 @@ def add_user():
     if user:
         return jsonify(status='ok', id=user.id, user=user.serialize), 201
     else:
-        raise ApiError('Creation of item list failed', 500)
+        raise ApiError('Creation of user failed', 500)
 
 
 @api.route('/user/<user_id>', methods=['DELETE'])
@@ -55,6 +55,49 @@ def delete_user(user_id):
 
     try:
         user.delete()
+    except Exception as e:
+        raise ApiError(str(e), 500)
+
+    return jsonify(status='ok')
+
+
+@api.route('/user/<user_id>/rename', methods=['PATCH'])
+def rename_user(user_id):
+
+    try:
+        id = int(user_id)
+    except ValueError:
+        raise ApiError(f'\'{user_id}\' is not int', 400)
+
+    user = User.find_user(id)
+
+    if not user:
+        raise ApiError('item list not found', 404)
+
+    user.name = request.json.get('name', user.name)
+    user.last_name = request.json.get('last_name', user.last_name)
+
+    if user.rename():
+        return jsonify(status='ok', id=user.id, user=user.serialize), 200
+    else:
+        raise ApiError('Failed to rename user', 500)
+
+
+@api.route('/user/<user_id>/private', methods=['PATCH'])
+def toggle_private_user(user_id):
+
+    try:
+        id = int(user_id)
+    except ValueError:
+        raise ApiError(f'\'{user_id}\' is not int', 400)
+
+    user = User.find_user(id)
+
+    if not user:
+        raise ApiError('item list not found', 404)
+
+    try:
+        user.toggle_private()
     except Exception as e:
         raise ApiError(str(e), 500)
 

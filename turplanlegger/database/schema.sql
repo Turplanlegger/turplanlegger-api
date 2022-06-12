@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS users (
     last_name text NOT NULL,
     email text NOT NULL,
     auth_method text NOT NULL,
+    private boolean DEFAULT FALSE,
     create_time timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted boolean DEFAULT FALSE,
     delete_time timestamp without time zone

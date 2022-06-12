@@ -223,13 +223,22 @@ class Database:
 
     def create_user(self, user):
         insert = """
-            INSERT INTO users (name, last_name, email, auth_method)
-            VALUES (%(name)s, %(last_name)s, %(email)s, %(auth_method)s)
+            INSERT INTO users (name, last_name, email, auth_method, private)
+            VALUES (%(name)s, %(last_name)s, %(email)s, %(auth_method)s, %(private)s)
             RETURNING *
         """
         return self._insert(insert, vars(user))
 
-    def delete_user(self, id):
+    def rename_user(self, user):
+        update = """
+            UPDATE users
+                SET name=%(name)s, last_name=%(last_name)s
+                WHERE id = %(id)s
+            RETURNING *
+        """
+        return self._updateone(update, vars(user), returning=True)
+
+    def delete_user(self, id: int):
         update = """
             UPDATE users
                 SET deleted=TRUE, delete_time=CURRENT_TIMESTAMP
@@ -237,6 +246,14 @@ class Database:
             RETURNING deleted
         """
         return self._updateone(update, (id,), returning=True)
+
+    def toggle_private_user(self, id: int, private: bool):
+        update = """
+            UPDATE users
+                SET private=%(private)s
+                WHERE id = %(id)s
+        """
+        return self._updateone(update, {'id': id, 'private': private})
 
     # Helpers
     def _insert(self, query, vars):
