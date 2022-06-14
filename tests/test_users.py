@@ -63,7 +63,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(data['user']['auth_method'], self.user1['auth_method'])
         self.assertEqual(data['user']['private'], self.user1['private'])
 
-    def test_create_public_user(self):
+    def test_create_private_user(self):
         response = self.client.post('/user', data=json.dumps(self.user4), headers=self.headers)
 
         self.assertEqual(response.status_code, 201)
