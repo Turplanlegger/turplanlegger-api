@@ -45,10 +45,7 @@ jobs:
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
         pip install .
-    - name: Configure app
-      run: |
-        echo 'DATABASE_URI="postgresql://postgres:postgres@localhost/turplanlegger?connect_timeout=10&application_name=turplanlegger"' > /home/runner/work/turplanlegger.conf
-        echo 'DATABASE_NAME="turplanlegger"' >> /home/runner/work/turplanlegger.conf
+
     - name: Pre-commit hooks
       id: hooks
       run: |
@@ -60,8 +57,5 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=50 --max-line-length=127 --statistics
     - name: Test with pytest
       id: test
-      env:
-        TURPLANLEGGER_CONFIG_PATH: /home/runner/work/turplanlegger.conf
-        TURPLANLEGGER_LOG_PATH: /home/runner/work/turplanlegger.log
       run: |
         pytest tests/*.py
