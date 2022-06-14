@@ -30,4 +30,7 @@ def create_app(config_override: Dict[str, Any] = None,
     from turplanlegger.views import api
     app.register_blueprint(api)
 
+    from turplanlegger.auth import auth
+    app.register_blueprint(auth)
+
     return app

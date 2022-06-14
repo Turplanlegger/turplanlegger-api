@@ -276,6 +276,20 @@ class Database:
 
         return self._fetchone(select, (id,))
 
+    # User
+    def get_user_by(self, type: str, value, deleted=False):
+        select = 'SELECT * FROM users WHERE'
+
+        if type == 'email':
+            select += ' email = %s'
+
+        if deleted:
+            select += ' AND deleted = TRUE'
+        else:
+            select += ' AND deleted = FALSE'
+
+        return self._fetchone(select, (value,))
+
     def create_user(self, user):
         insert = """
             INSERT INTO users (name, last_name, email, auth_method, private)

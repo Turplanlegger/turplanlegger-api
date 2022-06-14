@@ -91,6 +91,16 @@ class User:
     def find_user(id: int) -> 'User':
         return User.get_user(db.get_user(id))
 
+    @staticmethod
+    def find_by_email(email: str) -> 'User':
+        return User.get_user(db.get_user_by('email', email))
+
+    @staticmethod
+    def check_credentials(email: str, password: str):
+        user = User.find_by_email(email)
+        # Add a check here
+        return user
+
     @classmethod
     def get_user(cls, rec) -> 'User':
         if isinstance(rec, dict):
