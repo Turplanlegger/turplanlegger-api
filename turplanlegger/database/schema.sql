@@ -52,3 +52,13 @@ CREATE TABLE IF NOT EXISTS trips (
     deleted boolean DEFAULT FALSE,
     delete_time timestamp without time zone
 );
+
+CREATE TABLE IF NOT EXISTS notes (
+    id serial PRIMARY KEY,
+    name text,
+    content text NOT NULL,
+    owner int REFERENCES users (id),
+    create_time timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted boolean DEFAULT FALSE,
+    deleted_time timestamp without time zone
+);
