@@ -26,8 +26,7 @@ class Config:
 
         # Override config if other configfile exists
         config_path = os.getenv('TURPLANLEGGER_CONFIG_PATH', '/etc/turplanlegger/turplanlegger.conf')
-        file_exists = exists(config_path)
-        if (file_exists):
+        if (exists(config_path)):
             self.config.from_pyfile(config_path)
 
         # Database
