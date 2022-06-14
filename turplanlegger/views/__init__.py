@@ -5,13 +5,14 @@ from turplanlegger.utils.response import absolute_url
 
 api = Blueprint('api', __name__)  # noqa isort:skip
 
-from . import item_lists, routes, notes  # noqa isort:skip
+from . import item_lists, notes, routes, users  # noqa isort:skip
 
 
 @api.before_request
 def before_request():
-    if request.method in ['PATCH', 'POST', 'PUT'] and not request.is_json:
-        raise ApiError("POST and PUT requests must set 'Content-type' to "
+    if ((request.method in ['POST', 'PUT'] or (request.method == 'PATCH' and request.data))
+            and not request.is_json):
+        raise ApiError("PATCH, POST and PUT requests must set 'Content-type' to "
                        "'application/json'", 415)
 
 

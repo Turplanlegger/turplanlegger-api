@@ -2,6 +2,7 @@ import json
 import unittest
 
 from turplanlegger.app import create_app, db
+from turplanlegger.models.user import User
 
 
 class NotesTestCase(unittest.TestCase):
@@ -14,19 +15,22 @@ class NotesTestCase(unittest.TestCase):
         self.app = create_app(config)
         self.client = self.app.test_client()
 
-        self.user1 = {
-            'name': 'Ola',
-            'last_name': 'Nordamnn',
-            'email': 'ola.nordmann@norge.no'
-        }
-        self.user2 = {
-            'name': 'Kari',
-            'last_name': 'Nordamnn',
-            'email': 'kari.nordmann@norge.no'
-        }
-
-        db.create_user(self.user1['name'], self.user1['last_name'], self.user1['email'])
-        db.create_user(self.user2['name'], self.user2['last_name'], self.user2['email'])
+        self.user1 = User.create(
+            User(
+                name='Ola',
+                last_name='Nordamnn',
+                email='old.nordmann@norge.no',
+                auth_method='basic'
+            )
+        )
+        self.user2 = User.create(
+            User(
+                name='Kari',
+                last_name='Nordamnn',
+                email='kari.nordmann@norge.no',
+                auth_method='basic'
+            )
+        )
 
         self.note_full = {
             'owner': 1,

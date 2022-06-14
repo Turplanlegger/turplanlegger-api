@@ -266,13 +266,49 @@ class Database:
         return self._updateone(update, {'id': id, 'content': content}, returning=True)
 
     # User
-    def create_user(self, name, last_name, email):
+    def get_user(self, id, deleted=False):
+        select = 'SELECT * FROM users WHERE id = %s'
+
+        if deleted:
+            select += ' AND deleted = TRUE'
+        else:
+            select += ' AND deleted = FALSE'
+
+        return self._fetchone(select, (id,))
+
+    def create_user(self, user):
         insert = """
-            INSERT INTO users (name, last_name, email)
-            VALUES (%(name)s, %(last_name)s, %(email)s)
+            INSERT INTO users (name, last_name, email, auth_method, private)
+            VALUES (%(name)s, %(last_name)s, %(email)s, %(auth_method)s, %(private)s)
             RETURNING *
         """
-        return self._insert(insert, {'name': name, 'last_name': last_name, 'email': email})
+        return self._insert(insert, vars(user))
+
+    def rename_user(self, user):
+        update = """
+            UPDATE users
+                SET name=%(name)s, last_name=%(last_name)s
+                WHERE id = %(id)s
+            RETURNING *
+        """
+        return self._updateone(update, vars(user), returning=True)
+
+    def delete_user(self, id: int):
+        update = """
+            UPDATE users
+                SET deleted=TRUE, delete_time=CURRENT_TIMESTAMP
+                WHERE id = %s AND deleted = FALSE
+            RETURNING deleted
+        """
+        return self._updateone(update, (id,), returning=True)
+
+    def toggle_private_user(self, id: int, private: bool):
+        update = """
+            UPDATE users
+                SET private=%(private)s
+                WHERE id = %(id)s
+        """
+        return self._updateone(update, {'id': id, 'private': private})
 
     # Helpers
     def _insert(self, query, vars):
