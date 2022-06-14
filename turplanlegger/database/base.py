@@ -61,7 +61,7 @@ class Database:
     def destroy(self):
         conn = self.conn
         cursor = conn.cursor()
-        for table in ['trips', 'item_lists', 'lists_items', 'users', 'routes']:
+        for table in ['trips', 'item_lists', 'lists_items', 'users', 'routes', 'notes']:
             cursor.execute(f'DROP TABLE IF EXISTS {table} CASCADE')
 
         conn.commit()
@@ -210,14 +210,105 @@ class Database:
         """
         return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
 
-    # User
-    def create_user(self, name, last_name, email):
+    # Note
+    def get_note(self, id, deleted=False):
+        select = """
+            SELECT * FROM notes WHERE id = %s
+        """
+        if deleted:
+            select += ' AND deleted = TRUE'
+        else:
+            select += ' AND deleted = FALSE'
+        return self._fetchone(select, (id,))
+
+    def create_note(self, note):
         insert = """
-            INSERT INTO users (name, last_name, email)
-            VALUES (%(name)s, %(last_name)s, %(email)s)
+            INSERT INTO notes (owner, name, content)
+            VALUES (%(owner)s, %(name)s, %(content)s)
             RETURNING *
         """
-        return self._insert(insert, {'name': name, 'last_name': last_name, 'email': email})
+        return self._insert(insert, vars(note))
+
+    def delete_note(self, id):
+        update = """
+            UPDATE notes
+                SET deleted=TRUE, deleted_time=CURRENT_TIMESTAMP
+                WHERE id = %(id)s AND deleted = FALSE
+            RETURNING deleted
+        """
+        return self._updateone(update, {'id': id}, returning=True)
+
+    def change_note_owner(self, id, owner):
+        update = """
+            UPDATE notes
+                SET owner=%(owner)s
+                WHERE id = %(id)s
+            RETURNING *
+        """
+        return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
+
+    def rename_note(self, id, name):
+        update = """
+            UPDATE notes
+                SET name=%(name)s
+                WHERE id = %(id)s
+            RETURNING *
+        """
+        return self._updateone(update, {'id': id, 'name': name}, returning=True)
+
+    def update_note(self, id, content):
+        update = """
+            UPDATE notes
+                SET content=%(content)s
+                WHERE id = %(id)s
+            RETURNING *
+        """
+        return self._updateone(update, {'id': id, 'content': content}, returning=True)
+
+    # User
+    def get_user(self, id, deleted=False):
+        select = 'SELECT * FROM users WHERE id = %s'
+
+        if deleted:
+            select += ' AND deleted = TRUE'
+        else:
+            select += ' AND deleted = FALSE'
+
+        return self._fetchone(select, (id,))
+
+    def create_user(self, user):
+        insert = """
+            INSERT INTO users (name, last_name, email, auth_method, private)
+            VALUES (%(name)s, %(last_name)s, %(email)s, %(auth_method)s, %(private)s)
+            RETURNING *
+        """
+        return self._insert(insert, vars(user))
+
+    def rename_user(self, user):
+        update = """
+            UPDATE users
+                SET name=%(name)s, last_name=%(last_name)s
+                WHERE id = %(id)s
+            RETURNING *
+        """
+        return self._updateone(update, vars(user), returning=True)
+
+    def delete_user(self, id: int):
+        update = """
+            UPDATE users
+                SET deleted=TRUE, delete_time=CURRENT_TIMESTAMP
+                WHERE id = %s AND deleted = FALSE
+            RETURNING deleted
+        """
+        return self._updateone(update, (id,), returning=True)
+
+    def toggle_private_user(self, id: int, private: bool):
+        update = """
+            UPDATE users
+                SET private=%(private)s
+                WHERE id = %(id)s
+        """
+        return self._updateone(update, {'id': id, 'private': private})
 
     # Helpers
     def _insert(self, query, vars):
