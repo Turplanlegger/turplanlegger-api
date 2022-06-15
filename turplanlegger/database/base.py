@@ -292,8 +292,8 @@ class Database:
 
     def create_user(self, user):
         insert = """
-            INSERT INTO users (name, last_name, email, auth_method, private)
-            VALUES (%(name)s, %(last_name)s, %(email)s, %(auth_method)s, %(private)s)
+            INSERT INTO users (name, last_name, email, auth_method, password,  private)
+            VALUES (%(name)s, %(last_name)s, %(email)s, %(auth_method)s, %(password)s, %(private)s)
             RETURNING *
         """
         return self._insert(insert, vars(user))

@@ -21,6 +21,7 @@ setuptools.setup(
     author_email='are.schjetne@gmail.com',
     packages=setuptools.find_packages(exclude=['tests']),
     install_requires=[
+        'bcrypt>=3.2.2'
         'Flask>=2.0.1',
         'Flask-Compress>=1.4.0',
         'psycopg2',

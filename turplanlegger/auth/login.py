@@ -3,7 +3,6 @@ from flask import request, jsonify
 
 from turplanlegger.exceptions import ApiError
 
-from turplanlegger.models.user import User
 
 from . import auth  # noqa isort:skip
 
@@ -18,8 +17,9 @@ def login():
 
     p = re.compile('^[\\w.-]+@[\\w.-]+\\.\\w+$')
     if not p.match(email):
-        raise ValueError('invalid email address')
+        raise ApiError('invalid email address', 401)
 
+    from turplanlegger.models.user import User
     user = User.check_credentials(email, password)
 
     if user:
