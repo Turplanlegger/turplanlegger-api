@@ -310,6 +310,49 @@ class Database:
         """
         return self._updateone(update, {'id': id, 'private': private})
 
+    # Trip
+    def create_trip(self, trip):
+        insert_trip = """
+            INSERT INTO trips (name, date_start, date_end, owner, private)
+            VALUES (%(name)s, %(date_start)s, %(date_end)s, %(owner)s, %(private)s)
+            RETURNING *
+        """
+
+        self._insert(insert_trip, vars(trip))
+
+        self.add_references(self, trip, trip.notes, 'trips_notes_references', 'note_id')
+        self.add_references(self, trip, trip.lists, 'trips_lists_references', 'list_id')
+        self.add_references(self, trip, trip.routes, 'trips_routes_references', 'route_id')
+    
+    def add_references(self, trip, reference_table, reference_id):
+        insert_ref = """
+            INSERT INTO %s (trip_id, %s)
+            VALUES (%s, %s)
+            RETURNING *
+        """
+
+        self._insert(insert_ref, reference_table, reference_id, trip.id, reference_id)
+
+    def get_trip(self, id, deleted=False):
+        select = 'SELECT * FROM trips WHERE id = %s'
+
+        if deleted:
+            select += ' AND deleted = TRUE'
+        else:
+            select += ' AND deleted = FALSE'
+     
+        trip = self._fetchone(select, (id,))
+        trip.notes = self.get_trip_references(id, 'trips_notes_references')
+        trip.routes = self.get_trip_references(id, 'trips_routes_references')
+        trip.lists = self.get_trip_references(id, 'trips_list_references')
+
+        return trip
+
+    def get_trip_references(self, id, table):
+        select = 'SELECT * FROM %s WHERE trip_id = %s'
+
+        return self._fetchall(select, (table, id,))
+
     # Helpers
     def _insert(self, query, vars):
         """

@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS lists_items (
 CREATE TABLE IF NOT EXISTS trips (
     id serial PRIMARY KEY,
     name text NOT NULL,
+    private boolean DEFAULT FALSE,
     date_start timestamp without time zone CHECK (date_start < date_end),
     date_end timestamp without time zone CHECK (date_start < date_end),
     owner int REFERENCES users (id),
