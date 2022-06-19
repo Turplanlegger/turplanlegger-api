@@ -1,7 +1,7 @@
 import re
 from typing import Dict
 
-from turplanlegger.app import db
+from turplanlegger.app import db, logger
 from turplanlegger.auth import utils
 
 JSON = Dict[str, any]
@@ -62,15 +62,14 @@ class User:
         password = json.get('password', '')
         if auth_method == 'basic':
             if not password:
-                raise ValueError('Passowrd is mandatory for auth_type basic')
+                raise ValueError('Password is mandatory for auth_type basic')
             if len(password) < 3:  # We'll have to discuss this one
-                raise ValueError('Passowrd too short')
+                raise ValueError('Password too short')
         try:
             password = utils.hash_password(password)
         except Exception as e:
-            print(str(e))
-        print('######')
-        print(password)
+            raise ValueError('Failed to create user')
+            logger.exception(str(e))
 
         return User(
             name=json.get('name', None),
@@ -114,6 +113,10 @@ class User:
 
     @staticmethod
     def find_by_email(email: str) -> 'User':
+        p = re.compile('^[\\w.-]+@[\\w.-]+\\.\\w+$')
+        if not p.match(email):
+            raise ValueError('invalid email address')
+
         return User.get_user(db.get_user_by('email', email))
 
     @staticmethod

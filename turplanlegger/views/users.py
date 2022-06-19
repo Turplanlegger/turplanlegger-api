@@ -8,13 +8,32 @@ from . import api
 
 @api.route('/user/<user_id>', methods=['GET'])
 def get_user(user_id):
-
     try:
         id = int(user_id)
     except ValueError:
         raise ApiError(f'\'{user_id}\' is not int', 400)
 
     user = User.find_user(id)
+
+    if user:
+        return jsonify(status='ok', count=1, user=user.serialize)
+    else:
+        raise ApiError('user not found', 404)
+
+@api.route('/user', methods=['GET'])
+def lookup_user():
+    try:
+        email = request.args.get('email', None)
+    except KeyError as e:
+        raise ApiError(str(e))
+
+    if not email:
+        raise ApiError('Provide email as URL parameter', 400)
+
+    try:
+        user = User.find_by_email(email)
+    except ValueError as e:
+        raise ApiError('failed to look up user', 400, str(e))
 
     if user:
         return jsonify(status='ok', count=1, user=user.serialize)
