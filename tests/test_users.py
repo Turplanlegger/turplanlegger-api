@@ -19,23 +19,90 @@ class UsersTestCase(unittest.TestCase):
             'last_name': 'Nordamnn',
             'email': 'ola.nordmann@norge.no',
             'auth_method': 'basic',
+            'password': 'test123',
             'private': False
         }
         self.user2 = {
             'name': 'Kari',
-            'email': 'kari.nordmann@norge.no'
+            'email': 'kari.nordmann@norge.no',
+            'auth_method': 'basic',
+            'password': 'test123',
+            'private': False
         }
         self.user3 = {
             'name': 'Petter',
             'last_name': 'Smart',
             'email': 'invalid.com',
-            'auth_method': 'basic'
+            'auth_method': 'basic',
+            'password': 'test123',
+            'private': False
         }
         self.user4 = {
             'name': 'Petter',
             'last_name': 'Smart',
             'email': 'petter@smart.com',
             'auth_method': 'basic',
+            'password': 'te',
+            'private': True
+        }
+        self.user5 = {
+            'name': 'Ørulf',
+            'last_name': 'Åsenæs',
+            'email': 'oernulf.aasenaes@norge.no',
+            'auth_method': 'basic',
+            'password': 'test123',
+            'private': True
+        }
+        self.user6 = {
+            'name': 'Petter',
+            'last_name': 'Smart',
+            'email': 'petter@smart.com',
+            'auth_method': 'basic',
+            'password': 'GbYRCzE}q:~e6Qo?\':fg^*:d6;{*NV&b=Q2GUAqYv#792C<{?,8@JoYX>qV)3H^q',
+            'private': False
+        }
+        self.user7 = {
+            'name': 'Petter',
+            'last_name': 'Smart',
+            'email': 'petter@smart.com',
+            'auth_method': 'basic',
+            'password': 'm9uMSpb&q.Ft,[5,%oWj7yk-$YFBvKd}J<fNrToR2x~&+d_9J}K:gcGmUq#qkL\'#',
+            'private': False
+        }
+        self.user8 = {
+            'name': 'Petter',
+            'last_name': 'Smart',
+            'email': 'petter@smart.com',
+            'auth_method': 'basic',
+            'password': ('TZULjwxS3K5MPZv8P4qz3KfsEnxjCsZgd7HNWFXkhcutEDMxzcU5HyEv2'
+                         'VVm9okEaF5tjDfpoqyZrYwVfbQicrvNQrpjqxYexihKVUvJxN23LJxAvf'
+                         'vbbAsU2mbUw67b'),
+            'private': False
+        }
+        self.user9 = {
+            'name': 'Péter',
+            'last_name': 'Smart',
+            'email': 'peter@smart.com',
+            'auth_method': 'basic',
+            'password': ('>Q`CV"%3c9naU3(fj@eX~N,7+Qx~_t[+Nt9R4~7m(YRK/r)n!T;onA,^G7F'
+                         '+7]<uqy#xGmWkoaN4.JhxK!}u-S4#y^aC"dfBThL^w\'Y2M(qPyr(prX[Vc'
+                         'r_P~:v]Vbc;'),
+            'private': False
+        }
+        self.user10 = {
+            'name': 'Petter',
+            'last_name': 'Smart',
+            'email': 'petter@smart.com',
+            'auth_method': 'basic',
+            'password': 'JegErEtPassordeSomBurdeFunkeDaVelÅsåæSø',
+            'private': False
+        }
+        self.user11 = {
+            'name': 'Petter',
+            'last_name': 'Smart',
+            'email': 'petter@smart.com',
+            'auth_method': 'basic',
+            'password': 'JegErEtPassordeSomBurdeFunkeDaVelÅsåæSø',
             'private': True
         }
 
@@ -64,17 +131,17 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(data['user']['private'], self.user1['private'])
 
     def test_create_private_user(self):
-        response = self.client.post('/user', data=json.dumps(self.user4), headers=self.headers)
+        response = self.client.post('/user', data=json.dumps(self.user11), headers=self.headers)
 
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['id'], 1)
-        self.assertEqual(data['user']['name'], self.user4['name'])
-        self.assertEqual(data['user']['last_name'], self.user4['last_name'])
-        self.assertEqual(data['user']['email'], self.user4['email'])
-        self.assertEqual(data['user']['auth_method'], self.user4['auth_method'])
-        self.assertEqual(data['user']['private'], self.user4['private'])
+        self.assertEqual(data['user']['name'], self.user11['name'])
+        self.assertEqual(data['user']['last_name'], self.user11['last_name'])
+        self.assertEqual(data['user']['email'], self.user11['email'])
+        self.assertEqual(data['user']['auth_method'], self.user11['auth_method'])
+        self.assertEqual(data['user']['private'], self.user11['private'])
 
     def test_delete_user(self):
         response = self.client.post('/user', data=json.dumps(self.user1), headers=self.headers)
@@ -132,3 +199,98 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(data['user']['email'], self.user1['email'])
         self.assertEqual(data['user']['auth_method'], self.user1['auth_method'])
         self.assertEqual(data['user']['private'], True)
+
+    def test_create_user_short_pw(self):
+        response = self.client.post('/user', data=json.dumps(self.user4), headers=self.headers)
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_special_char(self):
+        response = self.client.post('/user', data=json.dumps(self.user5), headers=self.headers)
+
+        self.assertEqual(response.status_code, 201)
+
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['id'], 1)
+        self.assertEqual(data['user']['name'], self.user5['name'])
+        self.assertEqual(data['user']['last_name'], self.user5['last_name'])
+        self.assertEqual(data['user']['email'], self.user5['email'])
+        self.assertEqual(data['user']['auth_method'], self.user5['auth_method'])
+        self.assertEqual(data['user']['private'], self.user5['private'])
+
+    def test_create_special_char2(self):
+        response = self.client.post('/user', data=json.dumps(self.user9), headers=self.headers)
+
+        self.assertEqual(response.status_code, 201)
+
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['id'], 1)
+        self.assertEqual(data['user']['name'], self.user9['name'])
+        self.assertEqual(data['user']['last_name'], self.user9['last_name'])
+        self.assertEqual(data['user']['email'], self.user9['email'])
+        self.assertEqual(data['user']['auth_method'], self.user9['auth_method'])
+        self.assertEqual(data['user']['private'], self.user9['private'])
+
+    def test_create_user_long_pw1(self):
+        response = self.client.post('/user', data=json.dumps(self.user6), headers=self.headers)
+
+        self.assertEqual(response.status_code, 201)
+
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['id'], 1)
+        self.assertEqual(data['user']['name'], self.user6['name'])
+        self.assertEqual(data['user']['last_name'], self.user6['last_name'])
+        self.assertEqual(data['user']['email'], self.user6['email'])
+        self.assertEqual(data['user']['auth_method'], self.user6['auth_method'])
+        self.assertEqual(data['user']['private'], self.user6['private'])
+
+    def test_create_user_long_pw2(self):
+        response = self.client.post('/user', data=json.dumps(self.user7), headers=self.headers)
+
+        self.assertEqual(response.status_code, 201)
+
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['id'], 1)
+        self.assertEqual(data['user']['name'], self.user7['name'])
+        self.assertEqual(data['user']['last_name'], self.user7['last_name'])
+        self.assertEqual(data['user']['email'], self.user7['email'])
+        self.assertEqual(data['user']['auth_method'], self.user7['auth_method'])
+        self.assertEqual(data['user']['private'], self.user7['private'])
+
+    def test_create_user_long_pw3(self):
+        response = self.client.post('/user', data=json.dumps(self.user8), headers=self.headers)
+
+        self.assertEqual(response.status_code, 201)
+
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['id'], 1)
+        self.assertEqual(data['user']['name'], self.user8['name'])
+        self.assertEqual(data['user']['last_name'], self.user8['last_name'])
+        self.assertEqual(data['user']['email'], self.user8['email'])
+        self.assertEqual(data['user']['auth_method'], self.user8['auth_method'])
+        self.assertEqual(data['user']['private'], self.user8['private'])
+
+    def test_create_user_long_pw4(self):
+        response = self.client.post('/user', data=json.dumps(self.user9), headers=self.headers)
+
+        self.assertEqual(response.status_code, 201)
+
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['id'], 1)
+        self.assertEqual(data['user']['name'], self.user9['name'])
+        self.assertEqual(data['user']['last_name'], self.user9['last_name'])
+        self.assertEqual(data['user']['email'], self.user9['email'])
+        self.assertEqual(data['user']['auth_method'], self.user9['auth_method'])
+        self.assertEqual(data['user']['private'], self.user9['private'])
+
+    def test_create_user_long_pw5(self):
+        response = self.client.post('/user', data=json.dumps(self.user10), headers=self.headers)
+
+        self.assertEqual(response.status_code, 201)
+
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['id'], 1)
+        self.assertEqual(data['user']['name'], self.user10['name'])
+        self.assertEqual(data['user']['last_name'], self.user10['last_name'])
+        self.assertEqual(data['user']['email'], self.user10['email'])
+        self.assertEqual(data['user']['auth_method'], self.user10['auth_method'])
+        self.assertEqual(data['user']['private'], self.user10['private'])

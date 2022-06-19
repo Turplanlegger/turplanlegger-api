@@ -68,8 +68,8 @@ class User:
         try:
             password = utils.hash_password(password)
         except Exception as e:
-            raise ValueError('Failed to create user')
             logger.exception(str(e))
+            raise ValueError('Failed to create user')
 
         return User(
             name=json.get('name', None),
