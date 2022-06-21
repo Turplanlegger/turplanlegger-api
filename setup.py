@@ -24,6 +24,7 @@ setuptools.setup(
         'bcrypt>=3.2.2'
         'Flask>=2.0.1',
         'Flask-Compress>=1.4.0',
+        'PyJWT>=2.4.0',
         'psycopg2',
     ],
     include_package_data=True,

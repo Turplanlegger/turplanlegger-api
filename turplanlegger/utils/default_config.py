@@ -1,3 +1,6 @@
+# App
+TOKEN_EXPIRE_TIME = 86400  # Seconds
+
 # Database
 DATABASE_URI = """postgresql://postgres:postgres@localhost/turplanlegger
                 ?connect_timeout=10&application_name=turplanlegger"""

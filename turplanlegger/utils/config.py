@@ -29,6 +29,10 @@ class Config:
         if (exists(config_path)):
             self.config.from_pyfile(config_path)
 
+        # App
+        self.config['SECRET_KEY'] = self.conf_ent('SECRET_KEY')
+        self.config['TOKEN_EXPIRE_TIME'] = self.conf_ent('TOKEN_EXPIRE_TIME')  # Seconds
+
         # Database
         self.config['DATABASE_URI'] = self.conf_ent('DATABASE_URI')
         self.config['DATABASE_NAME'] = self.conf_ent('DATABASE_NAME')
