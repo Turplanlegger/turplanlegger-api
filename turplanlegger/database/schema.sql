@@ -41,6 +41,16 @@ CREATE TABLE IF NOT EXISTS lists_items (
     delete_time timestamp without time zone
 );
 
+CREATE TABLE IF NOT EXISTS notes (
+    id serial PRIMARY KEY,
+    name text,
+    content text NOT NULL,
+    owner int REFERENCES users (id),
+    create_time timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted boolean DEFAULT FALSE,
+    deleted_time timestamp without time zone
+);
+
 CREATE TABLE IF NOT EXISTS trips (
     id serial PRIMARY KEY,
     name text NOT NULL,
@@ -55,28 +65,18 @@ CREATE TABLE IF NOT EXISTS trips (
 
 CREATE TABLE IF NOT EXISTS trips_notes_references (
     id serial PRIMARY KEY,
-    trip_id int references trips (id)
+    trip_id int references trips (id),
     note_id int references notes (id)
 );
 
 CREATE TABLE IF NOT EXISTS trips_routes_references (
     id serial PRIMARY KEY,
-    trip_id int references trips (id)
+    trip_id int references trips (id),
     route_id int references routes (id)
 );
 
-CREATE TABLE IF NOT EXISTS trips_list_references (
+CREATE TABLE IF NOT EXISTS trips_item_lists_references (
     id serial PRIMARY KEY,
-    trip_id int references trips (id)
-    list_id int references item_lists (id)
-);
-
-CREATE TABLE IF NOT EXISTS notes (
-    id serial PRIMARY KEY,
-    name text,
-    content text NOT NULL,
-    owner int REFERENCES users (id),
-    create_time timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted boolean DEFAULT FALSE,
-    deleted_time timestamp without time zone
+    trip_id int references trips (id),
+    item_list_id int references item_lists (id)
 );

@@ -318,20 +318,34 @@ class Database:
             RETURNING *
         """
 
-        self._insert(insert_trip, vars(trip))
-
-        self.add_references(self, trip, trip.notes, 'trips_notes_references', 'note_id')
-        self.add_references(self, trip, trip.lists, 'trips_lists_references', 'list_id')
-        self.add_references(self, trip, trip.routes, 'trips_routes_references', 'route_id')
-    
-    def add_references(self, trip, reference_table, reference_id):
+        return self._insert(insert_trip, vars(trip))
+   
+    def add_trip_note_reference(self, trip_id, note_id):
         insert_ref = """
-            INSERT INTO %s (trip_id, %s)
+            INSERT INTO trips_notes_references (trip_id, note_id)
             VALUES (%s, %s)
             RETURNING *
         """
 
-        self._insert(insert_ref, reference_table, reference_id, trip.id, reference_id)
+        return self._insert(insert_ref, trip_id, note_id)
+
+    def add_trip_item_lists_reference(self, trip_id, item_list_id):
+        insert_ref = """
+            INSERT INTO trips_item_lists_references (trip_id, item_list_id)
+            VALUES (%s, %s)
+            RETURNING *
+        """
+
+        return self._insert(insert_ref, trip_id, item_list_id)
+
+    def add_trip_route_reference(self, trip_id, route_id):
+        insert_ref = """
+            INSERT INTO trip_route_references (trip_id, route_id)
+            VALUES (%s, %s)
+            RETURNING *
+        """
+
+        return self._insert(insert_ref, trip_id, route_id)
 
     def get_trip(self, id, deleted=False):
         select = 'SELECT * FROM trips WHERE id = %s'
@@ -340,17 +354,18 @@ class Database:
             select += ' AND deleted = TRUE'
         else:
             select += ' AND deleted = FALSE'
-     
-        trip = self._fetchone(select, (id,))
-        trip.notes = self.get_trip_references(id, 'trips_notes_references')
-        trip.routes = self.get_trip_references(id, 'trips_routes_references')
-        trip.lists = self.get_trip_references(id, 'trips_list_references')
+        return self._fetchone(select, (id,))
 
-        return trip
+    def get_trip_notes(self, id, table):
+        select = 'SELECT note_id FROM trips_notes_references WHERE trip_id = %s'
+        return self._fetchall(select, (table, id,))
 
-    def get_trip_references(self, id, table):
-        select = 'SELECT * FROM %s WHERE trip_id = %s'
-
+    def get_trip_routes(self, id, table):
+        select = 'SELECT route_id FROM trips_routes_references WHERE trip_id = %s'
+        return self._fetchall(select, (table, id,))
+   
+    def get_trip_lists(self, id, table):
+        select = 'SELECT list_id FROM trips_lists_references WHERE trip_id = %s'
         return self._fetchall(select, (table, id,))
 
     # Helpers
