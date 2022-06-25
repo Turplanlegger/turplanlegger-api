@@ -61,7 +61,7 @@ class Database:
     def destroy(self):
         conn = self.conn
         cursor = conn.cursor()
-        for table in ['trips', 'item_lists', 'lists_items', 'users', 'routes', 'notes']:
+        for table in ['trips', 'item_lists', 'lists_items', 'users', 'routes', 'notes', 'trips_notes_references', 'trips_routes_references', 'trips_item_lists_references']:
             cursor.execute(f'DROP TABLE IF EXISTS {table} CASCADE')
 
         conn.commit()
@@ -365,17 +365,17 @@ class Database:
             select += ' AND deleted = FALSE'
         return self._fetchone(select, (id,))
 
-    def get_trip_notes(self, id, table):
+    def get_trip_notes(self, id):
         select = 'SELECT note_id FROM trips_notes_references WHERE trip_id = %s'
-        return self._fetchall(select, (table, id,))
+        return self._fetchall(select, (id,))
 
-    def get_trip_routes(self, id, table):
+    def get_trip_routes(self, id):
         select = 'SELECT route_id FROM trips_routes_references WHERE trip_id = %s'
-        return self._fetchall(select, (table, id,))
+        return self._fetchall(select, (id,))
    
-    def get_trip_lists(self, id, table):
-        select = 'SELECT list_id FROM trips_lists_references WHERE trip_id = %s'
-        return self._fetchall(select, (table, id,))
+    def get_trip_lists(self, id):
+        select = 'SELECT item_list_id FROM trips_item_lists_references WHERE item_list_id = %s'
+        return self._fetchall(select, (id,))
 
     # Helpers
     def _insert(self, query, vars):

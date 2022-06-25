@@ -48,9 +48,9 @@ class Trip:
             'id': self.id,
             'owner': self.owner,
             'name': self.name,
-            'notes': [note.serialize for note in self.notes],
-            'routes': [route.serialize for route in self.routes],
-            'item_lists': [list.serialize for list in self.item_lists],
+            'notes': self.notes,
+            'routes': self.routes,
+            'item_lists': self.item_lists,
             'create_time': self.create_time
         }
 
@@ -62,11 +62,13 @@ class Trip:
         return db.delete_trip(self.id)
 
     def addNoteReference(self, note_id: int) -> 'Trip':
-        return db.add_trip_note_reference(self.id, note_id)
+        db.add_trip_note_reference(self.id, note_id)
+        self.notes = db.get_trip_notes(self.id)
 
     @staticmethod
     def find_trip(id: int) -> 'Trip':
-        return Trip.get_trip(db.get_trip(id))
+        trip = Trip.get_trip(db.get_trip(id))
+        return trip
 
     def change_owner(self, owner: int) -> 'Trip':
         if self.owner == owner:
@@ -79,14 +81,22 @@ class Trip:
     @classmethod
     def get_trip(cls, rec) -> 'Trip':
         if isinstance(rec, dict):
-            return Trip(
+            trip = Trip(
                 id=rec.get('id', None),
                 owner=rec.get('owner', None),
                 name=rec.get('name', None)
             )
+            trip.notes = [item.note_id for item in db.get_trip_notes(trip.id)]
+            trip.routes = [item.route_id for item in db.get_trip_routes(trip.id)]
+            trip.item_lists = [item.item_list_id for item in db.get_trip_lists(trip.id)]
+            return trip
         elif isinstance(rec, tuple):
-            return Trip(
+            trip = Trip(
                 id=rec.id,
                 owner=rec.owner,
                 name=rec.name
             )
+            trip.notes = [item.note_id for item in db.get_trip_notes(trip.id)]
+            trip.routes = [item.route_id for item in db.get_trip_routes(trip.id)]
+            trip.item_lists = [item.item_list_id for item in db.get_trip_lists(trip.id)]
+            return trip

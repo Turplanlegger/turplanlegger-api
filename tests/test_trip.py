@@ -97,4 +97,4 @@ class RoutesTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
 
-        self.assertEqual(data['notes'], [note_id])
+        self.assertEqual(data['trip']['notes'], [note_id])
