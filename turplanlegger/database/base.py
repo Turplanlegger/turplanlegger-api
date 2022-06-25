@@ -332,29 +332,29 @@ class Database:
     def add_trip_note_reference(self, trip_id, note_id):
         insert_ref = """
             INSERT INTO trips_notes_references (trip_id, note_id)
-            VALUES (%s, %s)
+            VALUES (%(trip_id)s, %(note_id)s)
             RETURNING *
         """
 
-        return self._insert(insert_ref, trip_id, note_id)
+        return self._insert(insert_ref, {'trip_id': trip_id, 'note_id': note_id})
 
     def add_trip_item_lists_reference(self, trip_id, item_list_id):
         insert_ref = """
             INSERT INTO trips_item_lists_references (trip_id, item_list_id)
-            VALUES (%s, %s)
+            VALUES (%(trip_id)s, %(item_list_id)s)
             RETURNING *
         """
 
-        return self._insert(insert_ref, trip_id, item_list_id)
+        return self._insert(insert_ref,  {'trip_id': trip_id, 'item_list_id': item_list_id})
 
     def add_trip_route_reference(self, trip_id, route_id):
         insert_ref = """
             INSERT INTO trip_route_references (trip_id, route_id)
-            VALUES (%s, %s)
+            VALUES (%(trip_id)s, %(route_id)s)
             RETURNING *
         """
 
-        return self._insert(insert_ref, trip_id, route_id)
+        return self._insert(insert_ref,  {'trip_id': trip_id, 'route_id': route_id})
 
     def get_trip(self, id, deleted=False):
         select = 'SELECT * FROM trips WHERE id = %s'

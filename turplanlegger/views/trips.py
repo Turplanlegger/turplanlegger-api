@@ -7,9 +7,9 @@ from . import api
 
 
 @api.route('/trip/<trip_id>', methods=['GET'])
-def get_trip(route_id):
+def get_trip(trip_id):
 
-    trip = Trip.find_trip(route_id)
+    trip = Trip.find_trip(trip_id)
 
     if trip:
         return jsonify(status='ok', count=1, trip=trip.serialize)
@@ -26,6 +26,22 @@ def add_trip():
 
     try:
         trip = trip.create()
+    except Exception as e:
+        raise ApiError(str(e), 500)
+
+    return jsonify(trip.serialize), 201
+
+@api.route('/trip/note', methods=['PATCH'])
+def add_note_to_trip():
+    try:
+        trip_id = request.json.get('trip_id', None)
+        note_id = request.json.get('note_id', None)
+    except (ValueError, TypeError) as e:
+        raise ApiError(str(e), 400)
+
+    try:
+        trip = Trip.find_trip(trip_id)
+        trip.addNoteReference(note_id)
     except Exception as e:
         raise ApiError(str(e), 500)
 

@@ -61,6 +61,9 @@ class Trip:
     def delete(self) -> bool:
         return db.delete_trip(self.id)
 
+    def addNoteReference(self, note_id: int) -> 'Trip':
+        return db.add_trip_note_reference(self.id, note_id)
+
     @staticmethod
     def find_trip(id: int) -> 'Trip':
         return Trip.get_trip(db.get_trip(id))
