@@ -319,6 +319,15 @@ class Database:
         """
 
         return self._insert(insert_trip, vars(trip))
+
+    def change_trip_owner(self, id, owner):
+        update = """
+            UPDATE trips
+                SET owner=%(owner)s
+                WHERE id = %(id)s
+            RETURNING *
+        """
+        return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
    
     def add_trip_note_reference(self, trip_id, note_id):
         insert_ref = """

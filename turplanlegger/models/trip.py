@@ -56,54 +56,40 @@ class Trip:
 
     def create(self) -> 'Trip':
         trip = self.get_trip(db.create_trip(self))
-        if self.notes:
-            notes = [Note(
-                owner=trip.owner,
-                content=note) for note in self.notes]
-            notes = [item.create() for note in notes]
-            trip.notes, self.notes = [notes, notes]
-
-        if self.items_checked:
-            items_checked = [ListItem(
-                owner=item_list.owner,
-                item_list=item_list.id,
-                checked=True,
-                content=item) for item in self.items_checked]
-            items_checked = [item.create() for item in items_checked]
-            item_list.items_checked, self.items_checked = [items_checked, items_checked]
-
-        return item_list
+        return trip
 
     def delete(self) -> bool:
-        return db.delete_route(self.id)
+        return db.delete_trip(self.id)
 
     @staticmethod
-    def find_route(id: int) -> 'Route':
-        return Route.get_route(db.get_route(id))
+    def find_trip(id: int) -> 'Trip':
+        return Trip.get_trip(db.get_trip(id))
 
-    def change_owner(self, owner: int) -> 'Route':
+    def change_owner(self, owner: int) -> 'Trip':
         if self.owner == owner:
             raise ValueError('new owner is same as old')
 
         # A user object should be parsed/passed
         # Return a boolean, don't get the list unless it's used
-        return Route.get_route(db.change_route_owner(self.id, owner))
+        return Trip.get_trip(db.change_trip_owner(self.id, owner))
 
     @classmethod
-    def get_route(cls, rec) -> 'Route':
+    def get_trip(cls, rec) -> 'Trip':
         if isinstance(rec, dict):
-            return Route(
+            return Trip(
                 id=rec.get('id', None),
                 owner=rec.get('owner', None),
-                route=rec.get('route', None),
-                route_history=rec.get('route_history', []),
+                routes=rec.get('routes', None),
+                notes=rec.get('notes', None),
+                item_lists=rec.get('item_lists', None),
                 create_time=rec.get('created', None)
             )
         elif isinstance(rec, tuple):
-            return Route(
+            return Trip(
                 id=rec.id,
                 owner=rec.owner,
-                route=rec.route,
-                route_history=rec.route_history,
+                routes=rec.routes,
+                notes=rec.notes,
+                item_lists=rec.item_lists,
                 create_time=rec.create_time
             )
