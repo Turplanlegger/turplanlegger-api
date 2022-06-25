@@ -313,8 +313,8 @@ class Database:
     # Trip
     def create_trip(self, trip):
         insert_trip = """
-            INSERT INTO trips (name, date_start, date_end, owner, private)
-            VALUES (%(name)s, %(date_start)s, %(date_end)s, %(owner)s, %(private)s)
+            INSERT INTO trips (name, owner, private)
+            VALUES (%(name)s, %(owner)s, %(private)s)
             RETURNING *
         """
 

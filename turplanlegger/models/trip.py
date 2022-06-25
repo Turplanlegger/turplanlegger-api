@@ -79,17 +79,11 @@ class Trip:
             return Trip(
                 id=rec.get('id', None),
                 owner=rec.get('owner', None),
-                routes=rec.get('routes', None),
-                notes=rec.get('notes', None),
-                item_lists=rec.get('item_lists', None),
-                create_time=rec.get('created', None)
+                name=rec.get('name', None)
             )
         elif isinstance(rec, tuple):
             return Trip(
                 id=rec.id,
                 owner=rec.owner,
-                routes=rec.routes,
-                notes=rec.notes,
-                item_lists=rec.item_lists,
-                create_time=rec.create_time
+                name=rec.name
             )

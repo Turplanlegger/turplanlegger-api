@@ -1,0 +1,76 @@
+import json
+import unittest
+
+from turplanlegger.app import create_app, db
+from turplanlegger.models.user import User
+
+
+class RoutesTestCase(unittest.TestCase):
+
+    def setUp(self):
+        config = {
+            'TESTING': True
+        }
+
+        self.app = create_app(config)
+        self.client = self.app.test_client()
+
+        self.user1 = User.create(
+            User(
+                name='Ola',
+                last_name='Nordamnn',
+                email='old.nordmann@norge.no',
+                auth_method='basic'
+            )
+        )
+        self.user2 = User.create(
+            User(
+                name='Kari',
+                last_name='Nordamnn',
+                email='kari.nordmann@norge.no',
+                auth_method='basic'
+            )
+        )
+        self.route = {
+            'route': ('{\"type\":\"LineString\",\"coordinates\":[[11.615295,60.603483],[11.638641,60.612921],'
+                         '[11.6819,60.613258],[11.697693,60.601797],[11.712112,60.586622],[11.703873,60.574476],'
+                         '[11.67984,60.568064],[11.640015,60.576838],[11.611862,60.587296]]}'),
+            'owner': self.user1.id,
+        }
+        self.note = {
+            'owner': 1,
+            'content': 'Are er kul',
+            'name': 'Best note ever'
+        }
+        self.item_list = {
+            'name': 'Test list',
+            'items': [
+                'item one',
+                'item two',
+                'item three'
+            ],
+            'items_checked': [
+                'item four',
+                'item five'
+            ],
+            'owner': self.user1.id,
+            'type': 'check'
+        }
+        self.trip = {
+            'name': 'UTrippin?',
+            'owner': self.user1.id,
+        }
+        self.headers = {
+            'Content-type': 'application/json'
+        }
+
+    def tearDown(self):
+        db.destroy()
+
+    def test_create_trip_ok(self):
+        response = self.client.post('/trip', data=json.dumps(self.trip), headers=self.headers)
+
+        self.assertEqual(response.status_code, 201)
+
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['owner'], 1)
