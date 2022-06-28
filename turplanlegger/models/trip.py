@@ -68,6 +68,10 @@ class Trip:
     def addRouteReference(self, route_id: int) -> 'Trip':
         db.add_trip_route_reference(self.id, route_id)
         self.routes = db.get_trip_routes(self.id)
+    
+    def addItemListReference(self, item_list_id: int) -> 'Trip':
+        db.add_trip_item_list_reference(self.id, item_list_id)
+        self.routes = db.get_trip_item_lists(self.id)
 
     @staticmethod
     def find_trip(id: int) -> 'Trip':
@@ -92,7 +96,7 @@ class Trip:
             )
             trip.notes = [item.note_id for item in db.get_trip_notes(trip.id)]
             trip.routes = [item.route_id for item in db.get_trip_routes(trip.id)]
-            trip.item_lists = [item.item_list_id for item in db.get_trip_lists(trip.id)]
+            trip.item_lists = [item.item_list_id for item in db.get_trip_item_lists(trip.id)]
             return trip
         elif isinstance(rec, tuple):
             trip = Trip(
@@ -102,5 +106,5 @@ class Trip:
             )
             trip.notes = [item.note_id for item in db.get_trip_notes(trip.id)]
             trip.routes = [item.route_id for item in db.get_trip_routes(trip.id)]
-            trip.item_lists = [item.item_list_id for item in db.get_trip_lists(trip.id)]
+            trip.item_lists = [item.item_list_id for item in db.get_trip_item_lists(trip.id)]
             return trip

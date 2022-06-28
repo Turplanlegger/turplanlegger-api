@@ -338,7 +338,7 @@ class Database:
 
         return self._insert(insert_ref, {'trip_id': trip_id, 'note_id': note_id})
 
-    def add_trip_item_lists_reference(self, trip_id, item_list_id):
+    def add_trip_item_list_reference(self, trip_id, item_list_id):
         insert_ref = """
             INSERT INTO trips_item_lists_references (trip_id, item_list_id)
             VALUES (%(trip_id)s, %(item_list_id)s)
@@ -373,7 +373,7 @@ class Database:
         select = 'SELECT route_id FROM trips_routes_references WHERE trip_id = %s'
         return self._fetchall(select, (id,))
    
-    def get_trip_lists(self, id):
+    def get_trip_item_lists(self, id):
         select = 'SELECT item_list_id FROM trips_item_lists_references WHERE item_list_id = %s'
         return self._fetchall(select, (id,))
 

@@ -62,3 +62,19 @@ def add_route_to_trip():
         raise ApiError(str(e), 500)
 
     return jsonify(trip.serialize), 201
+
+@api.route('/trip/item_list', methods=['PATCH'])
+def add_item_list_to_trip():
+    try:
+        trip_id = request.json.get('trip_id', None)
+        item_list_id = request.json.get('item_list_id', None)
+    except (ValueError, TypeError) as e:
+        raise ApiError(str(e), 400)
+
+    try:
+        trip = Trip.find_trip(trip_id)
+        trip.addItemListReference(item_list_id)
+    except Exception as e:
+        raise ApiError(str(e), 500)
+
+    return jsonify(trip.serialize), 201
