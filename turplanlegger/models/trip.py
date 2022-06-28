@@ -65,6 +65,10 @@ class Trip:
         db.add_trip_note_reference(self.id, note_id)
         self.notes = db.get_trip_notes(self.id)
 
+    def addRouteReference(self, route_id: int) -> 'Trip':
+        db.add_trip_route_reference(self.id, route_id)
+        self.routes = db.get_trip_routes(self.id)
+
     @staticmethod
     def find_trip(id: int) -> 'Trip':
         trip = Trip.get_trip(db.get_trip(id))
