@@ -61,7 +61,16 @@ class Database:
     def destroy(self):
         conn = self.conn
         cursor = conn.cursor()
-        for table in ['trips', 'item_lists', 'lists_items', 'users', 'routes', 'notes', 'trips_notes_references', 'trips_routes_references', 'trips_item_lists_references']:
+        for table in [
+            'trips',
+            'item_lists',
+            'lists_items',
+            'users', 'routes',
+            'notes',
+            'trips_notes_references',
+            'trips_routes_references',
+            'trips_item_lists_references'
+        ]:
             cursor.execute(f'DROP TABLE IF EXISTS {table} CASCADE')
 
         conn.commit()
@@ -328,7 +337,7 @@ class Database:
             RETURNING *
         """
         return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
-   
+
     def add_trip_note_reference(self, trip_id, note_id):
         insert_ref = """
             INSERT INTO trips_notes_references (trip_id, note_id)
@@ -372,7 +381,7 @@ class Database:
     def get_trip_routes(self, id):
         select = 'SELECT route_id FROM trips_routes_references WHERE trip_id = %s'
         return self._fetchall(select, (id,))
-   
+
     def get_trip_item_lists(self, id):
         select = 'SELECT item_list_id FROM trips_item_lists_references WHERE item_list_id = %s'
         return self._fetchall(select, (id,))

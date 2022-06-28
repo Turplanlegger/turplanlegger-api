@@ -1,8 +1,6 @@
-from datetime import datetime
 from typing import Dict
 
 from turplanlegger.app import db
-from turplanlegger.models.note import Note
 
 JSON = Dict[str, any]
 
@@ -68,7 +66,7 @@ class Trip:
     def addRouteReference(self, route_id: int) -> 'Trip':
         db.add_trip_route_reference(self.id, route_id)
         self.routes = db.get_trip_routes(self.id)
-    
+
     def addItemListReference(self, item_list_id: int) -> 'Trip':
         db.add_trip_item_list_reference(self.id, item_list_id)
         self.routes = db.get_trip_item_lists(self.id)

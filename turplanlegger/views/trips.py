@@ -30,6 +30,7 @@ def add_trip():
 
     return jsonify(trip.serialize), 201
 
+
 @api.route('/trip/note', methods=['PATCH'])
 def add_note_to_trip():
     try:
@@ -45,6 +46,7 @@ def add_note_to_trip():
         raise ApiError(str(e), 500)
 
     return jsonify(trip.serialize), 201
+
 
 @api.route('/trip/route', methods=['PATCH'])
 def add_route_to_trip():
@@ -62,6 +64,7 @@ def add_route_to_trip():
 
     return jsonify(trip.serialize), 201
 
+
 @api.route('/trip/item_list', methods=['PATCH'])
 def add_item_list_to_trip():
     try:
@@ -77,6 +80,7 @@ def add_item_list_to_trip():
         raise ApiError(str(e), 500)
 
     return jsonify(trip.serialize), 201
+
 
 @api.route('/trip/<trip_id>/owner', methods=['PATCH'])
 def change_trip_owner(trip_id):

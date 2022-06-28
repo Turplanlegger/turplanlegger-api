@@ -33,8 +33,8 @@ class RoutesTestCase(unittest.TestCase):
         )
         self.route = {
             'route': ('{\"type\":\"LineString\",\"coordinates\":[[11.615295,60.603483],[11.638641,60.612921],'
-                         '[11.6819,60.613258],[11.697693,60.601797],[11.712112,60.586622],[11.703873,60.574476],'
-                         '[11.67984,60.568064],[11.640015,60.576838],[11.611862,60.587296]]}'),
+                      '[11.6819,60.613258],[11.697693,60.601797],[11.712112,60.586622],[11.703873,60.574476],'
+                      '[11.67984,60.568064],[11.640015,60.576838],[11.611862,60.587296]]}'),
             'owner': self.user1.id,
         }
         self.note = {
@@ -88,7 +88,8 @@ class RoutesTestCase(unittest.TestCase):
         note_id = data['id']
 
         # Add note to trip
-        response = self.client.patch('/trip/note', data=json.dumps({'trip_id': trip_id, 'note_id': note_id}), headers=self.headers)
+        response = self.client.patch(
+            '/trip/note', data=json.dumps({'trip_id': trip_id, 'note_id': note_id}), headers=self.headers)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
 
@@ -111,7 +112,8 @@ class RoutesTestCase(unittest.TestCase):
         route_id = data['id']
 
         # Add route to trip
-        response = self.client.patch('/trip/route', data=json.dumps({'trip_id': trip_id, 'route_id': route_id}), headers=self.headers)
+        response = self.client.patch(
+            '/trip/route', data=json.dumps({'trip_id': trip_id, 'route_id': route_id}), headers=self.headers)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
 
@@ -134,7 +136,10 @@ class RoutesTestCase(unittest.TestCase):
         item_list_id = data['id']
 
         # Add item_list to trip
-        response = self.client.patch('/trip/item_list', data=json.dumps({'trip_id': trip_id, 'item_list_id': item_list_id}), headers=self.headers)
+        response = self.client.patch(
+            '/trip/item_list',
+            data=json.dumps({'trip_id': trip_id, 'item_list_id': item_list_id}),
+            headers=self.headers)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
 
