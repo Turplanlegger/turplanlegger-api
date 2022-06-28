@@ -349,7 +349,7 @@ class Database:
 
     def add_trip_route_reference(self, trip_id, route_id):
         insert_ref = """
-            INSERT INTO trip_route_references (trip_id, route_id)
+            INSERT INTO trips_routes_references (trip_id, route_id)
             VALUES (%(trip_id)s, %(route_id)s)
             RETURNING *
         """
