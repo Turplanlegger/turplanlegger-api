@@ -10,7 +10,6 @@ from . import api
 def get_trip(trip_id):
 
     trip = Trip.find_trip(trip_id)
-
     if trip:
         return jsonify(status='ok', count=1, trip=trip.serialize)
     else:
@@ -78,3 +77,23 @@ def add_item_list_to_trip():
         raise ApiError(str(e), 500)
 
     return jsonify(trip.serialize), 201
+
+@api.route('/trip/<trip_id>/owner', methods=['PATCH'])
+def change_trip_owner(trip_id):
+
+    trip = Trip.find_trip(trip_id)
+    if not trip:
+        raise ApiError('trip not found', 404)
+
+    owner = request.json.get('owner', None)
+    if not owner:
+        raise ApiError('must supply owner as int', 400)
+
+    try:
+        trip.change_owner(owner)
+    except ValueError as e:
+        raise ApiError(str(e), 400)
+    except Exception as e:
+        raise ApiError(str(e), 500)
+
+    return jsonify(status='ok')

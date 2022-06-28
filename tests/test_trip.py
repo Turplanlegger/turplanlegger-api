@@ -143,3 +143,17 @@ class RoutesTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(data['trip']['item_lists'], [item_list_id])
+
+    def test_change_trip_owner(self):
+        response = self.client.post('/trip', data=json.dumps(self.trip), headers=self.headers)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+
+        response = self.client.patch(f'/trip/{data["id"]}/owner',
+                                     data=json.dumps({'owner': 2}), headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(f'/trip/{data["id"]}')
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['trip']['owner'], 2)
