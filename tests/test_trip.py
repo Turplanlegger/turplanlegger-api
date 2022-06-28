@@ -5,7 +5,7 @@ from turplanlegger.app import create_app, db
 from turplanlegger.models.user import User
 
 
-class RoutesTestCase(unittest.TestCase):
+class TripsTestCase(unittest.TestCase):
 
     def setUp(self):
         config = {
