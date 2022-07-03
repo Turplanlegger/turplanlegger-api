@@ -330,7 +330,7 @@ class Database:
         Insert, with return.
         """
         cursor = self.conn.cursor()
-        self._log(cursor, query, vars)
+        self._log(cursor, '_insert', query, vars)
         cursor.execute(query, vars)
         self.conn.commit()
         return cursor.fetchone()
@@ -340,7 +340,7 @@ class Database:
         Return none or one row.
         """
         cursor = self.conn.cursor()
-        self._log(cursor, query, vars)
+        self._log(cursor, '_fetchone', query, vars)
         cursor.execute(query, vars)
         return cursor.fetchone()
 
@@ -349,7 +349,7 @@ class Database:
         Return none or multiple row.
         """
         cursor = self.conn.cursor()
-        self._log(cursor, query, vars)
+        self._log(cursor, '_fetchall', query, vars)
         cursor.execute(query, vars)
         return cursor.fetchall()
 
@@ -358,7 +358,7 @@ class Database:
         Update, with optional return.
         """
         cursor = self.conn.cursor()
-        self._log(cursor, query, vars)
+        self._log(cursor, '-updateone', query, vars)
         cursor.execute(query, vars)
         self.conn.commit()
         return cursor.fetchone() if returning else None
@@ -368,11 +368,11 @@ class Database:
         Delete, with optional return.
         """
         cursor = self.conn.cursor()
-        self._log(cursor, query, vars)
+        self._log(cursor, '_deleteone', query, vars)
         cursor.execute(query, vars)
         self.conn.commit()
         return cursor.fetchone() if returning else None
 
-    def _log(self, cursor, query, vars):
-        self.logger.debug('{stars}\n{query}\n{stars}'.format(
-            stars='*' * 40, query=cursor.mogrify(query, vars).decode('utf-8')))
+    def _log(self, cursor, method, query, vars):
+        self.logger.debug('{stars} {method} {stars}\n{query}'.format(
+            stars='*' * 40, method=method, query=cursor.mogrify(query, vars).decode('utf-8')))
