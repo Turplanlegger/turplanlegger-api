@@ -1,5 +1,6 @@
 from flask import jsonify, request
 
+from turplanlegger.auth.decorators import auth
 from turplanlegger.exceptions import ApiError
 from turplanlegger.models.item_lists import ItemList
 from turplanlegger.models.list_items import ListItem
@@ -8,6 +9,7 @@ from . import api
 
 
 @api.route('/item_list/<item_list_id>', methods=['GET'])
+@auth
 def get_item_list(item_list_id):
 
     item_list = ItemList.find_item_list(item_list_id)
