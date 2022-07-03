@@ -23,8 +23,7 @@ def auth(func):
                 auth_header[0] == 'Bearer' and auth_header[1]):
             token = auth_header[1]
             current_app.logger.debug(f'Supplied API token: {token}')
-
-        if not token:
+        else:
             raise AuthError(
                 'must supply token by Authorization header', 401)
 
