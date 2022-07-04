@@ -326,7 +326,6 @@ class Database:
             VALUES (%(name)s, %(owner)s, %(private)s)
             RETURNING *
         """
-
         return self._insert(insert_trip, vars(trip))
 
     def change_trip_owner(self, id, owner):
@@ -344,7 +343,6 @@ class Database:
             VALUES (%(trip_id)s, %(note_id)s)
             RETURNING *
         """
-
         return self._insert(insert_ref, {'trip_id': trip_id, 'note_id': note_id})
 
     def add_trip_item_list_reference(self, trip_id, item_list_id):
@@ -353,7 +351,6 @@ class Database:
             VALUES (%(trip_id)s, %(item_list_id)s)
             RETURNING *
         """
-
         return self._insert(insert_ref,  {'trip_id': trip_id, 'item_list_id': item_list_id})
 
     def add_trip_route_reference(self, trip_id, route_id):
@@ -362,7 +359,6 @@ class Database:
             VALUES (%(trip_id)s, %(route_id)s)
             RETURNING *
         """
-
         return self._insert(insert_ref,  {'trip_id': trip_id, 'route_id': route_id})
 
     def get_trip(self, id, deleted=False):

@@ -59,15 +59,15 @@ class Trip:
     def delete(self) -> bool:
         return db.delete_trip(self.id)
 
-    def addNoteReference(self, note_id: int) -> 'Trip':
+    def add_note_reference(self, note_id: int) -> 'Trip':
         db.add_trip_note_reference(self.id, note_id)
         self.notes = db.get_trip_notes(self.id)
 
-    def addRouteReference(self, route_id: int) -> 'Trip':
+    def add_route_reference(self, route_id: int) -> 'Trip':
         db.add_trip_route_reference(self.id, route_id)
         self.routes = db.get_trip_routes(self.id)
 
-    def addItemListReference(self, item_list_id: int) -> 'Trip':
+    def add_item_list_reference(self, item_list_id: int) -> 'Trip':
         db.add_trip_item_list_reference(self.id, item_list_id)
         self.routes = db.get_trip_item_lists(self.id)
 

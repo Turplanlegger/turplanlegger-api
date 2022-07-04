@@ -41,7 +41,7 @@ def add_note_to_trip():
 
     try:
         trip = Trip.find_trip(trip_id)
-        trip.addNoteReference(note_id)
+        trip.add_note_reference(note_id)
     except Exception as e:
         raise ApiError(str(e), 500)
 
@@ -58,7 +58,7 @@ def add_route_to_trip():
 
     try:
         trip = Trip.find_trip(trip_id)
-        trip.addRouteReference(route_id)
+        trip.add_route_reference(route_id)
     except Exception as e:
         raise ApiError(str(e), 500)
 
@@ -75,7 +75,7 @@ def add_item_list_to_trip():
 
     try:
         trip = Trip.find_trip(trip_id)
-        trip.addItemListReference(item_list_id)
+        trip.add_item_list_reference(item_list_id)
     except Exception as e:
         raise ApiError(str(e), 500)
 
