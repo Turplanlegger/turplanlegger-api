@@ -2,6 +2,8 @@ import json
 import unittest
 
 from turplanlegger.app import create_app, db
+from turplanlegger.models.user import User
+from turplanlegger.auth.utils import hash_password
 
 
 class UsersTestCase(unittest.TestCase):
@@ -106,24 +108,46 @@ class UsersTestCase(unittest.TestCase):
             'private': True
         }
 
+        self.test_user = User.create(
+            User(
+                name='Ola',
+                last_name='Nordamnn',
+                email='old.nordmann@norge.no',
+                auth_method='basic',
+                password=hash_password('test')
+            )
+        )
+        
+        response = self.client.post(
+            '/login',
+            data=json.dumps({'email': self.test_user.email, 'password': 'test'}),
+            headers={'Content-type': 'application/json'}
+        )
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.headers_json = {
+            'Content-type': 'application/json',
+            'Authorization': f'Bearer {data["token"]}'
+        }
         self.headers = {
-            'Content-type': 'application/json'
+            'Authorization': f'Bearer {data["token"]}'
         }
 
     def tearDown(self):
         db.destroy()
 
-    def test_get_user_not_found(self):
-        response = self.client.get('/user/1')
+    def test_user_not_found(self):
+        response = self.client.get('/user/2', headers=self.headers)
         self.assertEqual(response.status_code, 404)
 
     def test_create_user(self):
-        response = self.client.post('/user', data=json.dumps(self.user1), headers=self.headers)
+        response = self.client.post('/user', data=json.dumps(self.user1), headers=self.headers_json)
 
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 1)
+        self.assertEqual(data['id'], 2)
         self.assertEqual(data['user']['name'], self.user1['name'])
         self.assertEqual(data['user']['last_name'], self.user1['last_name'])
         self.assertEqual(data['user']['email'], self.user1['email'])
@@ -131,12 +155,12 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(data['user']['private'], self.user1['private'])
 
     def test_create_private_user(self):
-        response = self.client.post('/user', data=json.dumps(self.user11), headers=self.headers)
+        response = self.client.post('/user', data=json.dumps(self.user11), headers=self.headers_json)
 
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 1)
+        self.assertEqual(data['id'], 2)
         self.assertEqual(data['user']['name'], self.user11['name'])
         self.assertEqual(data['user']['last_name'], self.user11['last_name'])
         self.assertEqual(data['user']['email'], self.user11['email'])
@@ -144,34 +168,34 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(data['user']['private'], self.user11['private'])
 
     def test_delete_user(self):
-        response = self.client.post('/user', data=json.dumps(self.user1), headers=self.headers)
+        response = self.client.post('/user', data=json.dumps(self.user1), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
 
-        response = self.client.delete(f'/user/{data["id"]}')
+        response = self.client.delete(f'/user/{data["id"]}', headers=self.headers)
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get(f'/user/{data["id"]}')
+        response = self.client.get(f'/user/{data["id"]}', headers=self.headers)
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(response.status_code, 404)
 
     def test_create_user_no_last_name(self):
-        response = self.client.post('/user', data=json.dumps(self.user2), headers=self.headers)
+        response = self.client.post('/user', data=json.dumps(self.user2), headers=self.headers_json)
         self.assertEqual(response.status_code, 400)
 
     def test_create_user_invalid_email(self):
-        response = self.client.post('/user', data=json.dumps(self.user3), headers=self.headers)
+        response = self.client.post('/user', data=json.dumps(self.user3), headers=self.headers_json)
         self.assertEqual(response.status_code, 400)
 
     def test_rename_user(self):
-        response = self.client.post('/user', data=json.dumps(self.user1), headers=self.headers)
+        response = self.client.post('/user', data=json.dumps(self.user1), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
 
         response = self.client.patch(
             f'/user/{data["id"]}/rename',
             data=json.dumps({'name': 'Petter', 'last_name': 'Smart'}),
-            headers=self.headers
+            headers=self.headers_json
         )
         data = json.loads(response.data.decode('utf-8'))
 
@@ -183,15 +207,16 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(data['user']['private'], self.user1['private'])
 
     def test_change_private(self):
-        response = self.client.post('/user', data=json.dumps(self.user1), headers=self.headers)
+        response = self.client.post('/user', data=json.dumps(self.user1), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
 
-        response = self.client.patch(f'/user/{data["id"]}/private')
+        response = self.client.patch(f'/user/{data["id"]}/private', headers=self.headers)
 
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get(f'/user/{data["id"]}')
+        response = self.client.get(f'/user/{data["id"]}', headers=self.headers)
+        self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(data['user']['name'], self.user1['name'])
@@ -201,16 +226,16 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(data['user']['private'], True)
 
     def test_create_user_short_pw(self):
-        response = self.client.post('/user', data=json.dumps(self.user4), headers=self.headers)
+        response = self.client.post('/user', data=json.dumps(self.user4), headers=self.headers_json)
         self.assertEqual(response.status_code, 400)
 
     def test_create_special_char(self):
-        response = self.client.post('/user', data=json.dumps(self.user5), headers=self.headers)
+        response = self.client.post('/user', data=json.dumps(self.user5), headers=self.headers_json)
 
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 1)
+        self.assertEqual(data['id'], 2)
         self.assertEqual(data['user']['name'], self.user5['name'])
         self.assertEqual(data['user']['last_name'], self.user5['last_name'])
         self.assertEqual(data['user']['email'], self.user5['email'])
@@ -218,12 +243,12 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(data['user']['private'], self.user5['private'])
 
     def test_create_special_char2(self):
-        response = self.client.post('/user', data=json.dumps(self.user9), headers=self.headers)
+        response = self.client.post('/user', data=json.dumps(self.user9), headers=self.headers_json)
 
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 1)
+        self.assertEqual(data['id'], 2)
         self.assertEqual(data['user']['name'], self.user9['name'])
         self.assertEqual(data['user']['last_name'], self.user9['last_name'])
         self.assertEqual(data['user']['email'], self.user9['email'])
@@ -231,12 +256,12 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(data['user']['private'], self.user9['private'])
 
     def test_create_user_long_pw1(self):
-        response = self.client.post('/user', data=json.dumps(self.user6), headers=self.headers)
+        response = self.client.post('/user', data=json.dumps(self.user6), headers=self.headers_json)
 
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 1)
+        self.assertEqual(data['id'], 2)
         self.assertEqual(data['user']['name'], self.user6['name'])
         self.assertEqual(data['user']['last_name'], self.user6['last_name'])
         self.assertEqual(data['user']['email'], self.user6['email'])
@@ -244,12 +269,12 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(data['user']['private'], self.user6['private'])
 
     def test_create_user_long_pw2(self):
-        response = self.client.post('/user', data=json.dumps(self.user7), headers=self.headers)
+        response = self.client.post('/user', data=json.dumps(self.user7), headers=self.headers_json)
 
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 1)
+        self.assertEqual(data['id'], 2)
         self.assertEqual(data['user']['name'], self.user7['name'])
         self.assertEqual(data['user']['last_name'], self.user7['last_name'])
         self.assertEqual(data['user']['email'], self.user7['email'])
@@ -257,12 +282,12 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(data['user']['private'], self.user7['private'])
 
     def test_create_user_long_pw3(self):
-        response = self.client.post('/user', data=json.dumps(self.user8), headers=self.headers)
+        response = self.client.post('/user', data=json.dumps(self.user8), headers=self.headers_json)
 
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 1)
+        self.assertEqual(data['id'], 2)
         self.assertEqual(data['user']['name'], self.user8['name'])
         self.assertEqual(data['user']['last_name'], self.user8['last_name'])
         self.assertEqual(data['user']['email'], self.user8['email'])
@@ -270,12 +295,12 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(data['user']['private'], self.user8['private'])
 
     def test_create_user_long_pw4(self):
-        response = self.client.post('/user', data=json.dumps(self.user9), headers=self.headers)
+        response = self.client.post('/user', data=json.dumps(self.user9), headers=self.headers_json)
 
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 1)
+        self.assertEqual(data['id'], 2)
         self.assertEqual(data['user']['name'], self.user9['name'])
         self.assertEqual(data['user']['last_name'], self.user9['last_name'])
         self.assertEqual(data['user']['email'], self.user9['email'])
@@ -283,12 +308,12 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(data['user']['private'], self.user9['private'])
 
     def test_create_user_long_pw5(self):
-        response = self.client.post('/user', data=json.dumps(self.user10), headers=self.headers)
+        response = self.client.post('/user', data=json.dumps(self.user10), headers=self.headers_json)
 
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 1)
+        self.assertEqual(data['id'], 2)
         self.assertEqual(data['user']['name'], self.user10['name'])
         self.assertEqual(data['user']['last_name'], self.user10['last_name'])
         self.assertEqual(data['user']['email'], self.user10['email'])
