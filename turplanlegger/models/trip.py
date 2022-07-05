@@ -79,9 +79,6 @@ class Trip:
     def change_owner(self, owner: int) -> 'Trip':
         if self.owner == owner:
             raise ValueError('new owner is same as old')
-
-        # A user object should be parsed/passed
-        # Return a boolean, don't get the list unless it's used
         return Trip.get_trip(db.change_trip_owner(self.id, owner))
 
     @classmethod
