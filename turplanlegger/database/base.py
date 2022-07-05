@@ -3,6 +3,7 @@ import time
 import psycopg
 from psycopg.rows import namedtuple_row
 
+
 class Database:
     def __init__(self, app=None):
         self.app = None
