@@ -61,7 +61,16 @@ class Database:
     def destroy(self):
         conn = self.conn
         cursor = conn.cursor()
-        for table in ['trips', 'item_lists', 'lists_items', 'users', 'routes', 'notes']:
+        for table in [
+            'trips',
+            'item_lists',
+            'lists_items',
+            'users', 'routes',
+            'notes',
+            'trips_notes_references',
+            'trips_routes_references',
+            'trips_item_lists_references'
+        ]:
             cursor.execute(f'DROP TABLE IF EXISTS {table} CASCADE')
 
         conn.commit()
@@ -309,6 +318,69 @@ class Database:
                 WHERE id = %(id)s
         """
         return self._updateone(update, {'id': id, 'private': private})
+
+    # Trip
+    def create_trip(self, trip):
+        insert_trip = """
+            INSERT INTO trips (name, owner, private)
+            VALUES (%(name)s, %(owner)s, %(private)s)
+            RETURNING *
+        """
+        return self._insert(insert_trip, vars(trip))
+
+    def change_trip_owner(self, id, owner):
+        update = """
+            UPDATE trips
+                SET owner=%(owner)s
+                WHERE id = %(id)s
+            RETURNING *
+        """
+        return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
+
+    def add_trip_note_reference(self, trip_id, note_id):
+        insert_ref = """
+            INSERT INTO trips_notes_references (trip_id, note_id)
+            VALUES (%(trip_id)s, %(note_id)s)
+            RETURNING *
+        """
+        return self._insert(insert_ref, {'trip_id': trip_id, 'note_id': note_id})
+
+    def add_trip_item_list_reference(self, trip_id, item_list_id):
+        insert_ref = """
+            INSERT INTO trips_item_lists_references (trip_id, item_list_id)
+            VALUES (%(trip_id)s, %(item_list_id)s)
+            RETURNING *
+        """
+        return self._insert(insert_ref,  {'trip_id': trip_id, 'item_list_id': item_list_id})
+
+    def add_trip_route_reference(self, trip_id, route_id):
+        insert_ref = """
+            INSERT INTO trips_routes_references (trip_id, route_id)
+            VALUES (%(trip_id)s, %(route_id)s)
+            RETURNING *
+        """
+        return self._insert(insert_ref,  {'trip_id': trip_id, 'route_id': route_id})
+
+    def get_trip(self, id, deleted=False):
+        select = 'SELECT * FROM trips WHERE id = %s'
+
+        if deleted:
+            select += ' AND deleted = TRUE'
+        else:
+            select += ' AND deleted = FALSE'
+        return self._fetchone(select, (id,))
+
+    def get_trip_notes(self, id):
+        select = 'SELECT note_id FROM trips_notes_references WHERE trip_id = %s'
+        return self._fetchall(select, (id,))
+
+    def get_trip_routes(self, id):
+        select = 'SELECT route_id FROM trips_routes_references WHERE trip_id = %s'
+        return self._fetchall(select, (id,))
+
+    def get_trip_item_lists(self, id):
+        select = 'SELECT item_list_id FROM trips_item_lists_references WHERE item_list_id = %s'
+        return self._fetchall(select, (id,))
 
     # Helpers
     def _insert(self, query, vars):
