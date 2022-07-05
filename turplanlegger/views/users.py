@@ -1,5 +1,6 @@
 from flask import jsonify, request
 
+from turplanlegger.auth.decorators import auth
 from turplanlegger.exceptions import ApiError
 from turplanlegger.models.user import User
 
@@ -7,6 +8,7 @@ from . import api
 
 
 @api.route('/user/<user_id>', methods=['GET'])
+@auth
 def get_user(user_id):
     try:
         id = int(user_id)
@@ -20,7 +22,9 @@ def get_user(user_id):
     else:
         raise ApiError('user not found', 404)
 
+
 @api.route('/user', methods=['GET'])
+@auth
 def lookup_user():
     try:
         email = request.args.get('email', None)
@@ -42,6 +46,7 @@ def lookup_user():
 
 
 @api.route('/user', methods=['POST'])
+@auth
 def add_user():
     try:
         user = User.parse(request.json)
@@ -60,6 +65,7 @@ def add_user():
 
 
 @api.route('/user/<user_id>', methods=['DELETE'])
+@auth
 def delete_user(user_id):
 
     try:
@@ -81,6 +87,7 @@ def delete_user(user_id):
 
 
 @api.route('/user/<user_id>/rename', methods=['PATCH'])
+@auth
 def rename_user(user_id):
 
     try:
@@ -103,6 +110,7 @@ def rename_user(user_id):
 
 
 @api.route('/user/<user_id>/private', methods=['PATCH'])
+@auth
 def toggle_private_user(user_id):
 
     try:

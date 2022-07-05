@@ -21,6 +21,7 @@ def get_item_list(item_list_id):
 
 
 @api.route('/item_list/<item_list_id>', methods=['DELETE'])
+@auth
 def delete_item_list(item_list_id):
 
     item_list = ItemList.find_item_list(item_list_id)
@@ -37,6 +38,7 @@ def delete_item_list(item_list_id):
 
 
 @api.route('/item_list', methods=['POST'])
+@auth
 def add_item_list():
     try:
         item_list = ItemList.parse(request.json)
@@ -55,6 +57,7 @@ def add_item_list():
 
 
 @api.route('/item_list/<item_list_id>/add', methods=['PATCH'])
+@auth
 def add_item_list_items(item_list_id):
 
     item_list = ItemList.find_item_list(item_list_id)
@@ -100,6 +103,7 @@ def add_item_list_items(item_list_id):
 
 
 @api.route('/item_list/<item_list_id>/rename', methods=['PATCH'])
+@auth
 def rename_item_list(item_list_id):
 
     item_list = ItemList.find_item_list(item_list_id)
@@ -116,6 +120,7 @@ def rename_item_list(item_list_id):
 
 
 @api.route('/item_list/<item_list_id>/toggle_check', methods=['PATCH'])
+@auth
 def toggle_list_item_check(item_list_id):
 
     if not request.json.get('items', []):
@@ -142,6 +147,7 @@ def toggle_list_item_check(item_list_id):
 
 
 @api.route('/item_list/<item_list_id>/owner', methods=['PATCH'])
+@auth
 def change_item_list_owner(item_list_id):
 
     item_list = ItemList.find_item_list(item_list_id)

@@ -15,8 +15,7 @@ def auth(func):
 
         try:
             auth_header = auth_header.split()
-        except AttributeError as e:
-            current_app.logger.exception(str(e))
+        except AttributeError:
             raise AuthError('must supply token by Authorization header', 401)
 
         if (len(auth_header) == 2 and
