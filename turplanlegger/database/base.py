@@ -1,8 +1,7 @@
 import time
 
-import psycopg2
-from psycopg2.extras import NamedTupleCursor
-
+import psycopg
+from psycopg.rows import namedtuple_row
 
 class Database:
     def __init__(self, app=None):
@@ -31,12 +30,12 @@ class Database:
         retry = 0
         while True:
             try:
-                conn = psycopg2.connect(
-                    dsn=self.uri,
+                conn = psycopg.connect(
+                    conninfo=self.uri,
                     dbname=self.dbname,
-                    cursor_factory=NamedTupleCursor
+                    client_encoding='UTF8',
+                    row_factory=namedtuple_row
                 )
-                conn.set_client_encoding('UTF8')
                 break
             except Exception as e:
                 self.logger.exception(str(e))
@@ -432,5 +431,6 @@ class Database:
         return cursor.fetchone() if returning else None
 
     def _log(self, cursor, query, vars):
-        self.logger.debug('{stars}\n{query}\n{stars}'.format(
-            stars='*' * 40, query=cursor.mogrify(query, vars).decode('utf-8')))
+        # self.logger.debug('{stars}\n{query}\n{stars}'.format(
+        #     stars='*' * 40, query=cursor.mogrify(query, vars).decode('utf-8')))
+        return False
