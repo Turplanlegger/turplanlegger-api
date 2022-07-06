@@ -30,7 +30,7 @@ class Config:
             self.config.from_pyfile(config_path)
 
         # App
-        self.config['SECRET_KEY'] = self.conf_ent('SECRET_KEY')
+        self.config['SECRET_KEY'] = self.conf_ent('SECRET_KEY', os.urandom(24))
         self.config['TOKEN_EXPIRE_TIME'] = self.conf_ent('TOKEN_EXPIRE_TIME')  # Seconds
 
         # Database
