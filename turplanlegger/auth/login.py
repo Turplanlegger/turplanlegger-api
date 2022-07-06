@@ -1,11 +1,11 @@
 import re
 from datetime import datetime, timedelta
-from flask import current_app, request, jsonify
 from uuid import uuid4
+
+from flask import current_app, jsonify, request
 
 from turplanlegger.exceptions import ApiError
 from turplanlegger.models.token import JWT
-
 
 from . import auth, utils  # noqa isort:skip
 

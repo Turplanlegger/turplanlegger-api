@@ -2,8 +2,8 @@ import json
 import unittest
 
 from turplanlegger.app import create_app, db
-from turplanlegger.models.user import User
 from turplanlegger.auth.utils import hash_password
+from turplanlegger.models.user import User
 
 
 class ItemListsTestCase(unittest.TestCase):

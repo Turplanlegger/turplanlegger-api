@@ -50,6 +50,7 @@ def handle_http_error(error: HTTPException) -> Tuple[Response, int]:
         ]
     }), error.code
 
+
 def handle_auth_error(error: AuthError) -> Tuple[Response, int,
                                                  Dict[str, Any]]:
     return jsonify({
@@ -58,7 +59,6 @@ def handle_auth_error(error: AuthError) -> Tuple[Response, int,
         'code': error.code,
         'errors': error.errors
     }), error.code, {'WWW-Authenticate': 'Bearer realm=Turplanlegger'}
-
 
 
 def handle_api_error(error: ApiError) -> Tuple[Response, int]:

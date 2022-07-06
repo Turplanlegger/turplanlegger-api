@@ -1,9 +1,9 @@
 import datetime
-import jwt
+from typing import Any, Dict
 
+import jwt
 from flask import current_app
 from jwt import DecodeError, ExpiredSignatureError, InvalidAudienceError
-from typing import Any, Dict
 
 JSON = Dict[str, Any]
 dt = datetime.datetime
@@ -27,12 +27,12 @@ class JWT:
     def parse(cls, token: str, algorithm: str = 'HS256') -> 'JWT':
         try:
             json = jwt.decode(
-                    token,
-                    key=current_app.config['SECRET_KEY'],
-                    options={'verify_signature': True},
-                    algorithms=[algorithm],
-                    audience='/'
-                )
+                token,
+                key=current_app.config['SECRET_KEY'],
+                options={'verify_signature': True},
+                algorithms=[algorithm],
+                audience='/'
+            )
         except (DecodeError, ExpiredSignatureError, InvalidAudienceError):
             raise
 

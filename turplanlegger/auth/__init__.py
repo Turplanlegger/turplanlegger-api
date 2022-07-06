@@ -6,6 +6,7 @@ auth = Blueprint('auth', __name__)  # noqa isort:skip
 
 from . import login  # noqa isort:skip
 
+
 @auth.before_request
 def before_request():
     if ((request.method in ['POST', 'PUT'] or (request.method == 'PATCH' and request.data))

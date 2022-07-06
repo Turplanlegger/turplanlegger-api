@@ -2,8 +2,8 @@ import json
 import unittest
 
 from turplanlegger.app import create_app, db
-from turplanlegger.models.user import User
 from turplanlegger.auth.utils import hash_password
+from turplanlegger.models.user import User
 
 
 class NotesTestCase(unittest.TestCase):
@@ -183,7 +183,8 @@ class NotesTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
 
-        response = self.client.patch('/note/1/update', data=json.dumps({'content': 'newcontent'}), headers=self.headers_json)
+        response = self.client.patch(
+            '/note/1/update', data=json.dumps({'content': 'newcontent'}), headers=self.headers_json)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['status'], 'ok')
