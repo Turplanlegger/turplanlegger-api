@@ -23,7 +23,7 @@ setuptools.setup(
     install_requires=[
         'Flask>=2.0.1',
         'Flask-Compress>=1.4.0',
-        'psycopg2',
+        'psycopg>=3.0.15',
     ],
     include_package_data=True,
     zip_safe=False,
