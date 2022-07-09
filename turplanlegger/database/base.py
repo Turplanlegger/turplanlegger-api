@@ -1,7 +1,7 @@
 import time
 
-import psycopg2
-from psycopg2.extras import NamedTupleCursor
+import psycopg
+from psycopg.rows import namedtuple_row
 
 
 class Database:
@@ -31,12 +31,12 @@ class Database:
         retry = 0
         while True:
             try:
-                conn = psycopg2.connect(
-                    dsn=self.uri,
+                conn = psycopg.connect(
+                    conninfo=self.uri,
                     dbname=self.dbname,
-                    cursor_factory=NamedTupleCursor
+                    client_encoding='UTF8',
+                    row_factory=namedtuple_row
                 )
-                conn.set_client_encoding('UTF8')
                 break
             except Exception as e:
                 self.logger.exception(str(e))
@@ -61,7 +61,16 @@ class Database:
     def destroy(self):
         conn = self.conn
         cursor = conn.cursor()
-        for table in ['trips', 'item_lists', 'lists_items', 'users', 'routes', 'notes']:
+        for table in [
+            'trips',
+            'item_lists',
+            'lists_items',
+            'users', 'routes',
+            'notes',
+            'trips_notes_references',
+            'trips_routes_references',
+            'trips_item_lists_references'
+        ]:
             cursor.execute(f'DROP TABLE IF EXISTS {table} CASCADE')
 
         conn.commit()
@@ -324,13 +333,76 @@ class Database:
         """
         return self._updateone(update, {'id': id, 'private': private})
 
+    # Trip
+    def create_trip(self, trip):
+        insert_trip = """
+            INSERT INTO trips (name, owner, private)
+            VALUES (%(name)s, %(owner)s, %(private)s)
+            RETURNING *
+        """
+        return self._insert(insert_trip, vars(trip))
+
+    def change_trip_owner(self, id, owner):
+        update = """
+            UPDATE trips
+                SET owner=%(owner)s
+                WHERE id = %(id)s
+            RETURNING *
+        """
+        return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
+
+    def add_trip_note_reference(self, trip_id, note_id):
+        insert_ref = """
+            INSERT INTO trips_notes_references (trip_id, note_id)
+            VALUES (%(trip_id)s, %(note_id)s)
+            RETURNING *
+        """
+        return self._insert(insert_ref, {'trip_id': trip_id, 'note_id': note_id})
+
+    def add_trip_item_list_reference(self, trip_id, item_list_id):
+        insert_ref = """
+            INSERT INTO trips_item_lists_references (trip_id, item_list_id)
+            VALUES (%(trip_id)s, %(item_list_id)s)
+            RETURNING *
+        """
+        return self._insert(insert_ref,  {'trip_id': trip_id, 'item_list_id': item_list_id})
+
+    def add_trip_route_reference(self, trip_id, route_id):
+        insert_ref = """
+            INSERT INTO trips_routes_references (trip_id, route_id)
+            VALUES (%(trip_id)s, %(route_id)s)
+            RETURNING *
+        """
+        return self._insert(insert_ref,  {'trip_id': trip_id, 'route_id': route_id})
+
+    def get_trip(self, id, deleted=False):
+        select = 'SELECT * FROM trips WHERE id = %s'
+
+        if deleted:
+            select += ' AND deleted = TRUE'
+        else:
+            select += ' AND deleted = FALSE'
+        return self._fetchone(select, (id,))
+
+    def get_trip_notes(self, id):
+        select = 'SELECT note_id FROM trips_notes_references WHERE trip_id = %s'
+        return self._fetchall(select, (id,))
+
+    def get_trip_routes(self, id):
+        select = 'SELECT route_id FROM trips_routes_references WHERE trip_id = %s'
+        return self._fetchall(select, (id,))
+
+    def get_trip_item_lists(self, id):
+        select = 'SELECT item_list_id FROM trips_item_lists_references WHERE item_list_id = %s'
+        return self._fetchall(select, (id,))
+
     # Helpers
     def _insert(self, query, vars):
         """
         Insert, with return.
         """
         cursor = self.conn.cursor()
-        self._log(cursor, '_insert', query, vars)
+        # self._log(cursor, '_insert', query, vars)
         cursor.execute(query, vars)
         self.conn.commit()
         return cursor.fetchone()
@@ -340,7 +412,7 @@ class Database:
         Return none or one row.
         """
         cursor = self.conn.cursor()
-        self._log(cursor, '_fetchone', query, vars)
+        # self._log(cursor, '_fetchone', query, vars)
         cursor.execute(query, vars)
         return cursor.fetchone()
 
@@ -349,7 +421,7 @@ class Database:
         Return none or multiple row.
         """
         cursor = self.conn.cursor()
-        self._log(cursor, '_fetchall', query, vars)
+        # self._log(cursor, '_fetchall', query, vars)
         cursor.execute(query, vars)
         return cursor.fetchall()
 
@@ -358,7 +430,7 @@ class Database:
         Update, with optional return.
         """
         cursor = self.conn.cursor()
-        self._log(cursor, '-updateone', query, vars)
+        # self._log(cursor, '-updateone', query, vars)
         cursor.execute(query, vars)
         self.conn.commit()
         return cursor.fetchone() if returning else None
@@ -368,11 +440,12 @@ class Database:
         Delete, with optional return.
         """
         cursor = self.conn.cursor()
-        self._log(cursor, '_deleteone', query, vars)
+        # self._log(cursor, '_deleteone', query, vars)
         cursor.execute(query, vars)
         self.conn.commit()
         return cursor.fetchone() if returning else None
 
-    def _log(self, cursor, method, query, vars):
-        self.logger.debug('{stars} {method} {stars}\n{query}'.format(
-            stars='*' * 40, method=method, query=cursor.mogrify(query, vars).decode('utf-8')))
+    def _log(self, cursor, query, vars):
+        # self.logger.debug('{stars}\n{query}\n{stars}'.format(
+        #     stars='*' * 40, query=cursor.mogrify(query, vars).decode('utf-8')))
+        return False
