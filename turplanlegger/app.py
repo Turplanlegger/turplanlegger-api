@@ -18,8 +18,7 @@ def create_app(config_override: Dict[str, Any] = None,
 
     app = Flask(__name__)
     app.config['ENVIRONMENT'] = environment
-    config.init_app(app)
-    app.config.update(config_override or {})
+    config.init_app(app, config_override)
 
     logger.setup_logging(app)
 

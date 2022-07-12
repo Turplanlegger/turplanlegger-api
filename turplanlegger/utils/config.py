@@ -3,6 +3,8 @@ from os.path import exists
 
 from flask import Flask
 
+from typing import Any, Dict
+
 
 class Config:
 
@@ -11,11 +13,11 @@ class Config:
         if app:
             self.init_app(app)
 
-    def init_app(self, app: Flask) -> None:
-        config = self.get_config()
+    def init_app(self, app: Flask, override: Dict[str, Any]) -> None:
+        config = self.get_config(override)
         app.config.update(config)
 
-    def get_config(self):
+    def get_config(self, override: Dict[str, Any]):
         from flask import Config
         self.config = Config('/')
 
@@ -28,6 +30,10 @@ class Config:
         config_path = os.getenv('TURPLANLEGGER_CONFIG_PATH', '/etc/turplanlegger/turplanlegger.conf')
         if (exists(config_path)):
             self.config.from_pyfile(config_path)
+
+        if override:
+            for key, value in override.items():
+                self.config[key] = value
 
         # App
         self.config['SECRET_KEY'] = self.conf_ent('SECRET_KEY')

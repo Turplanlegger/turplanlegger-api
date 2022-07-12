@@ -42,7 +42,6 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         data = json.loads(response.data.decode('utf-8'))
-        print(data)
         self.assertEqual(data['user']['id'], 1)
         self.assertEqual(data['user']['name'], 'Admin')
         self.assertEqual(data['user']['last_name'], 'Nimda')
