@@ -9,6 +9,7 @@ class UsersTestCase(unittest.TestCase):
     def setUp(self):
         config = {
             'TESTING': True,
+            'SECRET_KEY': 'test',
             'CREATE_ADMIN_USER': True
         }
 
