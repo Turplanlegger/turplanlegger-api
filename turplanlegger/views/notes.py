@@ -1,5 +1,6 @@
 from flask import jsonify, request
 
+from turplanlegger.auth.decorators import auth
 from turplanlegger.exceptions import ApiError
 from turplanlegger.models.note import Note
 
@@ -7,6 +8,7 @@ from . import api
 
 
 @api.route('/note/<note_id>', methods=['GET'])
+@auth
 def get_note(note_id):
 
     note = Note.find_note(note_id)
@@ -18,6 +20,7 @@ def get_note(note_id):
 
 
 @api.route('/note/<note_id>', methods=['DELETE'])
+@auth
 def delete_note(note_id):
 
     note = Note.find_note(note_id)
@@ -34,6 +37,7 @@ def delete_note(note_id):
 
 
 @api.route('/note', methods=['POST'])
+@auth
 def add_note():
     try:
         note = Note.parse(request.json)
@@ -49,6 +53,7 @@ def add_note():
 
 
 @api.route('/note/<note_id>/owner', methods=['PATCH'])
+@auth
 def change_note_owner(note_id):
 
     note = Note.find_note(note_id)
@@ -72,6 +77,7 @@ def change_note_owner(note_id):
 
 
 @api.route('/note/<note_id>/rename', methods=['PATCH'])
+@auth
 def rename_note(note_id):
 
     note = Note.find_note(note_id)
@@ -88,6 +94,7 @@ def rename_note(note_id):
 
 
 @api.route('/note/<note_id>/update', methods=['PATCH'])
+@auth
 def update_note(note_id):
 
     note = Note.find_note(note_id)

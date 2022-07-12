@@ -1,7 +1,8 @@
 import re
 from typing import Dict
 
-from turplanlegger.app import db
+from turplanlegger.app import db, logger
+from turplanlegger.auth import utils
 
 JSON = Dict[str, any]
 
@@ -9,7 +10,7 @@ JSON = Dict[str, any]
 class User:
 
     def __init__(self, name: str, last_name: str, email: str, auth_method: str,
-                 private: bool = False, **kwargs) -> None:
+                 password: str, private: bool = False, **kwargs) -> None:
 
         if not isinstance(private, bool):
             raise TypeError('\'private\' must be boolean')
@@ -41,6 +42,7 @@ class User:
         self.last_name = last_name
         self.email = email
         self.auth_method = auth_method
+        self.password = password
         self.private = private
         self.deleted = kwargs.get('deleted', False)
         self.delete_time = kwargs.get('delete_time', None)
@@ -53,11 +55,28 @@ class User:
         if not p.match(email):
             raise ValueError('invalid email address')
 
+        if User.find_by_email(email):
+            raise ValueError('User allready existst')
+
+        auth_method = json.get('auth_method', None)
+        password = json.get('password', '')
+        if auth_method == 'basic':
+            if not password:
+                raise ValueError('Password is mandatory for auth_type basic')
+            if len(password) < 3:
+                raise ValueError('Password too short')
+        try:
+            password = utils.hash_password(password)
+        except Exception as e:
+            logger.exception(str(e))
+            raise ValueError('Failed to create user')
+
         return User(
             name=json.get('name', None),
             last_name=json.get('last_name', None),
             email=email,
-            auth_method=json.get('auth_method', None),
+            auth_method=auth_method,
+            password=password,
             private=json.get('private', False)
         )
 
@@ -76,6 +95,7 @@ class User:
         }
 
     def create(self) -> 'User':
+        self.password = self.password.decode('utf-8')  # Revise this one!
         return self.get_user(db.create_user(self))
 
     def rename(self) -> 'User':
@@ -91,6 +111,22 @@ class User:
     def find_user(id: int) -> 'User':
         return User.get_user(db.get_user(id))
 
+    @staticmethod
+    def find_by_email(email: str) -> 'User':
+        p = re.compile('^[\\w.-]+@[\\w.-]+\\.\\w+$')
+        if not p.match(email):
+            raise ValueError('invalid email address')
+
+        return User.get_user(db.get_user_by('email', email))
+
+    @staticmethod
+    def check_credentials(email: str, password: str):
+        user = User.find_by_email(email)
+
+        if user and utils.check_password(user.password, password):
+            return user
+        return None
+
     @classmethod
     def get_user(cls, rec) -> 'User':
         if isinstance(rec, dict):
@@ -100,6 +136,7 @@ class User:
                 last_name=rec.get('last_name', None),
                 email=rec.get('email', None),
                 auth_method=rec.get('auth_method', None),
+                password=rec.get('password', None),
                 private=rec.get('private', None),
                 create_time=rec.get('created', None),
                 deleted=rec.get('deleted', False),
@@ -112,6 +149,7 @@ class User:
                 last_name=rec.last_name,
                 email=rec.email,
                 auth_method=rec.auth_method,
+                password=rec.password,
                 private=rec.private,
                 create_time=rec.create_time,
                 deleted=rec.deleted,

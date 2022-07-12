@@ -1,5 +1,6 @@
 from flask import jsonify, request
 
+from turplanlegger.auth.decorators import auth
 from turplanlegger.exceptions import ApiError
 from turplanlegger.models.route import Route
 
@@ -7,6 +8,7 @@ from . import api
 
 
 @api.route('/route/<route_id>', methods=['GET'])
+@auth
 def get_route(route_id):
 
     route = Route.find_route(route_id)
@@ -18,6 +20,7 @@ def get_route(route_id):
 
 
 @api.route('/route/<route_id>', methods=['DELETE'])
+@auth
 def delete_route(route_id):
 
     route = Route.find_route(route_id)
@@ -34,6 +37,7 @@ def delete_route(route_id):
 
 
 @api.route('/route', methods=['POST'])
+@auth
 def add_route():
     try:
         route = Route.parse(request.json)
@@ -49,6 +53,7 @@ def add_route():
 
 
 @api.route('/route/<route_id>/owner', methods=['PATCH'])
+@auth
 def change_route_owner(route_id):
 
     route = Route.find_route(route_id)
