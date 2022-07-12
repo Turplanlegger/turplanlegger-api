@@ -1,9 +1,8 @@
 import os
 from os.path import exists
+from typing import Any, Dict
 
 from flask import Flask
-
-from typing import Any, Dict
 
 
 class Config:
