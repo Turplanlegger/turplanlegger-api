@@ -27,14 +27,14 @@ class Database:
                 raise
                 self.logger.exception(e)
 
-        if app.config.get('CREATE_ADMIN_USER', False):
-            if not self.check_admin_user(app.config.get('ADMIN_EMAIL')):
-                self.logger.debug('Did not find admin user, creating one')
-                from turplanlegger.utils.admin_user import create_admin_user
-                create_admin_user(
-                    email=app.config.get('ADMIN_EMAIL'),
-                    password=app.config.get('ADMIN_PASSWORD')
-                )
+        if (app.config.get('CREATE_ADMIN_USER', False)
+                and not self.check_admin_user(app.config.get('ADMIN_EMAIL'))):
+            self.logger.debug('Did not find admin user, creating one')
+            from turplanlegger.utils.admin_user import create_admin_user
+            create_admin_user(
+                email=app.config.get('ADMIN_EMAIL'),
+                password=app.config.get('ADMIN_PASSWORD')
+            )
 
     def connect(self):
         retry = 0
