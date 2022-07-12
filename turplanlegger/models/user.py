@@ -63,7 +63,7 @@ class User:
         if auth_method == 'basic':
             if not password:
                 raise ValueError('Password is mandatory for auth_type basic')
-            if len(password) < 3:  # We'll have to discuss this one
+            if len(password) < 3:
                 raise ValueError('Password too short')
         try:
             password = utils.hash_password(password)
