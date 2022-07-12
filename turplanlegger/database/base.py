@@ -285,10 +285,24 @@ class Database:
 
         return self._fetchone(select, (id,))
 
+    # User
+    def get_user_by(self, type: str, value, deleted=False):
+        select = 'SELECT * FROM users WHERE'
+
+        if type == 'email':
+            select += ' email = %s'
+
+        if deleted:
+            select += ' AND deleted = TRUE'
+        else:
+            select += ' AND deleted = FALSE'
+
+        return self._fetchone(select, (value,))
+
     def create_user(self, user):
         insert = """
-            INSERT INTO users (name, last_name, email, auth_method, private)
-            VALUES (%(name)s, %(last_name)s, %(email)s, %(auth_method)s, %(private)s)
+            INSERT INTO users (name, last_name, email, auth_method, password,  private)
+            VALUES (%(name)s, %(last_name)s, %(email)s, %(auth_method)s, %(password)s, %(private)s)
             RETURNING *
         """
         return self._insert(insert, vars(user))
@@ -388,7 +402,7 @@ class Database:
         Insert, with return.
         """
         cursor = self.conn.cursor()
-        self._log(cursor, query, vars)
+        # self._log(cursor, '_insert', query, vars)
         cursor.execute(query, vars)
         self.conn.commit()
         return cursor.fetchone()
@@ -398,7 +412,7 @@ class Database:
         Return none or one row.
         """
         cursor = self.conn.cursor()
-        self._log(cursor, query, vars)
+        # self._log(cursor, '_fetchone', query, vars)
         cursor.execute(query, vars)
         return cursor.fetchone()
 
@@ -407,7 +421,7 @@ class Database:
         Return none or multiple row.
         """
         cursor = self.conn.cursor()
-        self._log(cursor, query, vars)
+        # self._log(cursor, '_fetchall', query, vars)
         cursor.execute(query, vars)
         return cursor.fetchall()
 
@@ -416,7 +430,7 @@ class Database:
         Update, with optional return.
         """
         cursor = self.conn.cursor()
-        self._log(cursor, query, vars)
+        # self._log(cursor, '-updateone', query, vars)
         cursor.execute(query, vars)
         self.conn.commit()
         return cursor.fetchone() if returning else None
@@ -426,7 +440,7 @@ class Database:
         Delete, with optional return.
         """
         cursor = self.conn.cursor()
-        self._log(cursor, query, vars)
+        # self._log(cursor, '_deleteone', query, vars)
         cursor.execute(query, vars)
         self.conn.commit()
         return cursor.fetchone() if returning else None

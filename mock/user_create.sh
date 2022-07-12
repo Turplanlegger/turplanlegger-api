@@ -5,6 +5,7 @@ curl -iXPOST http://localhost:8080/user \
         "name": "Ola",
         "last_name": "Nordmann",
         "email": "ola.nordmann@norge.no",
-        "auth_method": "basic"
+        "auth_method": "basic",
+        "password": "test"
     }
 '
