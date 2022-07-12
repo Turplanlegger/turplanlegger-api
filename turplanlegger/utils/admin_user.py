@@ -6,6 +6,7 @@ def create_admin_user(email: str, password: str) -> None:
         last_name='Nimda',
         email=email,
         auth_method='basic',
-        password=hash_password(password)
+        password=hash_password(password),
+        private=True
     )
     admin.create()
