@@ -32,6 +32,10 @@ class Config:
         # App
         self.config['SECRET_KEY'] = self.conf_ent('SECRET_KEY', os.urandom(24))
         self.config['TOKEN_EXPIRE_TIME'] = self.conf_ent('TOKEN_EXPIRE_TIME')  # Seconds
+        self.config['CREATE_ADMIN_USER'] = self.conf_ent('CREATE_ADMIN_USER', False)
+        if self.config['CREATE_ADMIN_USER']:
+            self.config['ADMIN_EMAIL'] = self.conf_ent('ADMIN_EMAIL', 'test@test.com')
+            self.config['ADMIN_PASSWORD'] = self.conf_ent('ADMIN_PASSWORD', 'admin')
 
         # Database
         self.config['DATABASE_URI'] = self.conf_ent('DATABASE_URI')
@@ -49,7 +53,7 @@ class Config:
     def conf_ent(self, key, default=None):
         rv = self.config.get(key, default)
 
-        if not rv and not default:
+        if rv is None:
             raise RuntimeError(
                 f'Config entry {key} is required, please set it')
 
