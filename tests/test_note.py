@@ -10,7 +10,8 @@ class NotesTestCase(unittest.TestCase):
 
     def setUp(self):
         config = {
-            'TESTING': True
+            'TESTING': True,
+            'SECRET_KEY': 'test',
         }
 
         self.app = create_app(config)

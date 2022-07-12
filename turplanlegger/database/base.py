@@ -27,6 +27,15 @@ class Database:
                 raise
                 self.logger.exception(e)
 
+        if (app.config.get('CREATE_ADMIN_USER', False)
+                and not self.check_admin_user(app.config.get('ADMIN_EMAIL'))):
+            self.logger.debug('Did not find admin user, creating one')
+            from turplanlegger.utils.admin_user import create_admin_user
+            create_admin_user(
+                email=app.config.get('ADMIN_EMAIL'),
+                password=app.config.get('ADMIN_PASSWORD')
+            )
+
     def connect(self):
         retry = 0
         while True:
@@ -65,7 +74,8 @@ class Database:
             'trips',
             'item_lists',
             'lists_items',
-            'users', 'routes',
+            'users',
+            'routes',
             'notes',
             'trips_notes_references',
             'trips_routes_references',
@@ -285,7 +295,6 @@ class Database:
 
         return self._fetchone(select, (id,))
 
-    # User
     def get_user_by(self, type: str, value, deleted=False):
         select = 'SELECT * FROM users WHERE'
 
@@ -332,6 +341,10 @@ class Database:
                 WHERE id = %(id)s
         """
         return self._updateone(update, {'id': id, 'private': private})
+
+    def check_admin_user(self, email):
+        select = 'SELECT id FROM users WHERE email=%s'
+        return self._fetchone(select, (email,))
 
     # Trip
     def create_trip(self, trip):
