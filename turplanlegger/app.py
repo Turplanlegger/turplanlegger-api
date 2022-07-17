@@ -1,6 +1,7 @@
 from typing import Any, Dict
 
 from flask import Flask
+from flask_cors import CORS
 
 from turplanlegger.database.base import Database
 from turplanlegger.exceptions import ExceptionHandlers
@@ -17,6 +18,8 @@ def create_app(config_override: Dict[str, Any] = None,
                environment: str = None) -> Flask:
 
     app = Flask(__name__)
+    CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
+
     app.config['ENVIRONMENT'] = environment
     config.init_app(app, config_override)
 
