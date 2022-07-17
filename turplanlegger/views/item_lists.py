@@ -1,7 +1,7 @@
 from flask import jsonify, request
 
 from turplanlegger.auth.decorators import auth
-from turplanlegger.exceptions import ApiError
+from turplanlegger.exceptions import ApiProblem, ApiError
 from turplanlegger.models.item_lists import ItemList
 from turplanlegger.models.list_items import ListItem
 
@@ -43,7 +43,7 @@ def add_item_list():
     try:
         item_list = ItemList.parse(request.json)
     except (ValueError, TypeError) as e:
-        raise ApiError(str(e), 400)
+        raise ApiProblem(title='Failed to parse item list', detail=str(e), status=400)
 
     try:
         item_list = item_list.create()
