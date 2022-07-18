@@ -12,6 +12,7 @@ handlers = ExceptionHandlers()
 config = Config()
 logger = Logger()
 db = Database()
+cors = CORS()
 
 
 def create_app(config_override: Dict[str, Any] = None,
@@ -21,8 +22,7 @@ def create_app(config_override: Dict[str, Any] = None,
 
     app.config['ENVIRONMENT'] = environment
     config.init_app(app, config_override)
-
-    CORS(app, resources={r'/*': {'origins': app.config.get('ALLOWED_ORIGINS')}})
+    cors.init_app(app)
 
     logger.setup_logging(app)
 
