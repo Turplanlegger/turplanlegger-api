@@ -13,4 +13,4 @@ LOG_TO_FILE = False
 CREATE_ADMIN_USER = False
 
 # CORS
-ALLOWED_ORIGINS = [ "http://localhost:3000" ]
+ALLOWED_ORIGINS = ['http://localhost:3000']
