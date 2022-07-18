@@ -19,16 +19,16 @@ def create_app(config_override: Dict[str, Any] = None,
                environment: str = None) -> Flask:
 
     app = Flask(__name__)
-
     app.config['ENVIRONMENT'] = environment
     config.init_app(app, config_override)
-    cors.init_app(app)
 
     logger.setup_logging(app)
 
     handlers.register(app)
 
     db.init_db(app)
+
+    cors.init_app(app)
 
     from turplanlegger.views import api
     app.register_blueprint(api)
