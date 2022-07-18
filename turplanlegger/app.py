@@ -18,10 +18,11 @@ def create_app(config_override: Dict[str, Any] = None,
                environment: str = None) -> Flask:
 
     app = Flask(__name__)
-    CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 
     app.config['ENVIRONMENT'] = environment
     config.init_app(app, config_override)
+
+    CORS(app, resources={r"/*": {"origins": app.config.get('ALLOWED_ORIGINS')}})
 
     logger.setup_logging(app)
 
