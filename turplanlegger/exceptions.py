@@ -7,8 +7,8 @@ from werkzeug.routing import RoutingException
 
 
 class ApiProblem(Exception):
-    def __init__(self, type: Optional[str] = None, title: Optional[str] = None, status: Optional[int] = None,
-                 detail: Optional[str] = None, instance: Optional[str] = None, **kwargs) -> None:
+    def __init__(self, title: Optional[str] = None, detail: Optional[str] = None, status: Optional[int] = None,
+                 type: Optional[str] = None, instance: Optional[str] = None, **kwargs) -> None:
 
         self.type: str = type or 'about:blank'
         self.status: int = status or 500

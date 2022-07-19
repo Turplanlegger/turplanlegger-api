@@ -28,7 +28,7 @@ def index():
                                if m not in ['HEAD', 'OPTIONS']])})
 
     return jsonify(status='ok', uri=absolute_url(),
-                   data={'description': 'Marval API'},
+                   data={'description': 'Turplanlegger API'},
                    links=sorted(links, key=lambda
                    k: k['href']))
 
