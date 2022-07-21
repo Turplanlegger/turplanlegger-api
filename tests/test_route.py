@@ -12,6 +12,7 @@ class RoutesTestCase(unittest.TestCase):
         config = {
             'TESTING': True,
             'SECRET_KEY': 'test',
+            'LOG_LEVEL': 'INFO'
         }
 
         self.app = create_app(config)
@@ -75,20 +76,29 @@ class RoutesTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['owner'], 1)
+        self.assertEqual(data['owner'], 2)
 
     def test_add_route_no_owner(self):
         response = self.client.post('/route', data=json.dumps(self.route_no_owner), headers=self.headers_json)
         self.assertEqual(response.status_code, 400)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['message'], 'Missing mandatory field "owner"')
+        self.assertEqual(data['title'], 'Failed to parse route')
+        self.assertEqual(data['detail'], 'Missing mandatory field \'owner\'')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], 'http://localhost/route')
+
 
     def test_add_route_no_geometry(self):
         response = self.client.post('/route', data=json.dumps(self.route_no_geometry), headers=self.headers_json)
         self.assertEqual(response.status_code, 400)
+
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['message'], 'Missing mandatory field "route"')
+        self.assertEqual(data['title'], 'Failed to parse route')
+        self.assertEqual(data['detail'], 'Missing mandatory field \'route\'')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], 'http://localhost/route')
+
 
     def test_get_route(self):
         response = self.client.post('/route', data=json.dumps(self.route), headers=self.headers_json)
@@ -109,7 +119,10 @@ class RoutesTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['message'], 'route not found')
+        self.assertEqual(data['title'], 'Route not found')
+        self.assertEqual(data['detail'], 'The requested route was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], 'http://localhost/route/2')
 
     def test_delete_route(self):
         response = self.client.post('/route', data=json.dumps(self.route), headers=self.headers_json)
@@ -128,7 +141,10 @@ class RoutesTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['message'], 'route not found')
+        self.assertEqual(data['title'], 'Route not found')
+        self.assertEqual(data['detail'], 'The requested route was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], 'http://localhost/route/2')
 
     def test_change_route_owner(self):
         response = self.client.post('/route', data=json.dumps(self.route), headers=self.headers_json)
@@ -159,8 +175,12 @@ class RoutesTestCase(unittest.TestCase):
             headers=self.headers_json
         )
         self.assertEqual(response.status_code, 404)
+
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['message'], 'route not found')
+        self.assertEqual(data['title'], 'Route not found')
+        self.assertEqual(data['detail'], 'The requested route was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], 'http://localhost/route/2/owner')
 
     def test_change_route_owner_no_owner_given(self):
         response = self.client.post('/route', data=json.dumps(self.route), headers=self.headers_json)
@@ -169,5 +189,9 @@ class RoutesTestCase(unittest.TestCase):
 
         response = self.client.patch('/route/1/owner', data=json.dumps({}), headers=self.headers_json)
         self.assertEqual(response.status_code, 400)
+
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['message'], 'must supply owner as int')
+        self.assertEqual(data['title'], 'Owner is not int')
+        self.assertEqual(data['detail'], 'Owner must be passed as an int')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], 'http://localhost/route/1/owner')
