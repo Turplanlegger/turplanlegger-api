@@ -12,6 +12,7 @@ class NotesTestCase(unittest.TestCase):
         config = {
             'TESTING': True,
             'SECRET_KEY': 'test',
+            'LOG_LEVEL': 'INFO'
         }
 
         self.app = create_app(config)
@@ -87,7 +88,10 @@ class NotesTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['message'], 'Missing mandatory field \'owner\'')
+        self.assertEqual(data['title'], 'Failed to parse note')
+        self.assertEqual(data['detail'], 'Missing mandatory field \'owner\'')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], 'http://localhost/note')
 
     def test_get_note(self):
         response = self.client.post('/note', data=json.dumps(self.note_full), headers=self.headers_json)
@@ -105,25 +109,33 @@ class NotesTestCase(unittest.TestCase):
     def test_get_note_not_found(self):
         response = self.client.post('/note', data=json.dumps(self.note_full), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
+
         response = self.client.get('/note/2', headers=self.headers)
         self.assertEqual(response.status_code, 404)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['message'], 'note not found')
+        self.assertEqual(data['title'], 'Note not found')
+        self.assertEqual(data['detail'], 'The requested note was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], 'http://localhost/note/2')
 
     def test_delete_note(self):
         response = self.client.post('/note', data=json.dumps(self.note_full), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
+        id = data['id']
 
-        response = self.client.delete(f'/note/{data["id"]}', headers=self.headers)
+        response = self.client.delete(f'/note/{id}', headers=self.headers)
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get(f'/note/{data["id"]}', headers=self.headers)
+        response = self.client.get(f'/note/{id}', headers=self.headers)
         self.assertEqual(response.status_code, 404)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['message'], 'note not found')
+        self.assertEqual(data['title'], 'Note not found')
+        self.assertEqual(data['detail'], 'The requested note was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/note/{id}')
 
     def test_delete_note_not_found(self):
         response = self.client.post('/note', data=json.dumps(self.note_full), headers=self.headers_json)
@@ -133,7 +145,10 @@ class NotesTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['message'], 'note not found')
+        self.assertEqual(data['title'], 'Note not found')
+        self.assertEqual(data['detail'], 'The requested note was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], 'http://localhost/note/2')
 
     def test_change_note_owner(self):
         response = self.client.post('/note', data=json.dumps(self.note_full), headers=self.headers_json)
@@ -156,8 +171,12 @@ class NotesTestCase(unittest.TestCase):
 
         response = self.client.patch('/note/2/owner', data=json.dumps({'owner': 2}), headers=self.headers_json)
         self.assertEqual(response.status_code, 404)
+
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['message'], 'note not found')
+        self.assertEqual(data['title'], 'Note not found')
+        self.assertEqual(data['detail'], 'The requested note was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], 'http://localhost/note/2/owner')
 
     def test_change_note_owner_no_owner_given(self):
         response = self.client.post('/note', data=json.dumps(self.note_full), headers=self.headers_json)
@@ -166,8 +185,12 @@ class NotesTestCase(unittest.TestCase):
 
         response = self.client.patch('/note/1/owner', data=json.dumps({}), headers=self.headers_json)
         self.assertEqual(response.status_code, 400)
+
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['message'], 'must supply owner as int')
+        self.assertEqual(data['title'], 'Owner is not int')
+        self.assertEqual(data['detail'], 'Owner must be passed as an int')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], 'http://localhost/note/1/owner')
 
     def test_rename_note(self):
         response = self.client.post('/note', data=json.dumps(self.note_full), headers=self.headers_json)

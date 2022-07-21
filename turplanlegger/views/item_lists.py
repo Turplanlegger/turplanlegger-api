@@ -116,7 +116,7 @@ def rename_item_list(item_list_id):
     if item_list.rename():
         return jsonify(status='ok')
     else:
-        raise ApiProblem('Failed to rename item list', 'Unknown error', 404)
+        raise ApiProblem('Failed to rename item list', 'Unknown error', 500)
 
 
 @api.route('/item_list/<item_list_id>/toggle_check', methods=['PATCH'])
