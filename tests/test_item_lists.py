@@ -134,7 +134,7 @@ class ItemListsTestCase(unittest.TestCase):
         self.assertIsInstance(data['item_list']['items'], list)
         self.assertEqual(len(data['item_list']['items']), 0)
         self.assertEqual(data['item_list']['name'], 'Empty test list')
-        self.assertEqual(data['item_list']['owner'], 1)
+        self.assertEqual(data['item_list']['owner'], self.user1.id)
         self.assertEqual(data['item_list']['type'], 'check')
         self.assertIsInstance(data['item_list']['items_checked'], list)
         self.assertEqual(len(data['item_list']['items_checked']), 0)
@@ -186,6 +186,11 @@ class ItemListsTestCase(unittest.TestCase):
             headers=self.headers
         )
         self.assertEqual(response.status_code, 404)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Item list not found')
+        self.assertEqual(data['detail'], 'The requested item list was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], 'http://localhost/item_list/2')
 
     def test_delete_list(self):
         response = self.client.post('/item_list', data=json.dumps(self.item_list), headers=self.headers_json)

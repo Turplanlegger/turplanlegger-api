@@ -10,11 +10,11 @@ class ApiProblem(Exception):
     def __init__(self, title: Optional[str] = None, detail: Optional[str] = None, status: Optional[int] = None,
                  type: Optional[str] = None, instance: Optional[str] = None, **kwargs) -> None:
 
-        self.type: str = type or 'about:blank'
-        self.status: int = status or 500
         self.title: str = title
-        self.instance: str = instance or request.url
         self.detail: Optional[str] = detail
+        self.status: int = status or 500
+        self.type: str = type or 'about:blank'
+        self.instance: str = instance or request.url
         self.kwargs: Dict = kwargs
 
 
