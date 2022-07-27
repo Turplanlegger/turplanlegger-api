@@ -90,7 +90,7 @@ class TripsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['owner'], 1)
+        self.assertEqual(data['owner'], self.user1.id)
 
     def test_create_trip_add_note(self):
         response = self.client.post('/trip', data=json.dumps(self.trip), headers=self.headers_json)
@@ -172,10 +172,10 @@ class TripsTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         response = self.client.patch(f'/trip/{data["id"]}/owner',
-                                     data=json.dumps({'owner': 2}), headers=self.headers_json)
+                                     data=json.dumps({'owner': self.user2.id}), headers=self.headers_json)
         self.assertEqual(response.status_code, 200)
 
         response = self.client.get(f'/trip/{data["id"]}', headers=self.headers)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['trip']['owner'], 2)
+        self.assertEqual(data['trip']['owner'], self.user2.id)
