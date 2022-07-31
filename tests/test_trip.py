@@ -12,6 +12,7 @@ class TripsTestCase(unittest.TestCase):
         config = {
             'TESTING': True,
             'SECRET_KEY': 'test',
+            'CREATE_ADMIN_USER': True
         }
 
         self.app = create_app(config)

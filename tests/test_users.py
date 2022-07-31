@@ -12,7 +12,8 @@ class UsersTestCase(unittest.TestCase):
         config = {
             'TESTING': True,
             'SECRET_KEY': 'test',
-            'LOG_LEVEL': 'INFO'
+            'LOG_LEVEL': 'INFO',
+            'CREATE_ADMIN_USER': True
         }
 
         self.app = create_app(config)
