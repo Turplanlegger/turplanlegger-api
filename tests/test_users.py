@@ -12,6 +12,7 @@ class UsersTestCase(unittest.TestCase):
         config = {
             'TESTING': True,
             'SECRET_KEY': 'test',
+            'LOG_LEVEL': 'INFO'
         }
 
         self.app = create_app(config)
@@ -139,8 +140,14 @@ class UsersTestCase(unittest.TestCase):
         db.destroy()
 
     def test_user_not_found(self):
-        response = self.client.get('/user/2', headers=self.headers)
+        response = self.client.get('/user/3', headers=self.headers)
         self.assertEqual(response.status_code, 404)
+
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'User not found')
+        self.assertEqual(data['detail'], 'The requested user was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], 'http://localhost/user/3')
 
     def test_create_user(self):
         response = self.client.post('/user', data=json.dumps(self.user1), headers=self.headers_json)
@@ -148,7 +155,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 2)
+        self.assertEqual(data['id'], 3)
         self.assertEqual(data['user']['name'], self.user1['name'])
         self.assertEqual(data['user']['last_name'], self.user1['last_name'])
         self.assertEqual(data['user']['email'], self.user1['email'])
@@ -161,7 +168,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 2)
+        self.assertEqual(data['id'], 3)
         self.assertEqual(data['user']['name'], self.user11['name'])
         self.assertEqual(data['user']['last_name'], self.user11['last_name'])
         self.assertEqual(data['user']['email'], self.user11['email'])
@@ -184,13 +191,19 @@ class UsersTestCase(unittest.TestCase):
         response = self.client.post('/user', data=json.dumps(self.user1), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
+        id = data["id"]
 
-        response = self.client.delete(f'/user/{data["id"]}', headers=self.headers)
+        response = self.client.delete(f'/user/{id}', headers=self.headers)
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get(f'/user/{data["id"]}', headers=self.headers)
-        data = json.loads(response.data.decode('utf-8'))
+        response = self.client.get(f'/user/{id}', headers=self.headers)
         self.assertEqual(response.status_code, 404)
+
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'User not found')
+        self.assertEqual(data['detail'], 'The requested user was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/user/{id}')
 
         response = self.client.post(
             '/login',
@@ -203,9 +216,21 @@ class UsersTestCase(unittest.TestCase):
         response = self.client.post('/user', data=json.dumps(self.user2), headers=self.headers_json)
         self.assertEqual(response.status_code, 400)
 
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Failed to parse user')
+        self.assertEqual(data['detail'], 'Missing mandatory field \'last_name\'')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], 'http://localhost/user')
+
     def test_create_user_invalid_email(self):
         response = self.client.post('/user', data=json.dumps(self.user3), headers=self.headers_json)
         self.assertEqual(response.status_code, 400)
+
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Failed to parse user')
+        self.assertEqual(data['detail'], 'Invalid email address')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], 'http://localhost/user')
 
     def test_rename_user(self):
         response = self.client.post('/user', data=json.dumps(self.user1), headers=self.headers_json)
@@ -249,13 +274,19 @@ class UsersTestCase(unittest.TestCase):
         response = self.client.post('/user', data=json.dumps(self.user4), headers=self.headers_json)
         self.assertEqual(response.status_code, 400)
 
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Failed to parse user')
+        self.assertEqual(data['detail'], 'Password too short')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], 'http://localhost/user')
+
     def test_create_special_char(self):
         response = self.client.post('/user', data=json.dumps(self.user5), headers=self.headers_json)
 
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 2)
+        self.assertEqual(data['id'], 3)
         self.assertEqual(data['user']['name'], self.user5['name'])
         self.assertEqual(data['user']['last_name'], self.user5['last_name'])
         self.assertEqual(data['user']['email'], self.user5['email'])
@@ -280,7 +311,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 2)
+        self.assertEqual(data['id'], 3)
         self.assertEqual(data['user']['name'], self.user9['name'])
         self.assertEqual(data['user']['last_name'], self.user9['last_name'])
         self.assertEqual(data['user']['email'], self.user9['email'])
@@ -293,7 +324,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 2)
+        self.assertEqual(data['id'], 3)
         self.assertEqual(data['user']['name'], self.user6['name'])
         self.assertEqual(data['user']['last_name'], self.user6['last_name'])
         self.assertEqual(data['user']['email'], self.user6['email'])
@@ -318,7 +349,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 2)
+        self.assertEqual(data['id'], 3)
         self.assertEqual(data['user']['name'], self.user7['name'])
         self.assertEqual(data['user']['last_name'], self.user7['last_name'])
         self.assertEqual(data['user']['email'], self.user7['email'])
@@ -343,7 +374,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 2)
+        self.assertEqual(data['id'], 3)
         self.assertEqual(data['user']['name'], self.user8['name'])
         self.assertEqual(data['user']['last_name'], self.user8['last_name'])
         self.assertEqual(data['user']['email'], self.user8['email'])
@@ -368,7 +399,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 2)
+        self.assertEqual(data['id'], 3)
         self.assertEqual(data['user']['name'], self.user9['name'])
         self.assertEqual(data['user']['last_name'], self.user9['last_name'])
         self.assertEqual(data['user']['email'], self.user9['email'])
@@ -393,7 +424,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 2)
+        self.assertEqual(data['id'], 3)
         self.assertEqual(data['user']['name'], self.user10['name'])
         self.assertEqual(data['user']['last_name'], self.user10['last_name'])
         self.assertEqual(data['user']['email'], self.user10['email'])

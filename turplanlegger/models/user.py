@@ -53,7 +53,7 @@ class User:
         email = json.get('email', None)
         p = re.compile('^[\\w.-]+@[\\w.-]+\\.\\w+$')
         if not p.match(email):
-            raise ValueError('invalid email address')
+            raise ValueError('Invalid email address')
 
         if User.find_by_email(email):
             raise ValueError('User allready existst')
