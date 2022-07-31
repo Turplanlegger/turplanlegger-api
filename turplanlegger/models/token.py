@@ -1,6 +1,7 @@
+import json
 import datetime
 from typing import Any, Dict
-
+from urllib.request import urlopen
 import jwt
 from flask import current_app
 from jwt import DecodeError, ExpiredSignatureError, InvalidAudienceError
@@ -24,27 +25,41 @@ class JWT:
         self.type = typ
 
     @classmethod
-    def parse(cls, token: str, algorithm: str = 'HS256') -> 'JWT':
-        try:
-            json = jwt.decode(
-                token,
-                key=current_app.config['SECRET_KEY'],
-                options={'verify_signature': True},
-                algorithms=[algorithm],
-                audience='/'
-            )
-        except (DecodeError, ExpiredSignatureError, InvalidAudienceError):
-            raise
+    def parse(cls, token: str, algorithm: str = 'RS256') -> 'JWT':
+        jsonurl = urlopen("https://turplanlegger.b2clogin.com/turplanlegger.onmicrosoft.com/discovery/v2.0/keys?p=b2c_1_signin")
+        jwks = json.loads(jsonurl.read())
+        unverified_header = jwt.get_unverified_header(token)
+        rsa_key = {}
+        for key in jwks["keys"]:
+            if key["kid"] == unverified_header["kid"]:
+                rsa_key = {
+                    "kty": key["kty"],
+                    "kid": key["kid"],
+                    "use": key["use"],
+                    "n": key["n"],
+                    "e": key["e"]
+                }
+
+        if rsa_key:
+            try:
+                jsonRes = jwt.decode(
+                    token,
+                    jwt.algorithms.RSAAlgorithm.from_jwk(rsa_key),
+                    algorithms=[algorithm],
+                    audience="0149fc65-259e-4895-9034-e144c242f733"
+                )
+            except (DecodeError, ExpiredSignatureError, InvalidAudienceError):
+                raise
 
         return JWT(
-            iss=json.get('iss', None),
-            sub=json.get('sub', None),
-            aud=json.get('aud', None),
-            exp=json.get('exp', None),
-            nbf=json.get('nbf', None),
-            iat=json.get('iat', None),
-            jti=json.get('jti', None),
-            typ=json.get('typ', None)
+            iss=jsonRes.get('iss', None),
+            sub=jsonRes.get('sub', None),
+            aud=jsonRes.get('aud', None),
+            exp=jsonRes.get('exp', None),
+            nbf=jsonRes.get('nbf', None),
+            iat=jsonRes.get('iat', None),
+            jti=jsonRes.get('jti', None),
+            typ=jsonRes.get('typ', None)
         )
 
     @property
