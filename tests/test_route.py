@@ -88,7 +88,6 @@ class RoutesTestCase(unittest.TestCase):
         self.assertEqual(data['type'], 'about:blank')
         self.assertEqual(data['instance'], 'http://localhost/route')
 
-
     def test_add_route_no_geometry(self):
         response = self.client.post('/route', data=json.dumps(self.route_no_geometry), headers=self.headers_json)
         self.assertEqual(response.status_code, 400)
@@ -98,7 +97,6 @@ class RoutesTestCase(unittest.TestCase):
         self.assertEqual(data['detail'], 'Missing mandatory field \'route\'')
         self.assertEqual(data['type'], 'about:blank')
         self.assertEqual(data['instance'], 'http://localhost/route')
-
 
     def test_get_route(self):
         response = self.client.post('/route', data=json.dumps(self.route), headers=self.headers_json)

@@ -1,11 +1,10 @@
-
 from flask import jsonify, request
 
 from turplanlegger.exceptions import ApiProblem
 from turplanlegger.models.item_lists import ItemList
 from turplanlegger.models.note import Note
-from turplanlegger.models.trip import Trip
 from turplanlegger.models.route import Route
+from turplanlegger.models.trip import Trip
 
 from . import api
 

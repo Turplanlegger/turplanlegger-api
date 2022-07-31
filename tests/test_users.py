@@ -191,7 +191,7 @@ class UsersTestCase(unittest.TestCase):
         response = self.client.post('/user', data=json.dumps(self.user1), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
-        id = data["id"]
+        id = data['id']
 
         response = self.client.delete(f'/user/{id}', headers=self.headers)
         self.assertEqual(response.status_code, 200)

@@ -1,7 +1,7 @@
 import traceback
 from typing import Any, Dict, Optional, Tuple, Union
 
-from flask import Response, request, current_app, jsonify
+from flask import Response, current_app, jsonify, request
 from werkzeug.exceptions import HTTPException
 from werkzeug.routing import RoutingException
 
