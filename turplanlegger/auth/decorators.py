@@ -34,6 +34,11 @@ def auth(func):
             raise AuthError('Token has expired', 401)
         except InvalidAudienceError:
             raise AuthError('Token has invalid audience', 401)
+        except ValueError:
+            raise AuthError('Token is invalid', 401)
+        except Exception as e:
+            current_app.logger.exception(f'Auth failed:\n{str(e)}')
+            raise AuthError('Auth failed', 401)
 
         user = User.find_user(jwt.subject)
 

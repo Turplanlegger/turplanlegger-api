@@ -32,7 +32,7 @@ def login():
     token = JWT(
         iss=request.url_root,
         sub=user.id,
-        aud='/',
+        aud=current_app.config['AUDIENCE'],
         exp=(now + timedelta(seconds=current_app.config['TOKEN_EXPIRE_TIME'])),
         nbf=now,
         iat=now,
