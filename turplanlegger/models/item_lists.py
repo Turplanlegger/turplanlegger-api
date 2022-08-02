@@ -7,7 +7,7 @@ from turplanlegger.models.list_items import ListItem
 JSON = Dict[str, any]
 
 
-class ItemList:  # This class has to be renamed
+class ItemList:
 
     def __init__(self, owner: int, type: str, **kwargs) -> None:
         if not owner:
