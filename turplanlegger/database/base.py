@@ -86,6 +86,11 @@ class Database:
         conn.commit()
         conn.close()
 
+    def truncate_table(self, table: str):
+        cursor = self.conn.cursor()
+        cursor.execute(f'TRUNCATE TABLE {table} RESTART IDENTITY  CASCADE')
+        self.conn.commit()
+
     # Item List
     def get_item_list(self, id, deleted=False):
         select = """
