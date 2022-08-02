@@ -58,6 +58,6 @@ jobs:
       run: |
         pytest tests/test_*.py --csv tests/test_result_tmp.csv --csv-columns utc_timestamp,id,module,name,file,status,message,duration
         sed 1d tests/test_result_tmp.csv >> tests/test_result.csv
-        git add test/test_result.csv
+        git add tests/test_result.csv
         git commit -m "Added test result"
         git push
