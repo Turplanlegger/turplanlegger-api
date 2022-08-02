@@ -13,7 +13,7 @@ class NotesTestCase(unittest.TestCase):
         config = {
             'TESTING': True,
             'SECRET_KEY': 'test',
-            'LOG_LEVEL': 'DEBUG',
+            'LOG_LEVEL': 'INFO',
             'CREATE_ADMIN_USER': True
         }
 
