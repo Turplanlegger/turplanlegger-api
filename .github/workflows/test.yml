@@ -6,8 +6,12 @@ name: Code standards and unittests
 on:
   push:
     branches: [ main , release/* ]
+    paths-ignore:
+      - 'tests/test_result.csv'
   pull_request:
     branches: [ main, develop ]
+    paths-ignore:
+      - 'tests/test_result.csv'
 
 permissions:
   contents: read
@@ -58,18 +62,8 @@ jobs:
       run: |
         pytest tests/test_*.py --csv tests/test_result_tmp.csv --csv-columns utc_timestamp,id,module,name,file,status,message,duration
         sed 1d tests/test_result_tmp.csv >> tests/test_result.csv
-        echo ${{ github.ref_type }}
-        echo ${{ github.ref_name }}
-        echo ${{ github.ref }}
-        echo ${{ github.head_ref }}
-        echo ${{ github.event }}
-        echo ${{ github.event_path }}
-        echo ${{ github.event_name }}
-        echo ${{ github.base_ref }}
-        echo ${{ github.action_ref }}
-        echo ${{ github }}
         git fetch
-        git switch -m ${{ github.action_ref }}
+        git switch -m ${{ github.head_ref }}
         git add tests/test_result.csv
         git commit -m "Added test result"
         git push
