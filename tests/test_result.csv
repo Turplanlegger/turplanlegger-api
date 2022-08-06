@@ -1,5 +1,5 @@
 utc_timestamp,id,module,name,file,status,message,duration
-2022-07-31T15:39:24.428911,tests/test_admin.py::UsersTestCase::test_get_admin_user,tests.test_admin,test_get_admin_user,tests/test_admin.py,passed,,0.5161821749989031
+2022-07-31T15:39:24.428912,tests/test_admin.py::UsersTestCase::test_get_admin_user,tests.test_admin,test_get_admin_user,tests/test_admin.py,passed,,0.5161821749989031
 2022-07-31T15:39:24.428911,tests/test_item_lists.py::ItemListsTestCase::test_add_to_list,tests.test_item_lists,test_add_to_list,tests/test_item_lists.py,passed,,0.9452656400007982
 2022-07-31T15:39:24.428911,tests/test_item_lists.py::ItemListsTestCase::test_change_list_owner,tests.test_item_lists,test_change_list_owner,tests/test_item_lists.py,passed,,0.9294290210000327
 2022-07-31T15:39:24.428911,tests/test_item_lists.py::ItemListsTestCase::test_create_empty_list,tests.test_item_lists,test_create_empty_list,tests/test_item_lists.py,passed,,1.0102708200010966
