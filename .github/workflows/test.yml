@@ -7,14 +7,14 @@ on:
   push:
     paths-ignore:
       - 'tests/*.csv'
-    branches: 
+    branches:
       - main
       - release/*
 
   pull_request:
     paths-ignore:
       - 'tests/*.csv'
-    branches: 
+    branches:
       - main
       - develop
 
