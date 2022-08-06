@@ -7,11 +7,11 @@ on:
   push:
     branches: [ main , release/* ]
     paths-ignore:
-      - 'tests/test_result.csv'
+      - 'tests/*.csv'
   pull_request:
     branches: [ main, develop ]
     paths-ignore:
-      - 'tests/test_result.csv'
+      - 'tests/*.csv'
 
 permissions:
   contents: read
