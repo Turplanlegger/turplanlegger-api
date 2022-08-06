@@ -103,3 +103,4 @@ utc_timestamp,id,module,name,file,status,message,duration
 2022-08-02T18:12:42.101050,tests/test_users.py::UsersTestCase::test_delete_user,tests.test_users,test_delete_user,tests/test_users.py,passed,,0.5913815859998977
 2022-08-02T18:12:42.101050,tests/test_users.py::UsersTestCase::test_rename_user,tests.test_users,test_rename_user,tests/test_users.py,passed,,0.5667317969996475
 2022-08-02T18:12:42.101050,tests/test_users.py::UsersTestCase::test_user_not_found,tests.test_users,test_user_not_found,tests/test_users.py,passed,,0.32572625600005267
+
