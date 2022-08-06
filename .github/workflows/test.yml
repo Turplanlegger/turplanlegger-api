@@ -5,13 +5,18 @@ name: Code standards and unittests
 
 on:
   push:
-    branches: [ main , release/* ]
     paths-ignore:
       - 'tests/*.csv'
+    branches: 
+      - main
+      - release/*
+
   pull_request:
-    branches: [ main, develop ]
     paths-ignore:
       - 'tests/*.csv'
+    branches: 
+      - main
+      - develop
 
 permissions:
   contents: read
