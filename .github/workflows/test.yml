@@ -58,17 +58,13 @@ jobs:
       id: hooks
       run: |
         pre-commit run -a --show-diff-on-failure
-    - name: setup git config
-      run: |
-        git config user.name "GitHub Actions Bot"
-        git config user.email "<>"
     - name: Test with pytest
+      id: test
       with:
         name: 'GitHub Actions Bot'
         email: '<>'
         actor: 'sixcare'
         token: ${{ secrets.GITHUB_TOKEN }}
-      id: test
       run: |
         pytest tests/test_*.py --csv tests/test_result_tmp.csv --csv-columns utc_timestamp,id,module,name,file,status,message,duration
         sed 1d tests/test_result_tmp.csv >> tests/test_result.csv
