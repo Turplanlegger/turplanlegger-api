@@ -40,7 +40,7 @@ class JWT:
                     "e": key["e"]
                 })
                 break
-
+        
         key = rsa_key if rsa_key else current_app.config['SECRET_KEY'] if unverified_header["kid"] == current_app.config['SECRET_KEY_ID'] else ''
 
         try:
@@ -78,9 +78,9 @@ class JWT:
         }
 
     def tokenize(self, algorithm: str = 'HS256') -> str:
-        return jwt.encode(self.serialize, key=current_app.config['SECRET_KEY'], algorithm=algorithm, headers={"kid": current_app.config['SECRET_KEY_ID']})
+        return jwt.encode(self.serialize, key=self.key, algorithm=algorithm, headers={"kid": self.kid})
 
     def __repr__(self) -> str:
         return (f'Jwt(iss={self.issuer}, sub={self.subject}, aud={self.audience}, '
-                f'exp={self.expiration}, nb={self.not_before}, iat={self.issued_at})'
+                f'exp={self.expiration}, nbf={self.not_before}, iat={self.issued_at})'
                 f'jti={self.jwt_id}, typ={self.type}')

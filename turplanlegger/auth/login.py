@@ -37,6 +37,6 @@ def login():
         nbf=now,
         iat=now,
         jti=str(uuid4()),
-        typ='JWT',
+        typ='JWT'
     )
     return jsonify(token=token.tokenize())

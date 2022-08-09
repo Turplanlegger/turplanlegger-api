@@ -42,11 +42,12 @@ def auth(func):
 
         user = User.find_user(jwt.subject)
 
-        if user.deleted:
-            raise AuthError('Inactive user', 401)
+        if user is not None:
+            if user.deleted:
+                raise AuthError('Inactive user', 401)
 
-        current_app.logger.debug(f'user {user.id} logged in')
-        g.user = user
+            current_app.logger.debug(f'user {user.id} logged in')
+            g.user = user
 
         return func(*args, **kwargs)
     return wrapped

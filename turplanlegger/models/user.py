@@ -108,7 +108,7 @@ class User:
         return db.toggle_private_user(self.id, False if self.private else True)
 
     @staticmethod
-    def find_user(id: int) -> 'User':
+    def find_user(id: str) -> 'User':
         return User.get_user(db.get_user(id))
 
     @staticmethod
