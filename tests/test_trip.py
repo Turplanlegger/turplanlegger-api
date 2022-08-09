@@ -1,5 +1,6 @@
 import json
 import unittest
+from uuid import uuid4
 
 from turplanlegger.app import create_app, db
 from turplanlegger.auth.utils import hash_password
@@ -13,6 +14,7 @@ class TripsTestCase(unittest.TestCase):
         config = {
             'TESTING': True,
             'SECRET_KEY': 'test',
+            'SECRET_KEY_ID': 'test',
             'LOG_LEVEL': 'INFO',
             'CREATE_ADMIN_USER': True
         }
@@ -22,6 +24,7 @@ class TripsTestCase(unittest.TestCase):
 
         cls.user1 = User.create(
             User(
+                id=str(uuid4()),
                 name='Ola',
                 last_name='Nordamnn',
                 email='old.nordmann@norge.no',
@@ -31,6 +34,7 @@ class TripsTestCase(unittest.TestCase):
         )
         cls.user2 = User.create(
             User(
+                id=str(uuid4()),
                 name='Kari',
                 last_name='Nordamnn',
                 email='kari.nordmann@norge.no',
@@ -45,7 +49,7 @@ class TripsTestCase(unittest.TestCase):
             'owner': cls.user1.id,
         }
         cls.note = {
-            'owner': 1,
+            'owner': cls.user1.id,
             'content': 'Are er kul',
             'name': 'Best note ever'
         }

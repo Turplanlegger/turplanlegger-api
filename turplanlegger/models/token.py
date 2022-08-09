@@ -78,7 +78,7 @@ class JWT:
         }
 
     def tokenize(self, algorithm: str = 'HS256') -> str:
-        return jwt.encode(self.serialize, key=self.key, algorithm=algorithm, headers={"kid": self.kid})
+        return jwt.encode(self.serialize, key=current_app.config['SECRET_KEY'], algorithm=algorithm, headers={"kid": current_app.config['SECRET_KEY_ID']})
 
     def __repr__(self) -> str:
         return (f'Jwt(iss={self.issuer}, sub={self.subject}, aud={self.audience}, '

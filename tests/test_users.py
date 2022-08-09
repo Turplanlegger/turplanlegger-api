@@ -1,5 +1,6 @@
 import json
 import unittest
+from uuid import uuid4
 
 from turplanlegger.app import create_app, db
 from turplanlegger.auth.utils import hash_password
@@ -13,6 +14,7 @@ class UsersTestCase(unittest.TestCase):
         config = {
             'TESTING': True,
             'SECRET_KEY': 'test',
+            'SECRET_KEY_ID': 'test',
             'LOG_LEVEL': 'INFO',
             'CREATE_ADMIN_USER': False
         }
@@ -117,6 +119,7 @@ class UsersTestCase(unittest.TestCase):
     def setUp(self):
         self.test_user = User.create(
             User(
+                id=str(uuid4()),
                 name='Ola',
                 last_name='Nordamnn',
                 email='old.nordmann@norge.no',

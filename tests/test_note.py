@@ -1,5 +1,6 @@
 import json
 import unittest
+from uuid import uuid4
 
 from turplanlegger.app import create_app, db
 from turplanlegger.auth.utils import hash_password
@@ -13,6 +14,7 @@ class NotesTestCase(unittest.TestCase):
         config = {
             'TESTING': True,
             'SECRET_KEY': 'test',
+            'SECRET_KEY_ID': 'test',
             'LOG_LEVEL': 'INFO',
             'CREATE_ADMIN_USER': True
         }
@@ -22,6 +24,7 @@ class NotesTestCase(unittest.TestCase):
 
         cls.user1 = User.create(
             User(
+                id=str(uuid4()),
                 name='Ola',
                 last_name='Nordamnn',
                 email='old.nordmann@norge.no',
@@ -31,6 +34,7 @@ class NotesTestCase(unittest.TestCase):
         )
         cls.user2 = User.create(
             User(
+                id=str(uuid4()),
                 name='Kari',
                 last_name='Nordamnn',
                 email='kari.nordmann@norge.no',
@@ -40,16 +44,16 @@ class NotesTestCase(unittest.TestCase):
         )
 
         cls.note_full = {
-            'owner': 1,
+            'owner': cls.user1.id,
             'content': 'Are er kul',
             'name': 'Best note ever'
         }
         cls.note_no_name = {
-            'owner': 1,
+            'owner': cls.user1.id,
             'content': 'Are er kul',
         }
         cls.note_no_content = {
-            'owner': 1,
+            'owner': cls.user1.id,
             'name': 'Best note ever',
         }
         cls.note_no_owner = {
@@ -88,7 +92,7 @@ class NotesTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['owner'], 1)
+        self.assertEqual(data['owner'], self.user1.id)
         self.assertEqual(data['content'], 'Are er kul')
         self.assertEqual(data['name'], 'Best note ever')
 
@@ -165,7 +169,7 @@ class NotesTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         response = self.client.patch(f'/note/{data["id"]}/owner',
-                                     data=json.dumps({'owner': 2}), headers=self.headers_json)
+                                     data=json.dumps({'owner': self.user2.id}), headers=self.headers_json)
         self.assertEqual(response.status_code, 200)
 
         response = self.client.get(f'/note/{data["id"]}', headers=self.headers)
@@ -178,7 +182,7 @@ class NotesTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
 
-        response = self.client.patch('/note/2/owner', data=json.dumps({'owner': 2}), headers=self.headers_json)
+        response = self.client.patch('/note/2/owner', data=json.dumps({'owner': self.user2.id}), headers=self.headers_json)
         self.assertEqual(response.status_code, 404)
 
         data = json.loads(response.data.decode('utf-8'))
@@ -196,7 +200,7 @@ class NotesTestCase(unittest.TestCase):
 
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['title'], 'Owner is not int')
-        self.assertEqual(data['detail'], 'Owner must be passed as an int')
+        self.assertEqual(data['detail'], 'Owner must be passed as an str')
         self.assertEqual(data['type'], 'about:blank')
         self.assertEqual(data['instance'], 'http://localhost/note/1/owner')
 

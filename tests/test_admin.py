@@ -11,6 +11,7 @@ class UsersTestCase(unittest.TestCase):
         config = {
             'TESTING': True,
             'SECRET_KEY': 'test',
+            'SECRET_KEY_ID': 'test',
             'CREATE_ADMIN_USER': True
         }
 
@@ -45,7 +46,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['user']['id'], 1)
+        self.assertEqual(data['user']['id'], '1')
         self.assertEqual(data['user']['name'], 'Admin')
         self.assertEqual(data['user']['last_name'], 'Nimda')
         self.assertEqual(data['user']['email'], self.app.config.get('ADMIN_EMAIL'))

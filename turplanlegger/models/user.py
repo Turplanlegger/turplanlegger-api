@@ -9,7 +9,7 @@ JSON = Dict[str, any]
 
 class User:
 
-    def __init__(self, name: str, last_name: str, email: str, auth_method: str,
+    def __init__(self, id: str, name: str, last_name: str, email: str, auth_method: str,
                  password: str, private: bool = False, **kwargs) -> None:
 
         if not isinstance(private, bool):
@@ -33,9 +33,8 @@ class User:
         if not auth_method:
             raise ValueError('Missing mandatory field \'auth_method\'')
 
-        id = kwargs.get('id', None)
-        if id is not None and not isinstance(id, int):
-            raise TypeError('\'id\' must be int')
+        if not isinstance(id, str):
+            raise TypeError('\'id\' must be str')
 
         self.id = id
         self.name = name
