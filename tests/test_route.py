@@ -8,16 +8,19 @@ from turplanlegger.models.user import User
 
 class RoutesTestCase(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         config = {
             'TESTING': True,
             'SECRET_KEY': 'test',
+            'LOG_LEVEL': 'INFO',
+            'CREATE_ADMIN_USER': True
         }
 
-        self.app = create_app(config)
-        self.client = self.app.test_client()
+        cls.app = create_app(config)
+        cls.client = cls.app.test_client()
 
-        self.user1 = User.create(
+        cls.user1 = User.create(
             User(
                 name='Ola',
                 last_name='Nordamnn',
@@ -26,7 +29,7 @@ class RoutesTestCase(unittest.TestCase):
                 password=hash_password('test')
             )
         )
-        self.user2 = User.create(
+        cls.user2 = User.create(
             User(
                 name='Kari',
                 last_name='Nordamnn',
@@ -39,34 +42,41 @@ class RoutesTestCase(unittest.TestCase):
         routeGeometry = ('{\"type\":\"LineString\",\"coordinates\":[[11.615295,60.603483],[11.638641,60.612921],'
                          '[11.6819,60.613258],[11.697693,60.601797],[11.712112,60.586622],[11.703873,60.574476],'
                          '[11.67984,60.568064],[11.640015,60.576838],[11.611862,60.587296]]}')
-        self.route = {
+        cls.route = {
             'route': routeGeometry,
-            'owner': self.user1.id,
+            'owner': cls.user1.id,
         }
-        self.route_no_owner = {
+        cls.route_no_owner = {
             'route': routeGeometry,
         }
-        self.route_no_geometry = {
-            'owner': self.user1.id,
+        cls.route_no_geometry = {
+            'owner': cls.user1.id,
         }
 
-        response = self.client.post(
+        response = cls.client.post(
             '/login',
-            data=json.dumps({'email': self.user1.email, 'password': 'test'}),
+            data=json.dumps({'email': cls.user1.email, 'password': 'test'}),
             headers={'Content-type': 'application/json'}
         )
-        self.assertEqual(response.status_code, 200)
+
+        if response.status_code != 200:
+            raise RuntimeError('Failed to login')
+
         data = json.loads(response.data.decode('utf-8'))
 
-        self.headers_json = {
+        cls.headers_json = {
             'Content-type': 'application/json',
             'Authorization': f'Bearer {data["token"]}'
         }
-        self.headers = {
+        cls.headers = {
             'Authorization': f'Bearer {data["token"]}'
         }
 
     def tearDown(self):
+        db.truncate_table('routes')
+
+    @classmethod
+    def tearDownClass(cls):
         db.destroy()
 
     def test_add_route_ok(self):
@@ -75,20 +85,27 @@ class RoutesTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['owner'], 1)
+        self.assertEqual(data['owner'], 2)
 
     def test_add_route_no_owner(self):
         response = self.client.post('/route', data=json.dumps(self.route_no_owner), headers=self.headers_json)
         self.assertEqual(response.status_code, 400)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['message'], 'Missing mandatory field "owner"')
+        self.assertEqual(data['title'], 'Failed to parse route')
+        self.assertEqual(data['detail'], 'Missing mandatory field \'owner\'')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], 'http://localhost/route')
 
     def test_add_route_no_geometry(self):
         response = self.client.post('/route', data=json.dumps(self.route_no_geometry), headers=self.headers_json)
         self.assertEqual(response.status_code, 400)
+
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['message'], 'Missing mandatory field "route"')
+        self.assertEqual(data['title'], 'Failed to parse route')
+        self.assertEqual(data['detail'], 'Missing mandatory field \'route\'')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], 'http://localhost/route')
 
     def test_get_route(self):
         response = self.client.post('/route', data=json.dumps(self.route), headers=self.headers_json)
@@ -109,7 +126,10 @@ class RoutesTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['message'], 'route not found')
+        self.assertEqual(data['title'], 'Route not found')
+        self.assertEqual(data['detail'], 'The requested route was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], 'http://localhost/route/2')
 
     def test_delete_route(self):
         response = self.client.post('/route', data=json.dumps(self.route), headers=self.headers_json)
@@ -128,7 +148,10 @@ class RoutesTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['message'], 'route not found')
+        self.assertEqual(data['title'], 'Route not found')
+        self.assertEqual(data['detail'], 'The requested route was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], 'http://localhost/route/2')
 
     def test_change_route_owner(self):
         response = self.client.post('/route', data=json.dumps(self.route), headers=self.headers_json)
@@ -159,8 +182,12 @@ class RoutesTestCase(unittest.TestCase):
             headers=self.headers_json
         )
         self.assertEqual(response.status_code, 404)
+
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['message'], 'route not found')
+        self.assertEqual(data['title'], 'Route not found')
+        self.assertEqual(data['detail'], 'The requested route was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], 'http://localhost/route/2/owner')
 
     def test_change_route_owner_no_owner_given(self):
         response = self.client.post('/route', data=json.dumps(self.route), headers=self.headers_json)
@@ -169,5 +196,9 @@ class RoutesTestCase(unittest.TestCase):
 
         response = self.client.patch('/route/1/owner', data=json.dumps({}), headers=self.headers_json)
         self.assertEqual(response.status_code, 400)
+
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['message'], 'must supply owner as int')
+        self.assertEqual(data['title'], 'Owner is not int')
+        self.assertEqual(data['detail'], 'Owner must be passed as an int')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], 'http://localhost/route/1/owner')
