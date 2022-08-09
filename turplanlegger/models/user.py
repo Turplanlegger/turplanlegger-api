@@ -71,6 +71,7 @@ class User:
             raise ValueError('Failed to create user')
 
         return User(
+            id=json.get('id', None),
             name=json.get('name', None),
             last_name=json.get('last_name', None),
             email=email,
