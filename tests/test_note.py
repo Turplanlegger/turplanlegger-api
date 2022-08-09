@@ -8,7 +8,8 @@ from turplanlegger.models.user import User
 
 class NotesTestCase(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         config = {
             'TESTING': True,
             'SECRET_KEY': 'test',
@@ -16,10 +17,10 @@ class NotesTestCase(unittest.TestCase):
             'CREATE_ADMIN_USER': True
         }
 
-        self.app = create_app(config)
-        self.client = self.app.test_client()
+        cls.app = create_app(config)
+        cls.client = cls.app.test_client()
 
-        self.user1 = User.create(
+        cls.user1 = User.create(
             User(
                 name='Ola',
                 last_name='Nordamnn',
@@ -28,7 +29,7 @@ class NotesTestCase(unittest.TestCase):
                 password=hash_password('test')
             )
         )
-        self.user2 = User.create(
+        cls.user2 = User.create(
             User(
                 name='Kari',
                 last_name='Nordamnn',
@@ -38,44 +39,51 @@ class NotesTestCase(unittest.TestCase):
             )
         )
 
-        self.note_full = {
+        cls.note_full = {
             'owner': 1,
             'content': 'Are er kul',
             'name': 'Best note ever'
         }
-        self.note_no_name = {
+        cls.note_no_name = {
             'owner': 1,
             'content': 'Are er kul',
         }
-        self.note_no_content = {
+        cls.note_no_content = {
             'owner': 1,
             'name': 'Best note ever',
         }
-        self.note_no_owner = {
+        cls.note_no_owner = {
             'content': 'Are er kul',
             'name': 'Best note ever'
         }
 
-        response = self.client.post(
+        response = cls.client.post(
             '/login',
-            data=json.dumps({'email': self.user1.email, 'password': 'test'}),
+            data=json.dumps({'email': cls.user1.email, 'password': 'test'}),
             headers={'Content-type': 'application/json'}
         )
-        self.assertEqual(response.status_code, 200)
+        if response.status_code != 200:
+            raise RuntimeError('Failed to login')
+
         data = json.loads(response.data.decode('utf-8'))
 
-        self.headers_json = {
+        cls.headers_json = {
             'Content-type': 'application/json',
             'Authorization': f'Bearer {data["token"]}'
         }
-        self.headers = {
+        cls.headers = {
             'Authorization': f'Bearer {data["token"]}'
         }
 
     def tearDown(self):
+        db.truncate_table('notes')
+
+    @classmethod
+    def tearDownClass(cls):
         db.destroy()
 
     def test_add_note_ok(self):
+
         response = self.client.post('/note', data=json.dumps(self.note_full), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
 
@@ -182,7 +190,6 @@ class NotesTestCase(unittest.TestCase):
     def test_change_note_owner_no_owner_given(self):
         response = self.client.post('/note', data=json.dumps(self.note_full), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
-        data = json.loads(response.data.decode('utf-8'))
 
         response = self.client.patch('/note/1/owner', data=json.dumps({}), headers=self.headers_json)
         self.assertEqual(response.status_code, 400)

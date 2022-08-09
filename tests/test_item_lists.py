@@ -8,7 +8,8 @@ from turplanlegger.models.user import User
 
 class ItemListsTestCase(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         config = {
             'TESTING': True,
             'SECRET_KEY': 'test',
@@ -16,10 +17,10 @@ class ItemListsTestCase(unittest.TestCase):
             'CREATE_ADMIN_USER': True
         }
 
-        self.app = create_app(config)
-        self.client = self.app.test_client()
+        cls.app = create_app(config)
+        cls.client = cls.app.test_client()
 
-        self.user1 = User.create(
+        cls.user1 = User.create(
             User(
                 name='Ola',
                 last_name='Nordamnn',
@@ -28,7 +29,7 @@ class ItemListsTestCase(unittest.TestCase):
                 password=hash_password('test')
             )
         )
-        self.user2 = User.create(
+        cls.user2 = User.create(
             User(
                 name='Kari',
                 last_name='Nordamnn',
@@ -38,7 +39,7 @@ class ItemListsTestCase(unittest.TestCase):
             )
         )
 
-        self.item_list = {
+        cls.item_list = {
             'name': 'Test list',
             'items': [
                 'item one',
@@ -49,19 +50,19 @@ class ItemListsTestCase(unittest.TestCase):
                 'item four',
                 'item five'
             ],
-            'owner': self.user1.id,
+            'owner': cls.user1.id,
             'type': 'check'
         }
 
-        self.empty_item_list = {
+        cls.empty_item_list = {
             'name': 'Empty test list',
             'items': [],
             'items_checked': [],
-            'owner': self.user1.id,
+            'owner': cls.user1.id,
             'type': 'check'
         }
 
-        self.item_to_add = {
+        cls.item_to_add = {
             'items': [
                 'item one',
                 'item two',
@@ -71,23 +72,30 @@ class ItemListsTestCase(unittest.TestCase):
             ]
         }
 
-        response = self.client.post(
+        response = cls.client.post(
             '/login',
-            data=json.dumps({'email': self.user1.email, 'password': 'test'}),
+            data=json.dumps({'email': cls.user1.email, 'password': 'test'}),
             headers={'Content-type': 'application/json'}
         )
-        self.assertEqual(response.status_code, 200)
+        if response.status_code != 200:
+            raise RuntimeError('Failed to login')
+
         data = json.loads(response.data.decode('utf-8'))
 
-        self.headers_json = {
+        cls.headers_json = {
             'Content-type': 'application/json',
             'Authorization': f'Bearer {data["token"]}'
         }
-        self.headers = {
+        cls.headers = {
             'Authorization': f'Bearer {data["token"]}'
         }
 
     def tearDown(self):
+        db.truncate_table('lists_items')
+        db.truncate_table('item_lists')
+
+    @classmethod
+    def tearDownClass(cls):
         db.destroy()
 
     def test_create_list(self):

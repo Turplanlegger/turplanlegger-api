@@ -50,11 +50,6 @@ jobs:
       id: hooks
       run: |
         pre-commit run -a --show-diff-on-failure
-    - name: Lint with flake8
-      id: lint
-      run: |
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        flake8 . --count --exit-zero --max-complexity=50 --max-line-length=127 --statistics
     - name: Test with pytest
       id: test
       run: |

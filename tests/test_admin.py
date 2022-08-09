@@ -6,30 +6,33 @@ from turplanlegger.app import create_app, db
 
 class UsersTestCase(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         config = {
             'TESTING': True,
             'SECRET_KEY': 'test',
             'CREATE_ADMIN_USER': True
         }
 
-        self.app = create_app(config)
-        self.client = self.app.test_client()
+        cls.app = create_app(config)
+        cls.client = cls.app.test_client()
 
-        response = self.client.post(
+        response = cls.client.post(
             '/login',
             data=json.dumps(
                 {
-                    'email': self.app.config.get('ADMIN_EMAIL'),
-                    'password': self.app.config.get('ADMIN_PASSWORD')
+                    'email': cls.app.config.get('ADMIN_EMAIL'),
+                    'password': cls.app.config.get('ADMIN_PASSWORD')
                 }
             ),
             headers={'Content-type': 'application/json'}
         )
-        self.assertEqual(response.status_code, 200)
+
+        if response.status_code != 200:
+            raise RuntimeError('Failed to login')
         data = json.loads(response.data.decode('utf-8'))
 
-        self.headers = {
+        cls.headers = {
             'Authorization': f'Bearer {data["token"]}'
         }
 

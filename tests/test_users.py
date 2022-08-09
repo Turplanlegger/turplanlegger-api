@@ -8,18 +8,19 @@ from turplanlegger.models.user import User
 
 class UsersTestCase(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         config = {
             'TESTING': True,
             'SECRET_KEY': 'test',
             'LOG_LEVEL': 'INFO',
-            'CREATE_ADMIN_USER': True
+            'CREATE_ADMIN_USER': False
         }
 
-        self.app = create_app(config)
-        self.client = self.app.test_client()
+        cls.app = create_app(config)
+        cls.client = cls.app.test_client()
 
-        self.user1 = {
+        cls.user1 = {
             'name': 'Ola',
             'last_name': 'Nordamnn',
             'email': 'ola.nordmann@norge.no',
@@ -27,14 +28,14 @@ class UsersTestCase(unittest.TestCase):
             'password': 'test123',
             'private': False
         }
-        self.user2 = {
+        cls.user2 = {
             'name': 'Kari',
             'email': 'kari.nordmann@norge.no',
             'auth_method': 'basic',
             'password': 'test123',
             'private': False
         }
-        self.user3 = {
+        cls.user3 = {
             'name': 'Petter',
             'last_name': 'Smart',
             'email': 'invalid.com',
@@ -42,7 +43,7 @@ class UsersTestCase(unittest.TestCase):
             'password': 'test123',
             'private': False
         }
-        self.user4 = {
+        cls.user4 = {
             'name': 'Petter',
             'last_name': 'Smart',
             'email': 'petter@smart.com',
@@ -50,7 +51,7 @@ class UsersTestCase(unittest.TestCase):
             'password': 'te',
             'private': True
         }
-        self.user5 = {
+        cls.user5 = {
             'name': 'Ørulf',
             'last_name': 'Åsenæs',
             'email': 'oernulf.aasenaes@norge.no',
@@ -58,7 +59,7 @@ class UsersTestCase(unittest.TestCase):
             'password': 'test123',
             'private': True
         }
-        self.user6 = {
+        cls.user6 = {
             'name': 'Petter',
             'last_name': 'Smart',
             'email': 'petter@smart.com',
@@ -66,7 +67,7 @@ class UsersTestCase(unittest.TestCase):
             'password': 'GbYRCzE}q:~e6Qo?\':fg^*:d6;{*NV&b=Q2GUAqYv#792C<{?,8@JoYX>qV)3H^q',
             'private': False
         }
-        self.user7 = {
+        cls.user7 = {
             'name': 'Petter',
             'last_name': 'Smart',
             'email': 'petter@smart.com',
@@ -74,7 +75,7 @@ class UsersTestCase(unittest.TestCase):
             'password': 'm9uMSpb&q.Ft,[5,%oWj7yk-$YFBvKd}J<fNrToR2x~&+d_9J}K:gcGmUq#qkL\'#',
             'private': False
         }
-        self.user8 = {
+        cls.user8 = {
             'name': 'Petter',
             'last_name': 'Smart',
             'email': 'petter@smart.com',
@@ -84,7 +85,7 @@ class UsersTestCase(unittest.TestCase):
                          'vbbAsU2mbUw67b'),
             'private': False
         }
-        self.user9 = {
+        cls.user9 = {
             'name': 'Péter',
             'last_name': 'Smart',
             'email': 'peter@smart.com',
@@ -94,7 +95,7 @@ class UsersTestCase(unittest.TestCase):
                          'r_P~:v]Vbc;'),
             'private': False
         }
-        self.user10 = {
+        cls.user10 = {
             'name': 'Petter',
             'last_name': 'Smart',
             'email': 'petter@smart.com',
@@ -102,7 +103,7 @@ class UsersTestCase(unittest.TestCase):
             'password': 'JegErEtPassordeSomBurdeFunkeDaVelÅsåæSø',
             'private': False
         }
-        self.user11 = {
+        cls.user11 = {
             'name': 'Petter',
             'last_name': 'Smart',
             'email': 'petter@smart.com',
@@ -111,13 +112,16 @@ class UsersTestCase(unittest.TestCase):
             'private': True
         }
 
+        cls.hashed_password = hash_password('test')
+
+    def setUp(self):
         self.test_user = User.create(
             User(
                 name='Ola',
                 last_name='Nordamnn',
                 email='old.nordmann@norge.no',
                 auth_method='basic',
-                password=hash_password('test')
+                password=self.hashed_password
             )
         )
 
@@ -138,6 +142,10 @@ class UsersTestCase(unittest.TestCase):
         }
 
     def tearDown(self):
+        db.truncate_table('users')
+
+    @classmethod
+    def tearDownClass(cls):
         db.destroy()
 
     def test_user_not_found(self):
@@ -156,7 +164,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 3)
+        self.assertEqual(data['id'], 2)
         self.assertEqual(data['user']['name'], self.user1['name'])
         self.assertEqual(data['user']['last_name'], self.user1['last_name'])
         self.assertEqual(data['user']['email'], self.user1['email'])
@@ -169,7 +177,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 3)
+        self.assertEqual(data['id'], 2)
         self.assertEqual(data['user']['name'], self.user11['name'])
         self.assertEqual(data['user']['last_name'], self.user11['last_name'])
         self.assertEqual(data['user']['email'], self.user11['email'])
@@ -287,7 +295,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 3)
+        self.assertEqual(data['id'], 2)
         self.assertEqual(data['user']['name'], self.user5['name'])
         self.assertEqual(data['user']['last_name'], self.user5['last_name'])
         self.assertEqual(data['user']['email'], self.user5['email'])
@@ -312,7 +320,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 3)
+        self.assertEqual(data['id'], 2)
         self.assertEqual(data['user']['name'], self.user9['name'])
         self.assertEqual(data['user']['last_name'], self.user9['last_name'])
         self.assertEqual(data['user']['email'], self.user9['email'])
@@ -325,7 +333,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 3)
+        self.assertEqual(data['id'], 2)
         self.assertEqual(data['user']['name'], self.user6['name'])
         self.assertEqual(data['user']['last_name'], self.user6['last_name'])
         self.assertEqual(data['user']['email'], self.user6['email'])
@@ -350,7 +358,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 3)
+        self.assertEqual(data['id'], 2)
         self.assertEqual(data['user']['name'], self.user7['name'])
         self.assertEqual(data['user']['last_name'], self.user7['last_name'])
         self.assertEqual(data['user']['email'], self.user7['email'])
@@ -375,7 +383,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 3)
+        self.assertEqual(data['id'], 2)
         self.assertEqual(data['user']['name'], self.user8['name'])
         self.assertEqual(data['user']['last_name'], self.user8['last_name'])
         self.assertEqual(data['user']['email'], self.user8['email'])
@@ -400,7 +408,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 3)
+        self.assertEqual(data['id'], 2)
         self.assertEqual(data['user']['name'], self.user9['name'])
         self.assertEqual(data['user']['last_name'], self.user9['last_name'])
         self.assertEqual(data['user']['email'], self.user9['email'])
@@ -425,7 +433,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 3)
+        self.assertEqual(data['id'], 2)
         self.assertEqual(data['user']['name'], self.user10['name'])
         self.assertEqual(data['user']['last_name'], self.user10['last_name'])
         self.assertEqual(data['user']['email'], self.user10['email'])
