@@ -1,5 +1,7 @@
 import re
 from typing import Dict
+from uuid import uuid4
+from turplanlegger import auth
 
 from turplanlegger.app import db, logger
 from turplanlegger.auth import utils
@@ -9,7 +11,7 @@ JSON = Dict[str, any]
 
 class User:
 
-    def __init__(self, id: str, name: str, last_name: str, email: str, auth_method: str,
+    def __init__(self, name: str, last_name: str, email: str, auth_method: str,
                  password: str, private: bool = False, **kwargs) -> None:
 
         if not isinstance(private, bool):
@@ -33,10 +35,7 @@ class User:
         if not auth_method:
             raise ValueError('Missing mandatory field \'auth_method\'')
 
-        if not isinstance(id, str):
-            raise TypeError('\'id\' must be str')
-
-        self.id = id
+        self.id = kwargs.get('id') or str(uuid4())
         self.name = name
         self.last_name = last_name
         self.email = email

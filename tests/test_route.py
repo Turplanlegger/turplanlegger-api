@@ -24,7 +24,6 @@ class RoutesTestCase(unittest.TestCase):
 
         cls.user1 = User.create(
             User(
-                id=str(uuid4()),
                 name='Ola',
                 last_name='Nordamnn',
                 email='old.nordmann@norge.no',
@@ -34,7 +33,6 @@ class RoutesTestCase(unittest.TestCase):
         )
         cls.user2 = User.create(
             User(
-                id=str(uuid4()),
                 name='Kari',
                 last_name='Nordamnn',
                 email='kari.nordmann@norge.no',
@@ -84,12 +82,15 @@ class RoutesTestCase(unittest.TestCase):
         db.destroy()
 
     def test_add_route_ok(self):
+        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+        print(self.route)
+        print(self.user1)
         response = self.client.post('/route', data=json.dumps(self.route), headers=self.headers_json)
 
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['owner'], 2)
+        self.assertEqual(data['owner'], self.user1.id)
 
     def test_add_route_no_owner(self):
         response = self.client.post('/route', data=json.dumps(self.route_no_owner), headers=self.headers_json)

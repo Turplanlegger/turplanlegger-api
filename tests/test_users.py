@@ -119,7 +119,6 @@ class UsersTestCase(unittest.TestCase):
     def setUp(self):
         self.test_user = User.create(
             User(
-                id=str(uuid4()),
                 name='Ola',
                 last_name='Nordamnn',
                 email='old.nordmann@norge.no',
@@ -167,7 +166,6 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 2)
         self.assertEqual(data['user']['name'], self.user1['name'])
         self.assertEqual(data['user']['last_name'], self.user1['last_name'])
         self.assertEqual(data['user']['email'], self.user1['email'])
@@ -180,7 +178,6 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 2)
         self.assertEqual(data['user']['name'], self.user11['name'])
         self.assertEqual(data['user']['last_name'], self.user11['last_name'])
         self.assertEqual(data['user']['email'], self.user11['email'])
@@ -248,13 +245,15 @@ class UsersTestCase(unittest.TestCase):
         response = self.client.post('/user', data=json.dumps(self.user1), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
-
+        print(data)
+        
         response = self.client.patch(
             f'/user/{data["id"]}/rename',
             data=json.dumps({'name': 'Petter', 'last_name': 'Smart'}),
             headers=self.headers_json
         )
         data = json.loads(response.data.decode('utf-8'))
+        print(data)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data['user']['name'], 'Petter')
@@ -298,7 +297,6 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 2)
         self.assertEqual(data['user']['name'], self.user5['name'])
         self.assertEqual(data['user']['last_name'], self.user5['last_name'])
         self.assertEqual(data['user']['email'], self.user5['email'])
@@ -314,7 +312,7 @@ class UsersTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(response.status_code, 200)
-        response = self.client.get('/user/2', headers={'Authorization': f'Bearer {data["token"]}'})
+        response = self.client.get(f'/user/{data["id"]}', headers={'Authorization': f'Bearer {data["token"]}'})
         self.assertEqual(response.status_code, 200)
 
     def test_create_special_char2(self):
@@ -323,7 +321,6 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 2)
         self.assertEqual(data['user']['name'], self.user9['name'])
         self.assertEqual(data['user']['last_name'], self.user9['last_name'])
         self.assertEqual(data['user']['email'], self.user9['email'])
@@ -336,7 +333,6 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 2)
         self.assertEqual(data['user']['name'], self.user6['name'])
         self.assertEqual(data['user']['last_name'], self.user6['last_name'])
         self.assertEqual(data['user']['email'], self.user6['email'])
@@ -352,7 +348,7 @@ class UsersTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(response.status_code, 200)
-        response = self.client.get('/user/2', headers={'Authorization': f'Bearer {data["token"]}'})
+        response = self.client.get(f'/user/{data["id"]}', headers={'Authorization': f'Bearer {data["token"]}'})
         self.assertEqual(response.status_code, 200)
 
     def test_create_user_long_pw2(self):
@@ -361,7 +357,6 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 2)
         self.assertEqual(data['user']['name'], self.user7['name'])
         self.assertEqual(data['user']['last_name'], self.user7['last_name'])
         self.assertEqual(data['user']['email'], self.user7['email'])
@@ -377,7 +372,7 @@ class UsersTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(response.status_code, 200)
-        response = self.client.get('/user/2', headers={'Authorization': f'Bearer {data["token"]}'})
+        response = self.client.get(f'/user/{data["id"]}', headers={'Authorization': f'Bearer {data["token"]}'})
         self.assertEqual(response.status_code, 200)
 
     def test_create_user_long_pw3(self):
@@ -386,7 +381,6 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 2)
         self.assertEqual(data['user']['name'], self.user8['name'])
         self.assertEqual(data['user']['last_name'], self.user8['last_name'])
         self.assertEqual(data['user']['email'], self.user8['email'])
@@ -402,7 +396,7 @@ class UsersTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(response.status_code, 200)
-        response = self.client.get('/user/2', headers={'Authorization': f'Bearer {data["token"]}'})
+        response = self.client.get(f'/user/{data["id"]}', headers={'Authorization': f'Bearer {data["token"]}'})
         self.assertEqual(response.status_code, 200)
 
     def test_create_user_long_pw4(self):
@@ -411,7 +405,6 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 2)
         self.assertEqual(data['user']['name'], self.user9['name'])
         self.assertEqual(data['user']['last_name'], self.user9['last_name'])
         self.assertEqual(data['user']['email'], self.user9['email'])
@@ -427,7 +420,7 @@ class UsersTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(response.status_code, 200)
-        response = self.client.get('/user/2', headers={'Authorization': f'Bearer {data["token"]}'})
+        response = self.client.get(f'/user/{data["id"]}', headers={'Authorization': f'Bearer {data["token"]}'})
         self.assertEqual(response.status_code, 200)
 
     def test_create_user_long_pw5(self):
@@ -436,7 +429,6 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['id'], 2)
         self.assertEqual(data['user']['name'], self.user10['name'])
         self.assertEqual(data['user']['last_name'], self.user10['last_name'])
         self.assertEqual(data['user']['email'], self.user10['email'])
@@ -452,5 +444,5 @@ class UsersTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(response.status_code, 200)
-        response = self.client.get('/user/2', headers={'Authorization': f'Bearer {data["token"]}'})
+        response = self.client.get(f'/user/{data["id"]}', headers={'Authorization': f'Bearer {data["token"]}'})
         self.assertEqual(response.status_code, 200)
