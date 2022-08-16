@@ -11,7 +11,7 @@ class Trip:
         if not owner:
             raise ValueError('Missing mandatory field \'owner\'')
         if not isinstance(owner, str):
-            raise TypeError('\'owner\' must be integer')
+            raise TypeError('\'owner\' must be str')
         if not name:
             raise ValueError('Missing mandatory field \'name\'')
         if not isinstance(name, str):

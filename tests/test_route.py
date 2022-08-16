@@ -82,9 +82,6 @@ class RoutesTestCase(unittest.TestCase):
         db.destroy()
 
     def test_add_route_ok(self):
-        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-        print(self.route)
-        print(self.user1)
         response = self.client.post('/route', data=json.dumps(self.route), headers=self.headers_json)
 
         self.assertEqual(response.status_code, 201)

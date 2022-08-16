@@ -104,9 +104,6 @@ class TripsTestCase(unittest.TestCase):
         db.destroy()
 
     def test_create_trip_ok(self):
-        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-        print(self.trip)
-        print(self.user1)
         response = self.client.post('/trip', data=json.dumps(self.trip), headers=self.headers_json)
 
         self.assertEqual(response.status_code, 201)

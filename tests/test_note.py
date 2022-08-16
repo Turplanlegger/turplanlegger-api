@@ -175,7 +175,7 @@ class NotesTestCase(unittest.TestCase):
         response = self.client.get(f'/note/{data["id"]}', headers=self.headers)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['note']['owner'], 2)
+        self.assertEqual(data['note']['owner'], self.user2.id)
 
     def test_change_note_owner_note_not_found(self):
         response = self.client.post('/note', data=json.dumps(self.note_full), headers=self.headers_json)

@@ -64,7 +64,7 @@ def change_note_owner(note_id):
     owner = request.json.get('owner', None)
 
     if not owner:
-        raise ApiProblem('Owner is not int', 'Owner must be passed as an int', 400)
+        raise ApiProblem('Owner is not int', 'Owner must be passed as an str', 400)
 
     try:
         note.change_owner(owner)

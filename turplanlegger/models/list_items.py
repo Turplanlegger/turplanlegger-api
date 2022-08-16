@@ -11,8 +11,8 @@ class ListItem:
     def __init__(self, owner: int, item_list: int, checked: bool, **kwargs) -> None:
         if not owner:
             raise ValueError("missing mandatory field 'owner'")
-        if not isinstance(owner, int):
-            raise TypeError("'owner' must be integer")
+        if not isinstance(owner, str):
+            raise TypeError("'owner' must be str")
         if not item_list:
             raise ValueError("missing mandatory field 'item_list'")
         if not isinstance(item_list, int):
