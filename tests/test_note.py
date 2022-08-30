@@ -182,7 +182,8 @@ class NotesTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
 
-        response = self.client.patch('/note/2/owner', data=json.dumps({'owner': self.user2.id}), headers=self.headers_json)
+        response = self.client.patch(
+            '/note/2/owner', data=json.dumps({'owner': self.user2.id}), headers=self.headers_json)
         self.assertEqual(response.status_code, 404)
 
         data = json.loads(response.data.decode('utf-8'))

@@ -1,7 +1,6 @@
 import re
 from typing import Dict
 from uuid import uuid4
-from turplanlegger import auth
 
 from turplanlegger.app import db, logger
 from turplanlegger.auth import utils

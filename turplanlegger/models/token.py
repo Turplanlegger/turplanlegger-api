@@ -1,7 +1,8 @@
-import json
 import datetime
+import json
 from typing import Any, Dict
 from urllib.request import urlopen
+
 import jwt
 from flask import current_app
 from jwt import DecodeError, ExpiredSignatureError, InvalidAudienceError
@@ -26,33 +27,38 @@ class JWT:
 
     @classmethod
     def parse(cls, token: str) -> 'JWT':
-        jsonurl = urlopen("https://turplanlegger.b2clogin.com/turplanlegger.onmicrosoft.com/discovery/v2.0/keys?p=b2c_1_signin")
+        jsonurl = urlopen(current_app.config['AZURE_AD_B2C_KEY_URL'])
         jwks = json.loads(jsonurl.read())
         unverified_header = jwt.get_unverified_header(token)
         rsa_key = ''
-        for key in jwks["keys"]:
-            if key["kid"] == unverified_header["kid"]:
+        for key in jwks['keys']:
+            if key['kid'] == unverified_header['kid']:
                 rsa_key = jwt.algorithms.RSAAlgorithm.from_jwk({
-                    "kty": key["kty"],
-                    "kid": key["kid"],
-                    "use": key["use"],
-                    "n": key["n"],
-                    "e": key["e"]
+                    'kty': key['kty'],
+                    'kid': key['kid'],
+                    'use': key['use'],
+                    'n': key['n'],
+                    'e': key['e']
                 })
                 break
-        
-        key = rsa_key if rsa_key else current_app.config['SECRET_KEY'] if unverified_header["kid"] == current_app.config['SECRET_KEY_ID'] else ''
+
+        if (rsa_key):
+            key = rsa_key
+        elif(unverified_header['kid'] == current_app.config['SECRET_KEY_ID']):
+            key = current_app.config['SECRET_KEY']
+        else:
+            key = ''
 
         try:
             jsonRes = jwt.decode(
                 token,
                 key,
-                algorithms=[unverified_header["alg"]],
+                algorithms=[unverified_header['alg']],
                 audience=current_app.config['AUDIENCE']
             )
         except (DecodeError, ExpiredSignatureError, InvalidAudienceError):
             raise
-        
+
         return JWT(
             iss=jsonRes.get('iss', None),
             sub=jsonRes.get('sub', None),
@@ -78,7 +84,11 @@ class JWT:
         }
 
     def tokenize(self, algorithm: str = 'HS256') -> str:
-        return jwt.encode(self.serialize, key=current_app.config['SECRET_KEY'], algorithm=algorithm, headers={"kid": current_app.config['SECRET_KEY_ID']})
+        return jwt.encode(
+            self.serialize,
+            key=current_app.config['SECRET_KEY'],
+            algorithm=algorithm,
+            headers={'kid': current_app.config['SECRET_KEY_ID']})
 
     def __repr__(self) -> str:
         return (f'Jwt(iss={self.issuer}, sub={self.subject}, aud={self.audience}, '

@@ -37,6 +37,7 @@ class Config:
         # App
         self.config['SECRET_KEY'] = self.conf_ent('SECRET_KEY')
         self.config['SECRET_KEY_ID'] = self.conf_ent('SECRET_KEY_ID')
+        self.config['AZURE_AD_B2C_KEY_URL'] = self.conf_ent('AZURE_AD_B2C_KEY_URL')
         self.config['TOKEN_EXPIRE_TIME'] = self.conf_ent('TOKEN_EXPIRE_TIME')  # Seconds
         self.config['CREATE_ADMIN_USER'] = self.conf_ent('CREATE_ADMIN_USER', False)
         if self.config['CREATE_ADMIN_USER']:

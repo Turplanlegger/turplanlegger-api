@@ -256,7 +256,7 @@ class UsersTestCase(unittest.TestCase):
         response = self.client.post('/user', data=json.dumps(self.user1), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
-        
+
         response = self.client.patch(
             f'/user/{self.user1["id"]}/rename',
             data=json.dumps({'name': 'Petter', 'last_name': 'Smart'}),
