@@ -19,6 +19,6 @@ CORS_SUPPORTS_CREDENTIALS = True
 
 # Auth
 AUDIENCE = '0149fc65-259e-4895-9034-e144c242f733'
-AZURE_AD_B2C_KEY_URL = """https://turplanlegger.b2clogin.com/
-                        turplanlegger.onmicrosoft.com/discovery/
-                        v2.0/keys?p=b2c_1_signin"""
+AZURE_AD_B2C_KEY_URL = ("https://turplanlegger.b2clogin.com/"
+                        "turplanlegger.onmicrosoft.com/discovery/"
+                        "v2.0/keys?p=b2c_1_signin")
