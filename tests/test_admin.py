@@ -42,11 +42,11 @@ class UsersTestCase(unittest.TestCase):
 
     def test_get_admin_user(self):
 
-        response = self.client.get('/user/1', headers=self.headers)
+        response = self.client.get('/user/06335e84-2872-4914-8c5d-3ed07d2a2f16', headers=self.headers)
         self.assertEqual(response.status_code, 200)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['user']['id'], '1')
+        self.assertEqual(data['user']['id'], '06335e84-2872-4914-8c5d-3ed07d2a2f16')
         self.assertEqual(data['user']['name'], 'Admin')
         self.assertEqual(data['user']['last_name'], 'Nimda')
         self.assertEqual(data['user']['email'], self.app.config.get('ADMIN_EMAIL'))
