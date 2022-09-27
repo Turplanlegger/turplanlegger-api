@@ -13,6 +13,7 @@ class TripsTestCase(unittest.TestCase):
         config = {
             'TESTING': True,
             'SECRET_KEY': 'test',
+            'SECRET_KEY_ID': 'test',
             'LOG_LEVEL': 'INFO',
             'CREATE_ADMIN_USER': True
         }
@@ -45,7 +46,7 @@ class TripsTestCase(unittest.TestCase):
             'owner': cls.user1.id,
         }
         cls.note = {
-            'owner': 1,
+            'owner': cls.user1.id,
             'content': 'Are er kul',
             'name': 'Best note ever'
         }

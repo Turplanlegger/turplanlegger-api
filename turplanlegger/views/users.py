@@ -10,12 +10,7 @@ from . import api
 @api.route('/user/<user_id>', methods=['GET'])
 @auth
 def get_user(user_id):
-    try:
-        id = int(user_id)
-    except ValueError:
-        raise ApiProblem('Failed to get user', f'\'{user_id}\' is not int', 400)
-
-    user = User.find_user(id)
+    user = User.find_user(user_id)
 
     if user:
         return jsonify(status='ok', count=1, user=user.serialize)
@@ -66,14 +61,8 @@ def add_user():
 
 @api.route('/user/<user_id>', methods=['DELETE'])
 @auth
-def delete_user(user_id):
-
-    try:
-        id = int(user_id)
-    except ValueError:
-        raise ApiProblem('Failed to get user', f'\'{user_id}\' is not int', 400)
-
-    user = User.find_user(id)
+def delete_user(user_id: str):
+    user = User.find_user(user_id)
 
     if not user:
         raise ApiProblem('User not found', 'The requested user was not found', 404)
@@ -88,14 +77,8 @@ def delete_user(user_id):
 
 @api.route('/user/<user_id>/rename', methods=['PATCH'])
 @auth
-def rename_user(user_id):
-
-    try:
-        id = int(user_id)
-    except ValueError:
-        raise ApiProblem('Failed to get user', f'\'{user_id}\' is not int', 400)
-
-    user = User.find_user(id)
+def rename_user(user_id: str):
+    user = User.find_user(user_id)
 
     if not user:
         raise ApiProblem('User not found', 'The requested user was not found', 404)
@@ -111,14 +94,8 @@ def rename_user(user_id):
 
 @api.route('/user/<user_id>/private', methods=['PATCH'])
 @auth
-def toggle_private_user(user_id):
-
-    try:
-        id = int(user_id)
-    except ValueError:
-        raise ApiProblem('Failed to get user', f'\'{user_id}\' is not int', 400)
-
-    user = User.find_user(id)
+def toggle_private_user(user_id: str):
+    user = User.find_user(user_id)
 
     if not user:
         raise ApiProblem('User not found', 'The requested user was not found', 404)

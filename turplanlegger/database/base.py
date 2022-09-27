@@ -291,7 +291,7 @@ class Database:
 
     # User
     def get_user(self, id, deleted=False):
-        select = 'SELECT * FROM users WHERE id = %s'
+        select = 'SELECT * FROM users WHERE id = %s::VARCHAR'
 
         if deleted:
             select += ' AND deleted = TRUE'
@@ -315,8 +315,8 @@ class Database:
 
     def create_user(self, user):
         insert = """
-            INSERT INTO users (name, last_name, email, auth_method, password,  private)
-            VALUES (%(name)s, %(last_name)s, %(email)s, %(auth_method)s, %(password)s, %(private)s)
+            INSERT INTO users (id, name, last_name, email, auth_method, password,  private)
+            VALUES (%(id)s, %(name)s, %(last_name)s, %(email)s, %(auth_method)s, %(password)s, %(private)s)
             RETURNING *
         """
         return self._insert(insert, vars(user))

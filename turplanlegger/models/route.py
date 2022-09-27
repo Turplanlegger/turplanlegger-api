@@ -11,7 +11,7 @@ class Route:
     def __init__(self, owner: int, route: JSON, **kwargs) -> None:
         if not owner:
             raise ValueError('Missing mandatory field \'owner\'')
-        if not isinstance(owner, int):
+        if not isinstance(owner, str):
             raise TypeError('"owner" must be integer')
         if not route:
             raise ValueError('Missing mandatory field \'route\'')
@@ -52,7 +52,7 @@ class Route:
     def find_route(id: int) -> 'Route':
         return Route.get_route(db.get_route(id))
 
-    def change_owner(self, owner: int) -> 'Route':
+    def change_owner(self, owner: str) -> 'Route':
         if self.owner == owner:
             raise ValueError('new owner is same as old')
 

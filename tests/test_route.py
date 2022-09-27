@@ -13,6 +13,7 @@ class RoutesTestCase(unittest.TestCase):
         config = {
             'TESTING': True,
             'SECRET_KEY': 'test',
+            'SECRET_KEY_ID': 'test',
             'LOG_LEVEL': 'INFO',
             'CREATE_ADMIN_USER': True
         }
@@ -85,7 +86,7 @@ class RoutesTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['owner'], 2)
+        self.assertEqual(data['owner'], self.user1.id)
 
     def test_add_route_no_owner(self):
         response = self.client.post('/route', data=json.dumps(self.route_no_owner), headers=self.headers_json)
