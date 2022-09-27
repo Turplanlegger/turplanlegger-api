@@ -7,11 +7,11 @@ JSON = Dict[str, any]
 
 class Trip:
 
-    def __init__(self, owner: int, name: str, **kwargs) -> None:
+    def __init__(self, owner: str, name: str, **kwargs) -> None:
         if not owner:
             raise ValueError('Missing mandatory field \'owner\'')
-        if not isinstance(owner, int):
-            raise TypeError('\'owner\' must be integer')
+        if not isinstance(owner, str):
+            raise TypeError('\'owner\' must be str')
         if not name:
             raise ValueError('Missing mandatory field \'name\'')
         if not isinstance(name, str):
@@ -76,7 +76,7 @@ class Trip:
         trip = Trip.get_trip(db.get_trip(id))
         return trip
 
-    def change_owner(self, owner: int) -> 'Trip':
+    def change_owner(self, owner: str) -> 'Trip':
         if self.owner == owner:
             raise ValueError('new owner is same as old')
         return Trip.get_trip(db.change_trip_owner(self.id, owner))

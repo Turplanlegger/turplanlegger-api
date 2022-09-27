@@ -2,5 +2,6 @@ bcrypt>=3.2.2
 Flask>=2.0.1
 Flask-Compress>=1.4.0
 Flask-Cors>=3.0.2
+flask-cors>=3.0.10
 psycopg>=3.0.15
-PyJWT>=2.4.0
+PyJWT[crypto]>=2.4.0

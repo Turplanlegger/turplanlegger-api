@@ -1,5 +1,6 @@
 import re
 from typing import Dict
+from uuid import uuid4
 
 from turplanlegger.app import db, logger
 from turplanlegger.auth import utils
@@ -33,11 +34,7 @@ class User:
         if not auth_method:
             raise ValueError('Missing mandatory field \'auth_method\'')
 
-        id = kwargs.get('id', None)
-        if id is not None and not isinstance(id, int):
-            raise TypeError('\'id\' must be int')
-
-        self.id = id
+        self.id = kwargs.get('id') or str(uuid4())
         self.name = name
         self.last_name = last_name
         self.email = email
@@ -53,7 +50,7 @@ class User:
         email = json.get('email', None)
         p = re.compile('^[\\w.-]+@[\\w.-]+\\.\\w+$')
         if not p.match(email):
-            raise ValueError('invalid email address')
+            raise ValueError('Invalid email address')
 
         if User.find_by_email(email):
             raise ValueError('User allready existst')
@@ -72,6 +69,7 @@ class User:
             raise ValueError('Failed to create user')
 
         return User(
+            id=json.get('id', None),
             name=json.get('name', None),
             last_name=json.get('last_name', None),
             email=email,
@@ -108,7 +106,7 @@ class User:
         return db.toggle_private_user(self.id, False if self.private else True)
 
     @staticmethod
-    def find_user(id: int) -> 'User':
+    def find_user(id: str) -> 'User':
         return User.get_user(db.get_user(id))
 
     @staticmethod

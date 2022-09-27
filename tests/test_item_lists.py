@@ -1,5 +1,6 @@
 import json
 import unittest
+from uuid import uuid4
 
 from turplanlegger.app import create_app, db
 from turplanlegger.auth.utils import hash_password
@@ -8,18 +9,22 @@ from turplanlegger.models.user import User
 
 class ItemListsTestCase(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         config = {
             'TESTING': True,
             'SECRET_KEY': 'test',
-            'LOG_LEVEL': 'INFO'
+            'SECRET_KEY_ID': 'test',
+            'LOG_LEVEL': 'INFO',
+            'CREATE_ADMIN_USER': True
         }
 
-        self.app = create_app(config)
-        self.client = self.app.test_client()
+        cls.app = create_app(config)
+        cls.client = cls.app.test_client()
 
-        self.user1 = User.create(
+        cls.user1 = User.create(
             User(
+                id=str(uuid4()),
                 name='Ola',
                 last_name='Nordamnn',
                 email='old.nordmann@norge.no',
@@ -27,8 +32,9 @@ class ItemListsTestCase(unittest.TestCase):
                 password=hash_password('test')
             )
         )
-        self.user2 = User.create(
+        cls.user2 = User.create(
             User(
+                id=str(uuid4()),
                 name='Kari',
                 last_name='Nordamnn',
                 email='kari.nordmann@norge.no',
@@ -37,7 +43,7 @@ class ItemListsTestCase(unittest.TestCase):
             )
         )
 
-        self.item_list = {
+        cls.item_list = {
             'name': 'Test list',
             'items': [
                 'item one',
@@ -48,19 +54,19 @@ class ItemListsTestCase(unittest.TestCase):
                 'item four',
                 'item five'
             ],
-            'owner': self.user1.id,
+            'owner': cls.user1.id,
             'type': 'check'
         }
 
-        self.empty_item_list = {
+        cls.empty_item_list = {
             'name': 'Empty test list',
             'items': [],
             'items_checked': [],
-            'owner': self.user1.id,
+            'owner': cls.user1.id,
             'type': 'check'
         }
 
-        self.item_to_add = {
+        cls.item_to_add = {
             'items': [
                 'item one',
                 'item two',
@@ -70,23 +76,30 @@ class ItemListsTestCase(unittest.TestCase):
             ]
         }
 
-        response = self.client.post(
+        response = cls.client.post(
             '/login',
-            data=json.dumps({'email': self.user1.email, 'password': 'test'}),
+            data=json.dumps({'email': cls.user1.email, 'password': 'test'}),
             headers={'Content-type': 'application/json'}
         )
-        self.assertEqual(response.status_code, 200)
+        if response.status_code != 200:
+            raise RuntimeError('Failed to login')
+
         data = json.loads(response.data.decode('utf-8'))
 
-        self.headers_json = {
+        cls.headers_json = {
             'Content-type': 'application/json',
             'Authorization': f'Bearer {data["token"]}'
         }
-        self.headers = {
+        cls.headers = {
             'Authorization': f'Bearer {data["token"]}'
         }
 
     def tearDown(self):
+        db.truncate_table('lists_items')
+        db.truncate_table('item_lists')
+
+    @classmethod
+    def tearDownClass(cls):
         db.destroy()
 
     def test_create_list(self):
@@ -134,7 +147,7 @@ class ItemListsTestCase(unittest.TestCase):
         self.assertIsInstance(data['item_list']['items'], list)
         self.assertEqual(len(data['item_list']['items']), 0)
         self.assertEqual(data['item_list']['name'], 'Empty test list')
-        self.assertEqual(data['item_list']['owner'], 1)
+        self.assertEqual(data['item_list']['owner'], self.user1.id)
         self.assertEqual(data['item_list']['type'], 'check')
         self.assertIsInstance(data['item_list']['items_checked'], list)
         self.assertEqual(len(data['item_list']['items_checked']), 0)
@@ -186,6 +199,11 @@ class ItemListsTestCase(unittest.TestCase):
             headers=self.headers
         )
         self.assertEqual(response.status_code, 404)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Item list not found')
+        self.assertEqual(data['detail'], 'The requested item list was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], 'http://localhost/item_list/2')
 
     def test_delete_list(self):
         response = self.client.post('/item_list', data=json.dumps(self.item_list), headers=self.headers_json)

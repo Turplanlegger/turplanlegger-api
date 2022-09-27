@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS users (
-    id serial PRIMARY KEY,
+    id text PRIMARY KEY,
     name text NOT NULL,
     last_name text NOT NULL,
     email text NOT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS routes (
     id serial PRIMARY KEY,
     route jsonb,
     route_history jsonb ARRAY,
-    owner int REFERENCES users (id),
+    owner text REFERENCES users (id),
     create_time timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted boolean DEFAULT FALSE,
     delete_time timestamp without time zone
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS item_lists (
     id serial PRIMARY KEY,
     name text,
     type text,
-    owner int REFERENCES users (id),
+    owner text REFERENCES users (id),
     create_time timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted boolean DEFAULT FALSE,
     delete_time timestamp without time zone
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS lists_items (
     content text,
     checked boolean DEFAULT FALSE,
     item_list int REFERENCES item_lists (id),
-    owner int REFERENCES users (id),
+    owner text REFERENCES users (id),
     create_time timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted boolean DEFAULT FALSE,
     delete_time timestamp without time zone
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS notes (
     id serial PRIMARY KEY,
     name text,
     content text NOT NULL,
-    owner int REFERENCES users (id),
+    owner text REFERENCES users (id),
     create_time timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted boolean DEFAULT FALSE,
     deleted_time timestamp without time zone
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS trips (
     private boolean DEFAULT FALSE,
     date_start timestamp without time zone CHECK (date_start < date_end),
     date_end timestamp without time zone CHECK (date_start < date_end),
-    owner int REFERENCES users (id),
+    owner text REFERENCES users (id),
     create_time timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted boolean DEFAULT FALSE,
     delete_time timestamp without time zone

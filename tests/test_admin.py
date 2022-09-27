@@ -6,30 +6,34 @@ from turplanlegger.app import create_app, db
 
 class UsersTestCase(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         config = {
             'TESTING': True,
             'SECRET_KEY': 'test',
+            'SECRET_KEY_ID': 'test',
             'CREATE_ADMIN_USER': True
         }
 
-        self.app = create_app(config)
-        self.client = self.app.test_client()
+        cls.app = create_app(config)
+        cls.client = cls.app.test_client()
 
-        response = self.client.post(
+        response = cls.client.post(
             '/login',
             data=json.dumps(
                 {
-                    'email': self.app.config.get('ADMIN_EMAIL'),
-                    'password': self.app.config.get('ADMIN_PASSWORD')
+                    'email': cls.app.config.get('ADMIN_EMAIL'),
+                    'password': cls.app.config.get('ADMIN_PASSWORD')
                 }
             ),
             headers={'Content-type': 'application/json'}
         )
-        self.assertEqual(response.status_code, 200)
+
+        if response.status_code != 200:
+            raise RuntimeError('Failed to login')
         data = json.loads(response.data.decode('utf-8'))
 
-        self.headers = {
+        cls.headers = {
             'Authorization': f'Bearer {data["token"]}'
         }
 
@@ -38,11 +42,11 @@ class UsersTestCase(unittest.TestCase):
 
     def test_get_admin_user(self):
 
-        response = self.client.get('/user/1', headers=self.headers)
+        response = self.client.get('/user/06335e84-2872-4914-8c5d-3ed07d2a2f16', headers=self.headers)
         self.assertEqual(response.status_code, 200)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['user']['id'], 1)
+        self.assertEqual(data['user']['id'], '06335e84-2872-4914-8c5d-3ed07d2a2f16')
         self.assertEqual(data['user']['name'], 'Admin')
         self.assertEqual(data['user']['last_name'], 'Nimda')
         self.assertEqual(data['user']['email'], self.app.config.get('ADMIN_EMAIL'))

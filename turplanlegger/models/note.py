@@ -7,11 +7,11 @@ JSON = Dict[str, any]
 
 class Note:
 
-    def __init__(self, owner: int, content: str, **kwargs) -> None:
+    def __init__(self, owner: str, content: str, **kwargs) -> None:
         if not owner:
             raise ValueError('Missing mandatory field \'owner\'')
-        if not isinstance(owner, int):
-            raise TypeError('\'owner\' must be integer')
+        if not isinstance(owner, str):
+            raise TypeError('\'owner\' must be str')
         if not content:
             raise ValueError('Missing mandatory field \'content\'')
         if not isinstance(content, str):
@@ -59,7 +59,7 @@ class Note:
     def find_note(id: int) -> 'Note':
         return Note.get_note(db.get_note(id))
 
-    def change_owner(self, owner: int) -> 'Note':
+    def change_owner(self, owner: str) -> 'Note':
         if self.owner == owner:
             raise ValueError('new owner is same as old')
 

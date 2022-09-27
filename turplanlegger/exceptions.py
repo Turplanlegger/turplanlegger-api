@@ -1,9 +1,21 @@
 import traceback
-from typing import Any, Dict, Tuple, Union
+from typing import Any, Dict, Optional, Tuple, Union
 
-from flask import Response, current_app, jsonify
+from flask import Response, current_app, jsonify, request
 from werkzeug.exceptions import HTTPException
 from werkzeug.routing import RoutingException
+
+
+class ApiProblem(Exception):
+    def __init__(self, title: Optional[str] = None, detail: Optional[str] = None, status: Optional[int] = None,
+                 type: Optional[str] = None, instance: Optional[str] = None, **kwargs) -> None:
+
+        self.title: str = title
+        self.detail: Optional[str] = detail
+        self.status: int = status or 500
+        self.type: str = type or 'about:blank'
+        self.instance: str = instance or request.url
+        self.kwargs: Dict = kwargs
 
 
 class BaseError(Exception):
@@ -33,6 +45,7 @@ class ExceptionHandlers:
         for code in default_exceptions.keys():
             app.register_error_handler(code, handle_http_error)
         app.register_error_handler(AuthError, handle_auth_error)
+        app.register_error_handler(ApiProblem, handle_api_problem)
         app.register_error_handler(ApiError, handle_api_error)
         app.register_error_handler(Exception, handle_exception)
 
@@ -59,6 +72,18 @@ def handle_auth_error(error: AuthError) -> Tuple[Response, int,
         'code': error.code,
         'errors': error.errors
     }), error.code, {'WWW-Authenticate': 'Bearer realm=Turplanlegger'}
+
+
+def handle_api_problem(problem: ApiProblem) -> Tuple[Response, int, Dict[str, Any]]:
+    if problem.status >= 500:
+        current_app.logger.exception(problem)
+    return jsonify({
+        'type': problem.type,
+        'status': problem.status,
+        'title': problem.title,
+        'detail': problem.detail,
+        'instance': problem.instance
+    }), problem.status, {'Content-Type': 'application/problem+json'}
 
 
 def handle_api_error(error: ApiError) -> Tuple[Response, int]:

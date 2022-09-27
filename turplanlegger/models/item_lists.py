@@ -7,13 +7,13 @@ from turplanlegger.models.list_items import ListItem
 JSON = Dict[str, any]
 
 
-class ItemList:  # This class has to be renamed
+class ItemList:
 
     def __init__(self, owner: int, type: str, **kwargs) -> None:
         if not owner:
             raise ValueError("missing mandatory field 'owner'")
-        if not isinstance(owner, int):
-            raise TypeError("'owner' must be integer")
+        if not isinstance(owner, str):
+            raise TypeError("'owner' must be str")
         if not type:
             raise ValueError("missing mandatory field 'type'")
         if not isinstance(type, str):

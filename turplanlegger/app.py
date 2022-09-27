@@ -1,6 +1,7 @@
 from typing import Any, Dict
 
 from flask import Flask
+from flask_cors import CORS
 
 from turplanlegger.database.base import Database
 from turplanlegger.exceptions import ExceptionHandlers
@@ -11,6 +12,7 @@ handlers = ExceptionHandlers()
 config = Config()
 logger = Logger()
 db = Database()
+cors = CORS()
 
 
 def create_app(config_override: Dict[str, Any] = None,
@@ -25,6 +27,8 @@ def create_app(config_override: Dict[str, Any] = None,
     handlers.register(app)
 
     db.init_db(app)
+
+    cors.init_app(app)
 
     from turplanlegger.views import api
     app.register_blueprint(api)
