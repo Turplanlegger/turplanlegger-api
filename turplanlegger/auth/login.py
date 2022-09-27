@@ -31,7 +31,7 @@ def login():
     now = datetime.utcnow()
     token = JWT(
         iss=request.url_root,
-        sub=user.id,
+        sub=str(user.id),
         aud=current_app.config['AUDIENCE'],
         exp=(now + timedelta(seconds=current_app.config['TOKEN_EXPIRE_TIME'])),
         nbf=now,
