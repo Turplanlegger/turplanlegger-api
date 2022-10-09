@@ -1,4 +1,4 @@
-from flask import jsonify, request
+from flask import g, jsonify, request
 
 from turplanlegger.auth.decorators import auth
 from turplanlegger.exceptions import ApiProblem
@@ -108,3 +108,23 @@ def update_note(note_id):
         return jsonify(status='ok')
     else:
         raise ApiProblem('Failed to update note', 'Unknown error', 500)
+
+
+@api.route('/note/mine', methods=['GET'])
+@auth
+def get_my_notes():
+
+    notes = Note.find_note_by_owner(g.user.id)
+
+    if notes:
+        return jsonify(
+            status='ok',
+            count=len(notes),
+            note=[note.serialize for note in notes]
+        )
+    else:
+        raise ApiProblem(
+            'Note not found',
+            'No notes were found for the requested user',
+            404
+        )

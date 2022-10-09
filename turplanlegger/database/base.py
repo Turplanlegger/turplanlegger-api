@@ -255,6 +255,15 @@ class Database:
             select += ' AND deleted = FALSE'
         return self._fetchone(select, (id,))
 
+    def get_note_by_owner(self, owner_id: str, deleted=False):
+        select = 'SELECT * FROM notes WHERE owner = %s'
+
+        if deleted:
+            select += ' AND deleted = TRUE'
+        else:
+            select += ' AND deleted = FALSE'
+        return self._fetchall(select, (owner_id,))
+
     def create_note(self, note):
         insert = """
             INSERT INTO notes (owner, name, content)

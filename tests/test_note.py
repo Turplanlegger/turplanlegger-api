@@ -48,6 +48,11 @@ class NotesTestCase(unittest.TestCase):
             'content': 'Are er kul',
             'name': 'Best note ever'
         }
+        cls.note_full2 = {
+            'owner': cls.user1.id,
+            'content': 'Petter er kul',
+            'name': 'Best note ever'
+        }
         cls.note_no_name = {
             'owner': cls.user1.id,
             'content': 'Are er kul',
@@ -225,3 +230,20 @@ class NotesTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['status'], 'ok')
+
+    def test_get_my_note(self):
+        response = self.client.post('/note', data=json.dumps(self.note_full), headers=self.headers_json)
+        self.assertEqual(response.status_code, 201)
+        response = self.client.post('/note', data=json.dumps(self.note_full2), headers=self.headers_json)
+        self.assertEqual(response.status_code, 201)
+
+        response = self.client.get('/note/mine', headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['note'][0]['owner'], self.note_full['owner'])
+        self.assertEqual(data['note'][0]['content'], self.note_full['content'])
+        self.assertEqual(data['note'][0]['name'], self.note_full['name'])
+        self.assertEqual(data['note'][1]['owner'], self.note_full2['owner'])
+        self.assertEqual(data['note'][1]['content'], self.note_full2['content'])
+        self.assertEqual(data['note'][1]['name'], self.note_full2['name'])
