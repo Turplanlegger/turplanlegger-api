@@ -209,14 +209,21 @@ class Database:
 
     # Route
     def get_route(self, id, deleted=False):
-        select = """
-            SELECT * FROM routes WHERE id = %s
-        """
+        select = 'SELECT * FROM routes WHERE id = %s'
+
         if deleted:
             select += ' AND deleted = TRUE'
         else:
             select += ' AND deleted = FALSE'
-        return self._fetchone(select, [id])
+        return self._fetchone(select, (id,))
+
+    def get_routes_by_owner(self, owner_id: str, deleted=False):
+        select = 'SELECT * FROM routes WHERE owner = %s'
+        if deleted:
+            select += ' AND deleted = TRUE'
+        else:
+            select += ' AND deleted = FALSE'
+        return self._fetchall(select, (owner_id,))
 
     def create_route(self, route, owner):
         insert = """

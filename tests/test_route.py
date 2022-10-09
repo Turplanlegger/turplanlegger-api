@@ -203,3 +203,13 @@ class RoutesTestCase(unittest.TestCase):
         self.assertEqual(data['detail'], 'Owner must be passed as an int')
         self.assertEqual(data['type'], 'about:blank')
         self.assertEqual(data['instance'], 'http://localhost/route/1/owner')
+
+    def test_get_my_routes(self):
+        response = self.client.post('/route', data=json.dumps(self.route), headers=self.headers_json)
+        self.assertEqual(response.status_code, 201)
+
+        response = self.client.get('/route/mine', headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['route'][0]['owner'], self.route['owner'])

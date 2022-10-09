@@ -1,4 +1,4 @@
-from flask import jsonify, request
+from flask import g, jsonify, request
 
 from turplanlegger.auth.decorators import auth
 from turplanlegger.exceptions import ApiProblem
@@ -74,3 +74,23 @@ def change_route_owner(route_id):
         raise ApiProblem('Failed to change owner of route', str(e), 500)
 
     return jsonify(status='ok')
+
+
+@api.route('/route/mine', methods=['GET'])
+@auth
+def get_my_routes():
+
+    routes = Route.find_routes_by_owner(g.user.id)
+
+    if routes:
+        return jsonify(
+            status='ok',
+            count=len(routes),
+            route=[route.serialize for route in routes]
+        )
+    else:
+        raise ApiProblem(
+            'route not found',
+            'No routes were found for the requested user',
+            404
+        )
