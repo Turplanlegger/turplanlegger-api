@@ -106,6 +106,10 @@ class ItemList:
     def find_item_list(id: int) -> 'ItemList':  # Add a method for getting list without lists_items
         return ItemList.get_item_list(db.get_item_list(id))
 
+    @staticmethod
+    def find_item_list_by_owner(owner_id: str) -> 'ItemList':
+        return [ItemList.get_item_list(item_list) for item_list in db.get_item_list_by_owner(owner_id)]
+
     def change_owner(self, owner: int) -> 'ItemList':
         if self.owner == owner:
             raise ValueError('new owner is same as old')

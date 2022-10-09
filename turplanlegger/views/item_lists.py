@@ -1,4 +1,4 @@
-from flask import jsonify, request
+from flask import g, jsonify, request
 
 from turplanlegger.auth.decorators import auth
 from turplanlegger.exceptions import ApiProblem
@@ -168,3 +168,23 @@ def change_item_list_owner(item_list_id):
         raise ApiProblem('Failed to change owner of item list', str(e), 500)
 
     return jsonify(status='ok')
+
+
+@api.route('/item_list/mine', methods=['GET'])
+@auth
+def get_my_item_lists():
+
+    item_lists = ItemList.find_item_list_by_owner(g.user.id)
+
+    if item_lists:
+        return jsonify(
+            status='ok',
+            count=len(item_lists),
+            item_list=[item_list.serialize for item_list in item_lists]
+        )
+    else:
+        raise ApiProblem(
+            'Item lists not found',
+            'No item lists were found for the requested user',
+            404
+        )
