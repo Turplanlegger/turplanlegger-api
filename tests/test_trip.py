@@ -68,6 +68,10 @@ class TripsTestCase(unittest.TestCase):
             'name': 'UTrippin?',
             'owner': cls.user1.id,
         }
+        cls.trip2 = {
+            'name': 'Petter b trippin',
+            'owner': cls.user1.id,
+        }
 
         response = cls.client.post(
             '/login',
@@ -197,3 +201,20 @@ class TripsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['trip']['owner'], self.user2.id)
+
+    def test_get_my_trips(self):
+        response = self.client.post('/trip', data=json.dumps(self.trip), headers=self.headers_json)
+        self.assertEqual(response.status_code, 201)
+        response = self.client.post('/trip', data=json.dumps(self.trip2), headers=self.headers_json)
+        self.assertEqual(response.status_code, 201)
+
+        response = self.client.get('trip/mine', headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['count'], 2)
+        self.assertEqual(data['trip'][0]['owner'], self.user1.id)
+        self.assertEqual(data['trip'][0]['name'], self.trip['name'])
+        self.assertEqual(data['trip'][1]['owner'], self.user1.id)
+        self.assertEqual(data['trip'][1]['name'], self.trip2['name'])

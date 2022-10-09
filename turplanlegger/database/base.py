@@ -428,6 +428,15 @@ class Database:
             select += ' AND deleted = FALSE'
         return self._fetchone(select, (id,))
 
+    def get_trips_by_owner(self, owner_id: str, deleted=False):
+        select = 'SELECT * FROM trips WHERE owner = %s'
+
+        if deleted:
+            select += ' AND deleted = TRUE'
+        else:
+            select += ' AND deleted = FALSE'
+        return self._fetchall(select, (owner_id,))
+
     def get_trip_notes(self, id):
         select = 'SELECT note_id FROM trips_notes_references WHERE trip_id = %s'
         return self._fetchall(select, (id,))

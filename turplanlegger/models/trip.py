@@ -73,8 +73,11 @@ class Trip:
 
     @staticmethod
     def find_trip(id: int) -> 'Trip':
-        trip = Trip.get_trip(db.get_trip(id))
-        return trip
+        return Trip.get_trip(db.get_trip(id))
+
+    @staticmethod
+    def find_trips_by_owner(owner_id: str) -> '[Trip]':
+        return [Trip.get_trip(trip) for trip in db.get_trips_by_owner(owner_id)]
 
     def change_owner(self, owner: str) -> 'Trip':
         if self.owner == owner:
