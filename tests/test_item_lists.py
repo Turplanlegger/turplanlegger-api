@@ -2,8 +2,6 @@ import json
 import unittest
 from uuid import uuid4
 
-from pprint import pprint
-
 from turplanlegger.app import create_app, db
 from turplanlegger.auth.utils import hash_password
 from turplanlegger.models.user import User
@@ -359,7 +357,6 @@ class ItemListsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
 
-        pprint(data['item_list'][0])
         self.assertEqual(data['count'], 2)
         self.assertEqual(data['item_list'][0]['id'], 1)
         self.assertEqual(data['item_list'][0]['name'], self.item_list['name'])
