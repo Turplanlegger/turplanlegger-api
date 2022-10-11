@@ -13,5 +13,5 @@ Run test and save result:
 ```
 pip install pytest pytest-csv
 pytest tests/test_*.py --csv tests/test_result.csv --csv-columns utc_timestamp,id,module,name,file,status,message,duration
-git commit test/test_result.csv -m "Unitetest result"
+git commit tests/test_result.csv -m "Unitetest result"
 ```
