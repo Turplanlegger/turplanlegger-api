@@ -52,6 +52,10 @@ class Route:
     def find_route(id: int) -> 'Route':
         return Route.get_route(db.get_route(id))
 
+    @staticmethod
+    def find_routes_by_owner(owner_id: str) -> '[Route]':
+        return [Route.get_route(route) for route in db.get_routes_by_owner(owner_id)]
+
     def change_owner(self, owner: str) -> 'Route':
         if self.owner == owner:
             raise ValueError('new owner is same as old')
