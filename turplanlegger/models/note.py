@@ -59,6 +59,10 @@ class Note:
     def find_note(id: int) -> 'Note':
         return Note.get_note(db.get_note(id))
 
+    @staticmethod
+    def find_note_by_owner(owner_id: str) -> 'Note':
+        return [Note.get_note(note) for note in db.get_note_by_owner(owner_id)]
+
     def change_owner(self, owner: str) -> 'Note':
         if self.owner == owner:
             raise ValueError('new owner is same as old')
