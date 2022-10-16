@@ -1,6 +1,6 @@
-from flask import g
-
 from typing import Dict
+
+from flask import g
 
 from turplanlegger.app import db
 
