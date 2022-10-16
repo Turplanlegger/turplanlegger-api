@@ -7,6 +7,8 @@ import jwt
 from flask import current_app
 from jwt import DecodeError, ExpiredSignatureError, InvalidAudienceError
 
+from turplanlegger.models.user import User
+
 JSON = Dict[str, Any]
 dt = datetime.datetime
 
@@ -27,27 +29,8 @@ class JWT:
 
     @classmethod
     def parse(cls, token: str) -> 'JWT':
-        jsonurl = urlopen(current_app.config['AZURE_AD_B2C_KEY_URL'])
-        jwks = json.loads(jsonurl.read())
         unverified_header = jwt.get_unverified_header(token)
-        rsa_key = ''
-        for key in jwks['keys']:
-            if key['kid'] == unverified_header['kid']:
-                rsa_key = jwt.algorithms.RSAAlgorithm.from_jwk({
-                    'kty': key['kty'],
-                    'kid': key['kid'],
-                    'use': key['use'],
-                    'n': key['n'],
-                    'e': key['e']
-                })
-                break
-
-        if (rsa_key):
-            key = rsa_key
-        elif(unverified_header['kid'] == current_app.config['SECRET_KEY_ID']):
-            key = current_app.config['SECRET_KEY']
-        else:
-            key = ''
+        key = cls.find_correct_key(token, unverified_header)
 
         try:
             jsonRes = jwt.decode(
@@ -69,6 +52,55 @@ class JWT:
             jti=jsonRes.get('jti', None),
             typ=jsonRes.get('typ', None)
         )
+
+    @classmethod
+    def get_user_from_token(cls, token: str) -> User:
+        unverified_header = jwt.get_unverified_header(token)
+        key = cls.find_correct_key(token, unverified_header)
+
+        try:
+            jsonRes = jwt.decode(
+                token,
+                key,
+                algorithms=[unverified_header['alg']],
+                audience=current_app.config['AUDIENCE']
+            )
+        except (DecodeError, ExpiredSignatureError, InvalidAudienceError):
+            raise
+
+        return User(
+            id=jsonRes.get('sub', None),
+            name=jsonRes.get('given_name', None),
+            last_name=jsonRes.get('family_name', None),
+            email=jsonRes.get('emails', None)[0],
+            auth_method='b2c',
+            password = ''
+        )
+
+    def find_correct_key(token: str, unverified_header: str) -> str:
+        jsonurl = urlopen(current_app.config['AZURE_AD_B2C_KEY_URL'])
+        jwks = json.loads(jsonurl.read())
+        rsa_key = ''
+        for key in jwks['keys']:
+            if key['kid'] == unverified_header['kid']:
+                rsa_key = jwt.algorithms.RSAAlgorithm.from_jwk({
+                    'kty': key['kty'],
+                    'kid': key['kid'],
+                    'use': key['use'],
+                    'n': key['n'],
+                    'e': key['e']
+                })
+                break
+
+        if (rsa_key):
+            key = rsa_key
+        elif(unverified_header['kid'] == current_app.config['SECRET_KEY_ID']):
+            key = current_app.config['SECRET_KEY']
+        else:
+            key = ''
+
+        return key
+    
 
     @property
     def serialize(self) -> JSON:

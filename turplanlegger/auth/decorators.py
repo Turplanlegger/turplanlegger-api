@@ -48,6 +48,8 @@ def auth(func):
 
             current_app.logger.debug(f'user {user.id} logged in')
             g.user = user
+        else:
+            User.create(JWT.get_user_from_token(token))
 
         return func(*args, **kwargs)
     return wrapped
