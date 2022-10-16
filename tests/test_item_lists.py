@@ -1,6 +1,5 @@
 import json
 import unittest
-from uuid import uuid4
 
 from turplanlegger.app import create_app, db
 from turplanlegger.auth.utils import hash_password
