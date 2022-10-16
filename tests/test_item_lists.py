@@ -24,7 +24,6 @@ class ItemListsTestCase(unittest.TestCase):
 
         cls.user1 = User.create(
             User(
-                id=str(uuid4()),
                 name='Ola',
                 last_name='Nordamnn',
                 email='old.nordmann@norge.no',
@@ -34,7 +33,6 @@ class ItemListsTestCase(unittest.TestCase):
         )
         cls.user2 = User.create(
             User(
-                id=str(uuid4()),
                 name='Kari',
                 last_name='Nordamnn',
                 email='kari.nordmann@norge.no',
@@ -54,7 +52,6 @@ class ItemListsTestCase(unittest.TestCase):
                 'item four',
                 'item five'
             ],
-            'owner': cls.user1.id,
             'type': 'check'
         }
 
@@ -66,7 +63,6 @@ class ItemListsTestCase(unittest.TestCase):
             'items_checked': [
                 'only one checked',
             ],
-            'owner': cls.user1.id,
             'type': 'check'
         }
 
@@ -74,7 +70,6 @@ class ItemListsTestCase(unittest.TestCase):
             'name': 'Empty test list',
             'items': [],
             'items_checked': [],
-            'owner': cls.user1.id,
             'type': 'check'
         }
 
