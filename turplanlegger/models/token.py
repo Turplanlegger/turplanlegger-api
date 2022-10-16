@@ -74,7 +74,7 @@ class JWT:
             last_name=jsonRes.get('family_name', None),
             email=jsonRes.get('emails', None)[0],
             auth_method='b2c',
-            password = ''
+            password=''
         )
 
     def find_correct_key(token: str, unverified_header: str) -> str:
@@ -100,7 +100,6 @@ class JWT:
             key = ''
 
         return key
-    
 
     @property
     def serialize(self) -> JSON:
