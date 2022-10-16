@@ -1,3 +1,5 @@
+from flask import g
+
 from typing import Dict
 
 from turplanlegger.app import db
@@ -27,7 +29,7 @@ class Note:
     def parse(cls, json: JSON) -> 'Note':
         return Note(
             id=json.get('id', None),
-            owner=json.get('owner', None),
+            owner=g.user.id,
             content=json.get('content', None),
             name=json.get('name', None),
         )
