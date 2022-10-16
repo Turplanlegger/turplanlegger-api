@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import Dict
 
+from flask import g
+
 from turplanlegger.app import db
 
 JSON = Dict[str, any]
@@ -8,11 +10,11 @@ JSON = Dict[str, any]
 
 class Route:
 
-    def __init__(self, owner: int, route: JSON, **kwargs) -> None:
+    def __init__(self, owner: str, route: JSON, **kwargs) -> None:
         if not owner:
             raise ValueError('Missing mandatory field \'owner\'')
         if not isinstance(owner, str):
-            raise TypeError('"owner" must be integer')
+            raise TypeError('\'owner\' must be string')
         if not route:
             raise ValueError('Missing mandatory field \'route\'')
 
@@ -26,7 +28,7 @@ class Route:
     def parse(cls, json: JSON) -> 'Route':
         return Route(
             id=json.get('id', None),
-            owner=json.get('owner', None),
+            owner=g.user.id,
             route=json.get('route', None),
             route_history=json.get('route_history', []),
         )
