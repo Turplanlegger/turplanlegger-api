@@ -73,7 +73,7 @@ def add_item_list_items(item_list_id):
         items = [
             ListItem.parse(
                 {
-                    'owner': item_list.owner,
+                    'owner': g.user.id,
                     'item_list': item_list.id,
                     'checked': False,
                     'content': item
@@ -83,7 +83,7 @@ def add_item_list_items(item_list_id):
         items_checked = [
             ListItem.parse(
                 {
-                    'owner': item_list.owner,
+                    'owner': g.user.id,
                     'item_list': item_list.id,
                     'checked': True,
                     'content': item

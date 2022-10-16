@@ -1,3 +1,5 @@
+from flask import g
+
 from datetime import datetime
 from typing import Dict
 
@@ -9,7 +11,7 @@ JSON = Dict[str, any]
 
 class ItemList:
 
-    def __init__(self, owner: int, type: str, **kwargs) -> None:
+    def __init__(self, owner: str, type: str, **kwargs) -> None:
         if not owner:
             raise ValueError("missing mandatory field 'owner'")
         if not isinstance(owner, str):
@@ -52,7 +54,7 @@ class ItemList:
 
         return ItemList(
             id=json.get('id', None),
-            owner=json.get('owner', None),
+            owner=g.user.id,
             name=json.get('name', None),
             type=json.get('type', None),
             items=items,
@@ -110,7 +112,7 @@ class ItemList:
     def find_item_list_by_owner(owner_id: str) -> 'ItemList':
         return [ItemList.get_item_list(item_list) for item_list in db.get_item_list_by_owner(owner_id)]
 
-    def change_owner(self, owner: int) -> 'ItemList':
+    def change_owner(self, owner: str) -> 'ItemList':
         if self.owner == owner:
             raise ValueError('new owner is same as old')
 
