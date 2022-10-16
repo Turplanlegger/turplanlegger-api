@@ -44,15 +44,9 @@ class RoutesTestCase(unittest.TestCase):
                          '[11.6819,60.613258],[11.697693,60.601797],[11.712112,60.586622],[11.703873,60.574476],'
                          '[11.67984,60.568064],[11.640015,60.576838],[11.611862,60.587296]]}')
         cls.route = {
-            'route': routeGeometry,
-            'owner': cls.user1.id,
+            'route': routeGeometry
         }
-        cls.route_no_owner = {
-            'route': routeGeometry,
-        }
-        cls.route_no_geometry = {
-            'owner': cls.user1.id,
-        }
+        cls.route_no_geometry = {}
 
         response = cls.client.post(
             '/login',
@@ -88,16 +82,6 @@ class RoutesTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['owner'], self.user1.id)
 
-    def test_add_route_no_owner(self):
-        response = self.client.post('/route', data=json.dumps(self.route_no_owner), headers=self.headers_json)
-        self.assertEqual(response.status_code, 400)
-
-        data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['title'], 'Failed to parse route')
-        self.assertEqual(data['detail'], 'Missing mandatory field \'owner\'')
-        self.assertEqual(data['type'], 'about:blank')
-        self.assertEqual(data['instance'], 'http://localhost/route')
-
     def test_add_route_no_geometry(self):
         response = self.client.post('/route', data=json.dumps(self.route_no_geometry), headers=self.headers_json)
         self.assertEqual(response.status_code, 400)
@@ -118,7 +102,7 @@ class RoutesTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['route']['owner'], self.route['owner'])
+        self.assertEqual(data['route']['owner'], self.user1.id)
 
     def test_get_route_not_found(self):
         response = self.client.post('/route', data=json.dumps(self.route), headers=self.headers_json)
@@ -212,4 +196,4 @@ class RoutesTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['route'][0]['owner'], self.route['owner'])
+        self.assertEqual(data['route'][0]['owner'], self.user1.id)
