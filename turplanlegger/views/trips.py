@@ -11,6 +11,7 @@ from . import api
 
 
 @api.route('/trip/<trip_id>', methods=['GET'])
+@auth
 def get_trip(trip_id):
 
     trip = Trip.find_trip(trip_id)
@@ -21,6 +22,7 @@ def get_trip(trip_id):
 
 
 @api.route('/trip', methods=['POST'])
+@auth
 def add_trip():
     try:
         trip = Trip.parse(request.json)
@@ -36,6 +38,7 @@ def add_trip():
 
 
 @api.route('/trip/note', methods=['PATCH'])
+@auth
 def add_note_to_trip():
 
     trip = Trip.find_trip(request.json.get('trip_id', None))
@@ -55,6 +58,7 @@ def add_note_to_trip():
 
 
 @api.route('/trip/route', methods=['PATCH'])
+@auth
 def add_route_to_trip():
 
     trip = Trip.find_trip(request.json.get('trip_id', None))
@@ -74,6 +78,7 @@ def add_route_to_trip():
 
 
 @api.route('/trip/item_list', methods=['PATCH'])
+@auth
 def add_item_list_to_trip():
 
     trip = Trip.find_trip(request.json.get('trip_id', None))
@@ -93,6 +98,7 @@ def add_item_list_to_trip():
 
 
 @api.route('/trip/<trip_id>/owner', methods=['PATCH'])
+@auth
 def change_trip_owner(trip_id):
 
     trip = Trip.find_trip(trip_id)

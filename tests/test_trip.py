@@ -43,10 +43,8 @@ class TripsTestCase(unittest.TestCase):
             'route': ('{\"type\":\"LineString\",\"coordinates\":[[11.615295,60.603483],[11.638641,60.612921],'
                       '[11.6819,60.613258],[11.697693,60.601797],[11.712112,60.586622],[11.703873,60.574476],'
                       '[11.67984,60.568064],[11.640015,60.576838],[11.611862,60.587296]]}'),
-            'owner': cls.user1.id,
         }
         cls.note = {
-            'owner': cls.user1.id,
             'content': 'Are er kul',
             'name': 'Best note ever'
         }
@@ -61,16 +59,13 @@ class TripsTestCase(unittest.TestCase):
                 'item four',
                 'item five'
             ],
-            'owner': cls.user1.id,
             'type': 'check'
         }
         cls.trip = {
             'name': 'UTrippin?',
-            'owner': cls.user1.id,
         }
         cls.trip2 = {
             'name': 'Petter b trippin',
-            'owner': cls.user1.id,
         }
 
         response = cls.client.post(
@@ -171,6 +166,7 @@ class TripsTestCase(unittest.TestCase):
         # Create item_list
         response = self.client.post('/item_list', data=json.dumps(self.item_list), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
+
         data = json.loads(response.data.decode('utf-8'))
         item_list_id = data['id']
 
@@ -190,8 +186,8 @@ class TripsTestCase(unittest.TestCase):
 
     def test_change_trip_owner(self):
         response = self.client.post('/trip', data=json.dumps(self.trip), headers=self.headers_json)
-        self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(response.status_code, 201)
 
         response = self.client.patch(f'/trip/{data["id"]}/owner',
                                      data=json.dumps({'owner': self.user2.id}), headers=self.headers_json)
