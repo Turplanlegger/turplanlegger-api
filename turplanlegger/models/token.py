@@ -54,7 +54,7 @@ class JWT:
         )
 
     @classmethod
-    def get_user_from_token(cls, token: str) -> User:
+    def parse_user_from_token(cls, token: str) -> User:
         unverified_header = jwt.get_unverified_header(token)
         key = cls.find_correct_key(token, unverified_header)
 
@@ -94,7 +94,7 @@ class JWT:
 
         if (rsa_key):
             key = rsa_key
-        elif(unverified_header['kid'] == current_app.config['SECRET_KEY_ID']):
+        elif (unverified_header['kid'] == current_app.config['SECRET_KEY_ID']):
             key = current_app.config['SECRET_KEY']
         else:
             key = ''
