@@ -93,7 +93,7 @@ class User:
         }
 
     def create(self) -> 'User':
-        self.password = self.password.decode('utf-8')  # Revise this one!
+        self.password = self.password.decode('utf-8') if (self.password != '') else None  # Revise this one!
         return self.get_user(db.create_user(self))
 
     def rename(self) -> 'User':
