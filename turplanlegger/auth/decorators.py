@@ -3,7 +3,7 @@ from functools import wraps
 from flask import current_app, g, request
 from jwt import DecodeError, ExpiredSignatureError, InvalidAudienceError
 
-from turplanlegger.exceptions import AuthError
+from turplanlegger.exceptions import ApiProblem, AuthError
 from turplanlegger.models.token import JWT
 from turplanlegger.models.user import User
 
@@ -49,7 +49,11 @@ def auth(func):
             current_app.logger.debug(f'user {user.id} logged in')
             g.user = user
         else:
-            User.create(JWT.parse_user_from_token(token))
+            try:
+                user = JWT.parse_user_from_token(token)
+                User.create(user)
+            except Exception as e:
+                raise ApiProblem('Failed to create user', str(e), 500)
 
         return func(*args, **kwargs)
     return wrapped
