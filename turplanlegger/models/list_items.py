@@ -58,7 +58,6 @@ class ListItem:
 
         Returns:
             A ListItem object
-
         """
         content = json.get('content', None)
         if len(content) > 512:
