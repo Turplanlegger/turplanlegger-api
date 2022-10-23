@@ -10,7 +10,7 @@ JSON = Dict[str, any]
 
 
 class ItemList:
-    """A ItemList object. A object containing multiple
+    """A ItemList object. An object containing multiple
     ListItems to create a list used for planning.
 
     E.g shopping list, packing list, name list

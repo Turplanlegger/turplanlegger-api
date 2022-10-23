@@ -31,6 +31,7 @@ class Trip:
                           the trip
 
     """
+
     def __init__(self, owner: str, name: str, **kwargs) -> None:
         if not owner:
             raise ValueError('Missing mandatory field \'owner\'')

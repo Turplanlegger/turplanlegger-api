@@ -27,6 +27,7 @@ class Route:
         create_time (datetime): Time of creation,
                                 Default: datetime.now()
     """
+
     def __init__(self, owner: str, route: JSON, **kwargs) -> None:
         if not owner:
             raise ValueError('Missing mandatory field \'owner\'')
@@ -60,7 +61,7 @@ class Route:
 
     @property
     def serialize(self) -> JSON:
-        """Serialize the Route object and returns it as Dict(str, any)"""
+        """Serialize the Route instance, returns it as Dict(str, any)"""
         return {
             'id': self.id,
             'owner': self.owner,

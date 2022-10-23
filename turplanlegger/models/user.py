@@ -33,6 +33,7 @@ class User:
         create_time (datetime): Time of creation,
                                 Default: datetime.now()
     """
+
     def __init__(self, name: str, last_name: str, email: str, auth_method: str,
                  password: str, private: bool = False, **kwargs) -> None:
 
