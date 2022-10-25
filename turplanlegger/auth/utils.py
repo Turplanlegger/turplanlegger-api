@@ -8,7 +8,3 @@ def hash_password(provided_pw) -> str:
 def check_password(hashed_pw: str, provided_pw) -> bool:
     return bcrypt.checkpw(provided_pw.encode('utf-8'), hashed_pw.encode('utf-8'))
 
-
-def create_token(user_id: int) -> str:
-    from jwt import encode
-    return encode({'test': 'token'}, 'test', algorithm='HS256')
