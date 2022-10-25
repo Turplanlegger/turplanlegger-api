@@ -1,6 +1,8 @@
 import json
 import unittest
 
+from flask import current_app
+
 from turplanlegger.app import create_app, db
 from turplanlegger.auth.utils import hash_password
 from turplanlegger.models.user import User
@@ -107,6 +109,21 @@ class ItemListsTestCase(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         db.destroy()
+
+    def test_create_list_minimal_input(self):
+        response = self.client.post(
+            '/item_list',
+            data=json.dumps({'type': 'check'}),
+            headers=self.headers_json
+        )
+
+        print("pResdsadsaponse: ", response.data)
+        print("pResdsadsaponse: ", response.data.decode('utf-8'))
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['item_list']['type'], 'check')
+        self.assertEqual(data['item_list']['owner'], self.user1.id)
 
     def test_create_list(self):
         response = self.client.post(

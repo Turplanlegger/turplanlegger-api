@@ -21,12 +21,13 @@ class ItemList:
         if not isinstance(type, str):
             raise TypeError("'type' must be string")
 
-        if len(kwargs.get('name', '')) > 512:
+        name = kwargs.get('name', None)
+        if name is not None and len(name) > 512:
             raise ValueError("'name' is too long")
 
-        self.id = kwargs.get('id', 0)
+        self.id = kwargs.get('id', None)
         self.owner = owner
-        self.name = kwargs.get('name')
+        self.name = name
         self.type = type
         self.items = kwargs.get('items', [])
         self.items_checked = kwargs.get('items_checked', [])
@@ -34,22 +35,19 @@ class ItemList:
 
     @classmethod
     def parse(cls, json: JSON) -> 'ItemList':
-        name = json.get('name', None)
-        if len(name) > 512:
-            raise ValueError("'name' is too long")
 
         items = json.get('items', [])
         if not isinstance(items, list):
             raise TypeError("'items' must be JSON list")
         for i, item in enumerate(items):
-            if len(item) > 512:
+            if item is not None and len(item) > 512:
                 raise ValueError(f"item {i+1}:'{item}' is too long, max 512 char")
 
         items_checked = json.get('items_checked', [])
         if not isinstance(items_checked, list):
             raise TypeError("'items_checed' must be JSON list")
         for i, item in enumerate(items_checked):
-            if len(item) > 512:
+            if item is not None and len(item) > 512:
                 raise ValueError(f"checked item {i+1}:'{item}' is too long, max 512 char")
 
         return ItemList(
