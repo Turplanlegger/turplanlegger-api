@@ -137,13 +137,9 @@ class User:
         }
 
     def create(self) -> 'User':
-<<<<<<< feature/docstring
         """Creates the Route object in the database
         will also decode the hased password to a UTF-8 string"""
-        self.password = self.password.decode('utf-8')  # Revise this one!
-=======
         self.password = self.password.decode('utf-8') if (self.password != '') else None  # Revise this one!
->>>>>>> develop
         return self.get_user(db.create_user(self))
 
     def rename(self) -> 'User':
