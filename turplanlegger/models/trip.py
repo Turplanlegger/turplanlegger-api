@@ -1,5 +1,7 @@
 from typing import Dict
 
+from flask import g
+
 from turplanlegger.app import db
 
 JSON = Dict[str, any]
@@ -36,7 +38,7 @@ class Trip:
         if not owner:
             raise ValueError('Missing mandatory field \'owner\'')
         if not isinstance(owner, str):
-            raise TypeError('\'owner\' must be str')
+            raise TypeError('\'owner\' must be string')
         if not name:
             raise ValueError('Missing mandatory field \'name\'')
         if not isinstance(name, str):
@@ -68,7 +70,7 @@ class Trip:
 
         return Trip(
             id=json.get('id', None),
-            owner=json.get('owner', None),
+            owner=g.user.id,
             name=json.get('name', None),
             private=json.get('private', False)
         )
