@@ -8,6 +8,31 @@ JSON = Dict[str, any]
 
 
 class Trip:
+    """Trip object gathers ItemLists with ListItems,
+    Notes and Routes to plan a trip.
+
+    The trip object can contain multiple ItemLists,
+    Notes or Routes.
+
+    Args:
+        owner (str): The UUID4 of the owner of the object
+        name (str): Name of the Trip.
+        **kwargs: Arbitrary keyword arguments.
+
+    Attributes:
+        owner (str): The UUID4 of the owner of the object
+        name (str): Name of the Trip
+        id (int): Optional, the ID of the object
+        private (bool): Flag if the trip is private
+                        Default so False (public)
+        create_time (datetime): Start time of the date
+        create_time (datetime): End of the trip
+        notes (list): List of note ids that are related to the trip
+        routes (list): List of route ids that are related to the trip
+        item_list (list): List of item list ids that are related to
+                          the trip
+
+    """
 
     def __init__(self, owner: str, name: str, **kwargs) -> None:
         if not owner:
@@ -34,6 +59,14 @@ class Trip:
 
     @classmethod
     def parse(cls, json: JSON) -> 'Trip':
+        """Parse input JSON and return an Trip instance.
+
+        Args:
+            json (Dict[str, any]): JSON input object
+
+        Returns:
+            An trip instance
+        """
 
         return Trip(
             id=json.get('id', None),
@@ -44,6 +77,7 @@ class Trip:
 
     @property
     def serialize(self) -> JSON:
+        """Serialize the Trip instance and returns it as Dict(str, any)"""
         return {
             'id': self.id,
             'owner': self.owner,
@@ -55,17 +89,36 @@ class Trip:
         }
 
     def create(self) -> 'Trip':
+        """Creates the Trip instance in the database"""
         trip = self.get_trip(db.create_trip(self))
         return trip
 
     def delete(self) -> bool:
+        """Deletes the Route object from the database
+        Returns True if deleted"""
         return db.delete_trip(self.id)
 
     def add_note_reference(self, note_id: int) -> 'Trip':
+        """Adds a note to the trip instance
+
+        Args:
+            note_id (int): Id of note
+
+        Returns:
+            dict of notes from the database
+        """
         db.add_trip_note_reference(self.id, note_id)
         self.notes = db.get_trip_notes(self.id)
 
     def add_route_reference(self, route_id: int) -> 'Trip':
+        """Adds a route to the trip instance
+
+        Args:
+            note_id (int): Id of note
+
+        Returns:
+            dict of routes from the database
+        """
         db.add_trip_route_reference(self.id, route_id)
         self.routes = db.get_trip_routes(self.id)
 
@@ -75,19 +128,52 @@ class Trip:
 
     @staticmethod
     def find_trip(id: int) -> 'Trip':
+        """Looks up an trip based on id
+
+        Args:
+            id (int): Id of Trip
+
+        Returns:
+            An Trip
+        """
         return Trip.get_trip(db.get_trip(id))
 
     @staticmethod
     def find_trips_by_owner(owner_id: str) -> '[Trip]':
+        """Looks up Trips by owner
+
+        Args:
+            owner_id (str): Id (uuid4) of owner
+
+        Returns:
+            A list of Trip istances
+        """
         return [Trip.get_trip(trip) for trip in db.get_trips_by_owner(owner_id)]
 
     def change_owner(self, owner: str) -> 'Trip':
+        """Change owner of the Trip
+        Won't change name if new name is the same as current
+
+        Args:
+            owner (str): id (uuid4) of the new owner
+
+        Returns:
+            The updated Trip object
+        """
         if self.owner == owner:
             raise ValueError('new owner is same as old')
         return Trip.get_trip(db.change_trip_owner(self.id, owner))
 
     @classmethod
     def get_trip(cls, rec) -> 'Trip':
+        """Converts a database record to an Trip instance
+
+        Args:
+            rec (dict): Database record
+
+        Returns:
+            An Trip instance
+        """
         if isinstance(rec, dict):
             trip = Trip(
                 id=rec.get('id', None),

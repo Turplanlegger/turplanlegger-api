@@ -9,6 +9,30 @@ JSON = Dict[str, any]
 
 
 class User:
+    """A User object. Used for setting owner and sharing content
+
+    Args:
+        name (str): First name of the user
+        last_name (str): Last name/sir name of the user
+        email (str): Email of the user
+        password (str): Hashed password of the user
+                        Only used for basic auth
+        private (bool): Flag if the user should be private or public
+        **kwargs: Arbitrary keyword arguments.
+
+    Attributes:
+        id (int): Optional, the ID of the object
+        name (str): First name of the user
+        last_name (str): Last name/sir name of the user
+        email (str): Email of the user
+        password (str): Hashed password of the user
+                        Only used for basic auth
+        private (bool): Flag if the user should be private or public
+        deleted (bool): Flag if the user has logicaly been deleted
+        delete_time (datetime): Time of the deletion of the user
+        create_time (datetime): Time of creation,
+                                Default: datetime.now()
+    """
 
     def __init__(self, name: str, last_name: str, email: str, auth_method: str,
                  password: str, private: bool = False, **kwargs) -> None:
@@ -47,6 +71,25 @@ class User:
 
     @classmethod
     def parse(cls, json: JSON) -> 'User':
+        """Parse input JSON and return an User instance.
+        Checks if the email matches email-format regex
+        Checks length of password if auth_type is basic
+        Hashes password
+
+        Args:
+            json (Dict[str, any]): JSON input object
+
+        Raises:
+            ValueError:
+                On failed email format rexeg match
+                If user already exists (checked by email)
+                If password isn't supplied when auth_type is basic
+                If password is too short when auth_type is basic
+                If the password hashing failed
+
+        Returns:
+            A Route object
+        """
         email = json.get('email', None)
         p = re.compile('^[\\w.-]+@[\\w.-]+\\.\\w+$')
         if not p.match(email):
@@ -80,6 +123,7 @@ class User:
 
     @property
     def serialize(self) -> JSON:
+        """Serialize the User instance, returns it as Dict(str, any)"""
         return {
             'id': self.id,
             'name': self.name,
@@ -93,24 +137,51 @@ class User:
         }
 
     def create(self) -> 'User':
+        """Creates the Route object in the database
+        will also decode the hased password to a UTF-8 string"""
         self.password = self.password.decode('utf-8') if (self.password != '') else None  # Revise this one!
         return self.get_user(db.create_user(self))
 
     def rename(self) -> 'User':
+        """Update name and last name
+        Returns an updated instance of the user"""
         return self.get_user(db.rename_user(self))
 
     def delete(self) -> bool:
+        """Deletes the Route object from the database
+        Returns True if deleted"""
         return db.delete_user(self.id)
 
-    def toggle_private(self):
+    def toggle_private(self) -> 'None':
+        """Switch the privacy of the user"""
         return db.toggle_private_user(self.id, False if self.private else True)
 
     @staticmethod
     def find_user(id: str) -> 'User':
+        """Looks up an user based on id
+
+        Args:
+            id (int): Id (uuid4) of user
+
+        Returns:
+            An User instance
+        """
         return User.get_user(db.get_user(id))
 
     @staticmethod
     def find_by_email(email: str) -> 'User':
+        """Looks up an user based on email
+
+        Args:
+            email (str): Email to look for
+
+        Raises:
+            ValueError:
+                On failed email format rexeg match
+
+        Returns:
+            A User instance
+        """
         p = re.compile('^[\\w.-]+@[\\w.-]+\\.\\w+$')
         if not p.match(email):
             raise ValueError('invalid email address')
@@ -119,14 +190,34 @@ class User:
 
     @staticmethod
     def check_credentials(email: str, password: str):
+        """Looks up a user by email and checkes passed password
+        if it matches the on in the database.
+
+        Args:
+            email (str): Email to look for
+            passowrd (str): Unhashed password
+
+        Returns:
+            A user instance if user is found and password matches
+            None if not
+        """
         user = User.find_by_email(email)
 
         if user and utils.check_password(user.password, password):
             return user
+
         return None
 
     @classmethod
     def get_user(cls, rec) -> 'User':
+        """Converts a database record to an User instance
+
+        Args:
+            rec (dict): Database record
+
+        Returns:
+            An User instance
+        """
         if isinstance(rec, dict):
             return User(
                 id=rec.get('id', None),
