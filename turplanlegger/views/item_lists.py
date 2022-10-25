@@ -155,15 +155,23 @@ def change_item_list_owner(item_list_id):
     if not item_list:
         raise ApiProblem('Item list not found', 'The requested item list was not found', 404)
 
-    owner = request.json.get('owner', None)
+    if item_list.owner == request.json.get('owner', None):
+        raise ApiProblem(
+            'Failed to change owner of item list',
+            'New owner is the same as old',
+            400
+        )
+    item_list.owner = request.json.get('owner', None)
 
-    if not owner:
-        raise ApiProblem('Owner is not int', 'Owner must be passed as an int', 400)
+    if not item_list.owner:
+        raise ApiProblem(
+            'Owner is not str',
+            'Owner must be passed as an str',
+            400
+        )
 
     try:
-        item_list.change_owner(owner)
-    except ValueError as e:
-        raise ApiProblem('Failed to change owner of item list', str(e), 400)
+        item_list.change_owner()
     except Exception as e:
         raise ApiProblem('Failed to change owner of item list', str(e), 500)
 

@@ -167,21 +167,8 @@ class ItemList:
         return [ItemList.get_item_list(item_list) for item_list in db.get_item_list_by_owner(owner_id)]
 
     def change_owner(self, owner: str) -> 'ItemList':
-        """Change owner of the ItemList
-        Won't change name if new name is the same as current
-
-        Args:
-            owner (str): id (uuid4) of the new owner
-
-        Returns:
-            The updated ItemList object
-        """
-        if self.owner == owner:
-            raise ValueError('new owner is same as old')
-
-        # A user object should be parsed/passed
-        # Return a boolean, don't get the list unless it's used
-        return ItemList.get_item_list(db.change_item_list_owner(self.id, owner))
+        """Changes owner of the ItemList"""
+        return ItemList.get_item_list(db.change_item_list_owner(self.id, self.owner))
 
     @classmethod
     def get_item_list(cls, rec) -> 'ItemList':
