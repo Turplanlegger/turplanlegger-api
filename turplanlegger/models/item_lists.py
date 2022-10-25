@@ -140,7 +140,7 @@ class ItemList:
 
     def rename(self) -> 'ItemList':
         """Renames the ItemList"""
-        return db.rename_item_list(self.id, self.name)
+        return ItemList.get_item_list(db.rename_item_list(self.id, self.name))
 
     @staticmethod
     def find_item_list(id: int) -> 'ItemList':  # Add a method for getting list without lists_items
