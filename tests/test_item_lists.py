@@ -117,8 +117,6 @@ class ItemListsTestCase(unittest.TestCase):
             headers=self.headers_json
         )
 
-        print("pResdsadsaponse: ", response.data)
-        print("pResdsadsaponse: ", response.data.decode('utf-8'))
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
 
