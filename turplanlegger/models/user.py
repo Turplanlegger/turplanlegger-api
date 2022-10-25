@@ -1,5 +1,5 @@
 import re
-from typing import Dict
+from typing import Dict, NamedTuple
 from uuid import uuid4
 
 from turplanlegger.app import db, logger
@@ -209,38 +209,27 @@ class User:
         return None
 
     @classmethod
-    def get_user(cls, rec) -> 'User':
+    def get_user(cls, rec: NamedTuple) -> 'User':
         """Converts a database record to an User instance
 
         Args:
-            rec (dict): Database record
+            rec (NamedTuple): Database record
 
         Returns:
             An User instance
         """
-        if isinstance(rec, dict):
-            return User(
-                id=rec.get('id', None),
-                name=rec.get('name', None),
-                last_name=rec.get('last_name', None),
-                email=rec.get('email', None),
-                auth_method=rec.get('auth_method', None),
-                password=rec.get('password', None),
-                private=rec.get('private', None),
-                create_time=rec.get('created', None),
-                deleted=rec.get('deleted', False),
-                delete_time=rec.get('delete_time', None)
-            )
-        elif isinstance(rec, tuple):
-            return User(
-                id=rec.id,
-                name=rec.name,
-                last_name=rec.last_name,
-                email=rec.email,
-                auth_method=rec.auth_method,
-                password=rec.password,
-                private=rec.private,
-                create_time=rec.create_time,
-                deleted=rec.deleted,
-                delete_time=rec.delete_time
-            )
+        if rec is None:
+            return None
+
+        return User(
+            id=rec.id,
+            name=rec.name,
+            last_name=rec.last_name,
+            email=rec.email,
+            auth_method=rec.auth_method,
+            password=rec.password,
+            private=rec.private,
+            create_time=rec.create_time,
+            deleted=rec.deleted,
+            delete_time=rec.delete_time
+        )

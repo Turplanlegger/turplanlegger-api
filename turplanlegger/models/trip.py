@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, NamedTuple
 
 from flask import g
 
@@ -43,7 +43,7 @@ class Trip:
             raise ValueError('Missing mandatory field \'name\'')
         if not isinstance(name, str):
             raise TypeError('\'name\' must be string')
-        
+
         if name is not None and len(name) > 512:
             raise ValueError("'name' is too long")
 
@@ -165,32 +165,24 @@ class Trip:
         return Trip.get_trip(db.change_trip_owner(self.id, owner))
 
     @classmethod
-    def get_trip(cls, rec) -> 'Trip':
+    def get_trip(cls, rec: NamedTuple) -> 'Trip':
         """Converts a database record to an Trip instance
 
         Args:
-            rec (dict): Database record
+            rec (NamedTuple): Database record
 
         Returns:
             An Trip instance
         """
-        if isinstance(rec, dict):
-            trip = Trip(
-                id=rec.get('id', None),
-                owner=rec.get('owner', None),
-                name=rec.get('name', None)
-            )
-            trip.notes = [item.note_id for item in db.get_trip_notes(trip.id)]
-            trip.routes = [item.route_id for item in db.get_trip_routes(trip.id)]
-            trip.item_lists = [item.item_list_id for item in db.get_trip_item_lists(trip.id)]
-            return trip
-        elif isinstance(rec, tuple):
-            trip = Trip(
-                id=rec.id,
-                owner=rec.owner,
-                name=rec.name
-            )
-            trip.notes = [item.note_id for item in db.get_trip_notes(trip.id)]
-            trip.routes = [item.route_id for item in db.get_trip_routes(trip.id)]
-            trip.item_lists = [item.item_list_id for item in db.get_trip_item_lists(trip.id)]
-            return trip
+        if rec is None:
+            return None
+
+        trip = Trip(
+            id=rec.id,
+            owner=rec.owner,
+            name=rec.name
+        )
+        trip.notes = [item.note_id for item in db.get_trip_notes(trip.id)]
+        trip.routes = [item.route_id for item in db.get_trip_routes(trip.id)]
+        trip.item_lists = [item.item_list_id for item in db.get_trip_item_lists(trip.id)]
+        return trip

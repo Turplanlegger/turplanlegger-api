@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict
+from typing import Dict, NamedTuple
 
 from flask import g
 
@@ -171,32 +171,24 @@ class ItemList:
         return ItemList.get_item_list(db.change_item_list_owner(self.id, self.owner))
 
     @classmethod
-    def get_item_list(cls, rec) -> 'ItemList':
+    def get_item_list(cls, rec: NamedTuple) -> 'ItemList':
         """Converts a database record to a ItemList object
 
         Args:
-            rec (dict): Database record
+            rec (NamedTuple): Database record
 
         Returns:
-            A  ItemList object
+            An ItemList instance
         """
-        if isinstance(rec, dict):
-            return ItemList(
-                id=rec.get('id', None),
-                owner=rec.get('owner', None),
-                name=rec.get('name', None),
-                type=rec.get('type', None),
-                items=rec.get('items', None),
-                items_checked=rec.get('items_checked', None),
-                create_time=rec.get('created', None)
-            )
-        elif isinstance(rec, tuple):
-            return ItemList(
-                id=rec.id,
-                owner=rec.owner,
-                name=rec.name,
-                type=rec.type,
-                items=ListItem.find_list_items(rec.id, checked=False),
-                items_checked=ListItem.find_list_items(rec.id, checked=True),
-                create_time=rec.create_time
-            )
+        if rec is None:
+            return None
+
+        return ItemList(
+            id=rec.id,
+            owner=rec.owner,
+            name=rec.name,
+            type=rec.type,
+            items=ListItem.find_list_items(rec.id, checked=False),
+            items_checked=ListItem.find_list_items(rec.id, checked=True),
+            create_time=rec.create_time
+        )
