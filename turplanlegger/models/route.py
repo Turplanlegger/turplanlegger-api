@@ -78,8 +78,7 @@ class Route:
 
     def create(self) -> 'Route':
         """Creates the Route object in the database"""
-        route = self.get_route(db.create_route(self))
-        return route
+        return self.get_route(db.create_route(self))
 
     def delete(self) -> bool:
         """Deletes the Route object from the database
