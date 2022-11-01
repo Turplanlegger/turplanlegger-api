@@ -24,4 +24,3 @@ def check_password(hashed_pw: str, provided_pw: str) -> bool:
         bool
     '''
     return bcrypt.checkpw(provided_pw.encode('utf-8'), hashed_pw.encode('utf-8'))
-

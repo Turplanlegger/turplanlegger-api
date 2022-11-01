@@ -1,8 +1,6 @@
 import json
 import unittest
 
-from flask import current_app
-
 from turplanlegger.app import create_app, db
 from turplanlegger.auth.utils import hash_password
 from turplanlegger.models.user import User

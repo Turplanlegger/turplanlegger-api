@@ -1,10 +1,9 @@
+from datetime import datetime
 from typing import Dict, NamedTuple
 
 from flask import g
 
 from turplanlegger.app import db
-
-from datetime import datetime
 
 JSON = Dict[str, any]
 
