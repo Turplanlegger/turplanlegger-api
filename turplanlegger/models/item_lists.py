@@ -166,7 +166,7 @@ class ItemList:
         """
         return [ItemList.get_item_list(item_list) for item_list in db.get_item_list_by_owner(owner_id)]
 
-    def change_owner(self, owner: str) -> 'ItemList':
+    def change_owner(self) -> 'ItemList':
         """Changes owner of the ItemList"""
         return ItemList.get_item_list(db.change_item_list_owner(self.id, self.owner))
 
