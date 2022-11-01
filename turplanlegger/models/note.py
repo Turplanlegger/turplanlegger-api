@@ -73,19 +73,13 @@ class Note:
 
     @classmethod
     def get_note(cls, rec) -> 'Note':
-        if isinstance(rec, dict):
-            return Note(
-                id=rec.get('id', None),
-                owner=rec.get('owner', None),
-                name=rec.get('name', None),
-                content=rec.get('content', None),
-                create_time=rec.get('created', None)
-            )
-        elif isinstance(rec, tuple):
-            return Note(
-                id=rec.id,
-                owner=rec.owner,
-                name=rec.name,
-                content=rec.content,
-                create_time=rec.create_time
-            )
+        if rec is None:
+            return None
+
+        return Note(
+            id=rec.id,
+            owner=rec.owner,
+            name=rec.name,
+            content=rec.content,
+            create_time=rec.create_time
+        )

@@ -1,4 +1,5 @@
-from typing import Dict
+from datetime import datetime
+from typing import Dict, NamedTuple
 
 from flask import g
 
@@ -25,12 +26,14 @@ class Trip:
         id (int): Optional, the ID of the object
         private (bool): Flag if the trip is private
                         Default so False (public)
-        create_time (datetime): Start time of the date
-        create_time (datetime): End of the trip
+        start_time (datetime): Start time of the trip
+        end_time (datetime): End time of the trip
         notes (list): List of note ids that are related to the trip
         routes (list): List of route ids that are related to the trip
         item_list (list): List of item list ids that are related to
                           the trip
+        create_time (datetime): Time of creation,
+                                Default: datetime.now()
 
     """
 
@@ -51,11 +54,12 @@ class Trip:
         self.name = name
         self.id = kwargs.get('id', None)
         self.private = kwargs.get('private', False)
-        self.create_time = kwargs.get('date_start', None)
-        self.create_time = kwargs.get('date_end', None)
+        self.start_time = kwargs.get('start_time', None)
+        self.end_time = kwargs.get('end_time', None)
         self.notes = kwargs.get('notes', [])
         self.routes = kwargs.get('routes', [])
         self.item_lists = kwargs.get('item_lists', [])
+        self.create_time = kwargs.get('create_time', None) or datetime.now()
 
     @classmethod
     def parse(cls, json: JSON) -> 'Trip':
@@ -72,7 +76,9 @@ class Trip:
             id=json.get('id', None),
             owner=g.user.id,
             name=json.get('name', None),
-            private=json.get('private', False)
+            private=json.get('private', False),
+            start_time=json.get('start_time', None),
+            end_time=json.get('end_time', None)
         )
 
     @property
@@ -82,6 +88,8 @@ class Trip:
             'id': self.id,
             'owner': self.owner,
             'name': self.name,
+            'start_time': self.start_time,
+            'end_time': self.end_time,
             'notes': self.notes,
             'routes': self.routes,
             'item_lists': self.item_lists,
@@ -165,32 +173,28 @@ class Trip:
         return Trip.get_trip(db.change_trip_owner(self.id, owner))
 
     @classmethod
-    def get_trip(cls, rec) -> 'Trip':
+    def get_trip(cls, rec: NamedTuple) -> 'Trip':
         """Converts a database record to an Trip instance
 
         Args:
-            rec (dict): Database record
+            rec (NamedTuple): Database record
 
         Returns:
             An Trip instance
         """
-        if isinstance(rec, dict):
-            trip = Trip(
-                id=rec.get('id', None),
-                owner=rec.get('owner', None),
-                name=rec.get('name', None)
-            )
-            trip.notes = [item.note_id for item in db.get_trip_notes(trip.id)]
-            trip.routes = [item.route_id for item in db.get_trip_routes(trip.id)]
-            trip.item_lists = [item.item_list_id for item in db.get_trip_item_lists(trip.id)]
-            return trip
-        elif isinstance(rec, tuple):
-            trip = Trip(
-                id=rec.id,
-                owner=rec.owner,
-                name=rec.name
-            )
-            trip.notes = [item.note_id for item in db.get_trip_notes(trip.id)]
-            trip.routes = [item.route_id for item in db.get_trip_routes(trip.id)]
-            trip.item_lists = [item.item_list_id for item in db.get_trip_item_lists(trip.id)]
-            return trip
+        if rec is None:
+            return None
+
+        trip = Trip(
+            id=rec.id,
+            owner=rec.owner,
+            name=rec.name,
+            private=rec.private,
+            start_time=rec.start_time,
+            end_time=rec.end_time,
+            create_time=rec.create_time
+        )
+        trip.notes = [item.note_id for item in db.get_trip_notes(trip.id)]
+        trip.routes = [item.route_id for item in db.get_trip_routes(trip.id)]
+        trip.item_lists = [item.item_list_id for item in db.get_trip_item_lists(trip.id)]
+        return trip

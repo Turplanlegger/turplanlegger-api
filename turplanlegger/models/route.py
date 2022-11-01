@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict
+from typing import Dict, NamedTuple
 
 from flask import g
 
@@ -78,8 +78,7 @@ class Route:
 
     def create(self) -> 'Route':
         """Creates the Route object in the database"""
-        route = self.get_route(db.create_route(self))
-        return route
+        return self.get_route(db.create_route(self))
 
     def delete(self) -> bool:
         """Deletes the Route object from the database
@@ -128,32 +127,24 @@ class Route:
         return Route.get_route(db.change_route_owner(self.id, owner))
 
     @classmethod
-    def get_route(cls, rec) -> 'Route':
+    def get_route(cls, rec: NamedTuple) -> 'Route':
         """Converts a database record to an Route object
 
         Args:
-            rec (dict): Database record
+            rec (NamedTuple): Database record
 
         Returns:
             An Route object
         """
-        if isinstance(rec, dict):
-            return Route(
-                id=rec.get('id', None),
-                owner=rec.get('owner', None),
-                route=rec.get('route', None),
-                route_history=rec.get('route_history', []),
-                name=rec.get('name', None),
-                comment=rec.get('comment', None),
-                create_time=rec.get('created', None)
-            )
-        elif isinstance(rec, tuple):
-            return Route(
-                id=rec.id,
-                owner=rec.owner,
-                route=rec.route,
-                route_history=rec.route_history,
-                name=rec.name,
-                comment=rec.comment,
-                create_time=rec.create_time
-            )
+        if rec is None:
+            return None
+
+        return Route(
+            id=rec.id,
+            owner=rec.owner,
+            route=rec.route,
+            route_history=rec.route_history,
+            name=rec.name,
+            comment=rec.comment,
+            create_time=rec.create_time
+        )

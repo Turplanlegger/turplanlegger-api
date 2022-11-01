@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict
+from typing import Dict, NamedTuple
 
 from turplanlegger.app import db
 
@@ -142,31 +142,23 @@ class ListItem:
         return [ListItem.get_list_item(item) for item in db.get_list_items(item_list_id, checked)]
 
     @classmethod
-    def get_list_item(cls, rec) -> 'ListItem':
+    def get_list_item(cls, rec: NamedTuple) -> 'ListItem':
         """Converts a database record to a ListItem object
 
         Args:
-            rec (dict): Database record
+            rec (NamedTuple): Database record
 
         Returns:
-            A  ListItem object
+            An ListItem instance
         """
+        if rec is None:
+            return None
 
-        if isinstance(rec, dict):
-            return ListItem(
-                id=rec.get('id', None),
-                owner=rec.get('owner', None),
-                item_list=rec.get('item_list', None),
-                checked=rec.get('checked', False),
-                content=rec.get('content', None),
-                create_time=rec.get('created', None)
-            )
-        elif isinstance(rec, tuple):
-            return ListItem(
-                id=rec.id,
-                owner=rec.owner,
-                item_list=rec.item_list,
-                checked=rec.checked,
-                content=rec.content,
-                create_time=rec.create_time
-            )
+        return ListItem(
+            id=rec.id,
+            owner=rec.owner,
+            item_list=rec.item_list,
+            checked=rec.checked,
+            content=rec.content,
+            create_time=rec.create_time
+        )
