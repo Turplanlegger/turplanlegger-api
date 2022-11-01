@@ -43,7 +43,7 @@ class Trip:
             raise ValueError('Missing mandatory field \'name\'')
         if not isinstance(name, str):
             raise TypeError('\'name\' must be string')
-        
+
         if name is not None and len(name) > 512:
             raise ValueError("'name' is too long")
 
