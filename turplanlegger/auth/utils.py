@@ -24,16 +24,3 @@ def check_password(hashed_pw: str, provided_pw: str) -> bool:
         bool
     '''
     return bcrypt.checkpw(provided_pw.encode('utf-8'), hashed_pw.encode('utf-8'))
-
-
-def create_token(user_id: str) -> str:
-    '''Creates a token using user_id
-
-    Args:
-        user_id (str): id (uuid4) of the user
-
-    Returns:
-        token as string
-    '''
-    from jwt import encode
-    return encode({'test': 'token'}, 'test', algorithm='HS256')

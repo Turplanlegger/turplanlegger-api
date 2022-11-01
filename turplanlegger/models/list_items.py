@@ -38,7 +38,8 @@ class ListItem:
         if not isinstance(checked, bool):
             raise TypeError("'checked' must be boolean")
 
-        if len(kwargs.get('content', '')) > 512:
+        content = kwargs.get('content', None)
+        if content is not None and len(content) > 512:
             raise ValueError("'content' is too long")
 
         self.id = kwargs.get('id', None)
@@ -59,16 +60,13 @@ class ListItem:
         Returns:
             A ListItem object
         """
-        content = json.get('content', None)
-        if len(content) > 512:
-            raise ValueError("'content' is too long")
 
         return ListItem(
             id=json.get('id', None),
             owner=json.get('owner', None),
             item_list=json.get('item_list', None),
             checked=json.get('checked', False),
-            content=content
+            content=json.get('content', None)
         )
 
     @property

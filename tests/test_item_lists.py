@@ -108,6 +108,19 @@ class ItemListsTestCase(unittest.TestCase):
     def tearDownClass(cls):
         db.destroy()
 
+    def test_create_list_minimal_input(self):
+        response = self.client.post(
+            '/item_list',
+            data=json.dumps({'type': 'check'}),
+            headers=self.headers_json
+        )
+
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['item_list']['type'], 'check')
+        self.assertEqual(data['item_list']['owner'], self.user1.id)
+
     def test_create_list(self):
         response = self.client.post(
             '/item_list',

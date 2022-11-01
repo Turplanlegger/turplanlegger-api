@@ -43,12 +43,13 @@ class ItemList:
         if not isinstance(type, str):
             raise TypeError("'type' must be string")
 
-        if len(kwargs.get('name', '')) > 512:
+        name = kwargs.get('name', None)
+        if name is not None and len(name) > 512:
             raise ValueError("'name' is too long")
 
-        self.id = kwargs.get('id', 0)
+        self.id = kwargs.get('id', None)
         self.owner = owner
-        self.name = kwargs.get('name')
+        self.name = name
         self.type = type
         self.items = kwargs.get('items', [])
         self.items_checked = kwargs.get('items_checked', [])
@@ -64,22 +65,19 @@ class ItemList:
         Returns:
             A ItemList object
         """
-        name = json.get('name', None)
-        if len(name) > 512:
-            raise ValueError("'name' is too long")
 
         items = json.get('items', [])
         if not isinstance(items, list):
             raise TypeError("'items' must be JSON list")
         for i, item in enumerate(items):
-            if len(item) > 512:
+            if item is not None and len(item) > 512:
                 raise ValueError(f"item {i+1}:'{item}' is too long, max 512 char")
 
         items_checked = json.get('items_checked', [])
         if not isinstance(items_checked, list):
             raise TypeError("'items_checed' must be JSON list")
         for i, item in enumerate(items_checked):
-            if len(item) > 512:
+            if item is not None and len(item) > 512:
                 raise ValueError(f"checked item {i+1}:'{item}' is too long, max 512 char")
 
         return ItemList(
@@ -142,7 +140,7 @@ class ItemList:
 
     def rename(self) -> 'ItemList':
         """Renames the ItemList"""
-        return db.rename_item_list(self.id, self.name)
+        return ItemList.get_item_list(db.rename_item_list(self.id, self.name))
 
     @staticmethod
     def find_item_list(id: int) -> 'ItemList':  # Add a method for getting list without lists_items
@@ -168,22 +166,9 @@ class ItemList:
         """
         return [ItemList.get_item_list(item_list) for item_list in db.get_item_list_by_owner(owner_id)]
 
-    def change_owner(self, owner: str) -> 'ItemList':
-        """Change owner of the ItemList
-        Won't change name if new name is the same as current
-
-        Args:
-            owner (str): id (uuid4) of the new owner
-
-        Returns:
-            The updated ItemList object
-        """
-        if self.owner == owner:
-            raise ValueError('new owner is same as old')
-
-        # A user object should be parsed/passed
-        # Return a boolean, don't get the list unless it's used
-        return ItemList.get_item_list(db.change_item_list_owner(self.id, owner))
+    def change_owner(self) -> 'ItemList':
+        """Changes owner of the ItemList"""
+        return ItemList.get_item_list(db.change_item_list_owner(self.id, self.owner))
 
     @classmethod
     def get_item_list(cls, rec) -> 'ItemList':

@@ -39,6 +39,8 @@ class Route:
         self.owner = owner
         self.route = route
         self.id = kwargs.get('id', None)
+        self.name = kwargs.get('name', None)
+        self.comment = kwargs.get('comment', None)
         self.route_history = kwargs.get('route_history', [])
         self.create_time = kwargs.get('create_time', None) or datetime.now()
 
@@ -57,6 +59,8 @@ class Route:
             owner=g.user.id,
             route=json.get('route', None),
             route_history=json.get('route_history', []),
+            name=json.get('name', None),
+            comment=json.get('comment', None),
         )
 
     @property
@@ -67,12 +71,14 @@ class Route:
             'owner': self.owner,
             'route': self.route,
             'route_history': self.route_history,
-            'create_time': self.create_time
+            'create_time': self.create_time,
+            'name': self.name,
+            'comment': self.comment
         }
 
     def create(self) -> 'Route':
         """Creates the Route object in the database"""
-        route = self.get_route(db.create_route(self.route, self.owner))
+        route = self.get_route(db.create_route(self))
         return route
 
     def delete(self) -> bool:
@@ -137,6 +143,8 @@ class Route:
                 owner=rec.get('owner', None),
                 route=rec.get('route', None),
                 route_history=rec.get('route_history', []),
+                name=rec.get('name', None),
+                comment=rec.get('comment', None),
                 create_time=rec.get('created', None)
             )
         elif isinstance(rec, tuple):
@@ -145,5 +153,7 @@ class Route:
                 owner=rec.owner,
                 route=rec.route,
                 route_history=rec.route_history,
+                name=rec.name,
+                comment=rec.comment,
                 create_time=rec.create_time
             )

@@ -44,6 +44,9 @@ class Trip:
         if not isinstance(name, str):
             raise TypeError('\'name\' must be string')
 
+        if name is not None and len(name) > 512:
+            raise ValueError("'name' is too long")
+
         self.owner = owner
         self.name = name
         self.id = kwargs.get('id', None)
@@ -64,9 +67,6 @@ class Trip:
         Returns:
             An trip instance
         """
-        name = json.get('name', None)
-        if len(name) > 512:
-            raise ValueError("'name' is too long")
 
         return Trip(
             id=json.get('id', None),
