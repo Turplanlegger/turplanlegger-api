@@ -1,5 +1,7 @@
 from typing import Dict
 
+from flask import g
+
 from turplanlegger.app import db
 
 JSON = Dict[str, any]
@@ -27,7 +29,7 @@ class Note:
     def parse(cls, json: JSON) -> 'Note':
         return Note(
             id=json.get('id', None),
-            owner=json.get('owner', None),
+            owner=g.user.id,
             content=json.get('content', None),
             name=json.get('name', None),
         )
@@ -59,6 +61,10 @@ class Note:
     def find_note(id: int) -> 'Note':
         return Note.get_note(db.get_note(id))
 
+    @staticmethod
+    def find_note_by_owner(owner_id: str) -> 'Note':
+        return [Note.get_note(note) for note in db.get_note_by_owner(owner_id)]
+
     def change_owner(self, owner: str) -> 'Note':
         if self.owner == owner:
             raise ValueError('new owner is same as old')
@@ -67,19 +73,13 @@ class Note:
 
     @classmethod
     def get_note(cls, rec) -> 'Note':
-        if isinstance(rec, dict):
-            return Note(
-                id=rec.get('id', None),
-                owner=rec.get('owner', None),
-                name=rec.get('name', None),
-                content=rec.get('content', None),
-                create_time=rec.get('created', None)
-            )
-        elif isinstance(rec, tuple):
-            return Note(
-                id=rec.id,
-                owner=rec.owner,
-                name=rec.name,
-                content=rec.content,
-                create_time=rec.create_time
-            )
+        if rec is None:
+            return None
+
+        return Note(
+            id=rec.id,
+            owner=rec.owner,
+            name=rec.name,
+            content=rec.content,
+            create_time=rec.create_time
+        )

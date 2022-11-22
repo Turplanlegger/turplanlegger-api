@@ -1,4 +1,4 @@
-from flask import jsonify, request
+from flask import g, jsonify, request
 
 from turplanlegger.auth.decorators import auth
 from turplanlegger.exceptions import ApiProblem
@@ -73,7 +73,7 @@ def add_item_list_items(item_list_id):
         items = [
             ListItem.parse(
                 {
-                    'owner': item_list.owner,
+                    'owner': g.user.id,
                     'item_list': item_list.id,
                     'checked': False,
                     'content': item
@@ -83,7 +83,7 @@ def add_item_list_items(item_list_id):
         items_checked = [
             ListItem.parse(
                 {
-                    'owner': item_list.owner,
+                    'owner': g.user.id,
                     'item_list': item_list.id,
                     'checked': True,
                     'content': item
@@ -155,16 +155,44 @@ def change_item_list_owner(item_list_id):
     if not item_list:
         raise ApiProblem('Item list not found', 'The requested item list was not found', 404)
 
-    owner = request.json.get('owner', None)
+    if item_list.owner == request.json.get('owner', None):
+        raise ApiProblem(
+            'Failed to change owner of item list',
+            'New owner is the same as old',
+            400
+        )
+    item_list.owner = request.json.get('owner', None)
 
-    if not owner:
-        raise ApiProblem('Owner is not int', 'Owner must be passed as an int', 400)
+    if not item_list.owner:
+        raise ApiProblem(
+            'Owner is not str',
+            'Owner must be passed as an str',
+            400
+        )
 
     try:
-        item_list.change_owner(owner)
-    except ValueError as e:
-        raise ApiProblem('Failed to change owner of item list', str(e), 400)
+        item_list.change_owner()
     except Exception as e:
         raise ApiProblem('Failed to change owner of item list', str(e), 500)
 
     return jsonify(status='ok')
+
+
+@api.route('/item_list/mine', methods=['GET'])
+@auth
+def get_my_item_lists():
+
+    item_lists = ItemList.find_item_list_by_owner(g.user.id)
+
+    if item_lists:
+        return jsonify(
+            status='ok',
+            count=len(item_lists),
+            item_list=[item_list.serialize for item_list in item_lists]
+        )
+    else:
+        raise ApiProblem(
+            'Item lists not found',
+            'No item lists were found for the requested user',
+            404
+        )

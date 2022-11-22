@@ -1,5 +1,6 @@
-from flask import jsonify, request
+from flask import g, jsonify, request
 
+from turplanlegger.auth.decorators import auth
 from turplanlegger.exceptions import ApiProblem
 from turplanlegger.models.item_lists import ItemList
 from turplanlegger.models.note import Note
@@ -10,6 +11,7 @@ from . import api
 
 
 @api.route('/trip/<trip_id>', methods=['GET'])
+@auth
 def get_trip(trip_id):
 
     trip = Trip.find_trip(trip_id)
@@ -20,6 +22,7 @@ def get_trip(trip_id):
 
 
 @api.route('/trip', methods=['POST'])
+@auth
 def add_trip():
     try:
         trip = Trip.parse(request.json)
@@ -35,6 +38,7 @@ def add_trip():
 
 
 @api.route('/trip/note', methods=['PATCH'])
+@auth
 def add_note_to_trip():
 
     trip = Trip.find_trip(request.json.get('trip_id', None))
@@ -54,6 +58,7 @@ def add_note_to_trip():
 
 
 @api.route('/trip/route', methods=['PATCH'])
+@auth
 def add_route_to_trip():
 
     trip = Trip.find_trip(request.json.get('trip_id', None))
@@ -73,6 +78,7 @@ def add_route_to_trip():
 
 
 @api.route('/trip/item_list', methods=['PATCH'])
+@auth
 def add_item_list_to_trip():
 
     trip = Trip.find_trip(request.json.get('trip_id', None))
@@ -92,6 +98,7 @@ def add_item_list_to_trip():
 
 
 @api.route('/trip/<trip_id>/owner', methods=['PATCH'])
+@auth
 def change_trip_owner(trip_id):
 
     trip = Trip.find_trip(trip_id)
@@ -110,3 +117,23 @@ def change_trip_owner(trip_id):
         raise ApiProblem('Failed to change owner', str(e), 500)
 
     return jsonify(status='ok')
+
+
+@api.route('/trip/mine', methods=['GET'])
+@auth
+def get_my_trips():
+
+    trips = Trip.find_trips_by_owner(g.user.id)
+
+    if trips:
+        return jsonify(
+            status='ok',
+            count=len(trips),
+            trip=[trip.serialize for trip in trips]
+        )
+    else:
+        raise ApiProblem(
+            'Trip not found',
+            'No trips were found for the requested user',
+            404
+        )

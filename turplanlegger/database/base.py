@@ -102,6 +102,16 @@ class Database:
             select += ' AND deleted = FALSE'
         return self._fetchone(select, [id])
 
+    def get_item_list_by_owner(self, owner_id: str, deleted=False):
+        select = """
+            SELECT * FROM item_lists WHERE owner = %s
+        """
+        if deleted:
+            select += ' AND deleted = TRUE'
+        else:
+            select += ' AND deleted = FALSE'
+        return self._fetchall(select, (owner_id,))
+
     def create_item_list(self, item_list):
         insert = """
             INSERT INTO item_lists (name, type, owner)
@@ -199,22 +209,29 @@ class Database:
 
     # Route
     def get_route(self, id, deleted=False):
-        select = """
-            SELECT * FROM routes WHERE id = %s
-        """
+        select = 'SELECT * FROM routes WHERE id = %s'
+
         if deleted:
             select += ' AND deleted = TRUE'
         else:
             select += ' AND deleted = FALSE'
-        return self._fetchone(select, [id])
+        return self._fetchone(select, (id,))
 
-    def create_route(self, route, owner):
+    def get_routes_by_owner(self, owner_id: str, deleted=False):
+        select = 'SELECT * FROM routes WHERE owner = %s'
+        if deleted:
+            select += ' AND deleted = TRUE'
+        else:
+            select += ' AND deleted = FALSE'
+        return self._fetchall(select, (owner_id,))
+
+    def create_route(self, route):
         insert = """
-            INSERT INTO routes (route, owner)
-            VALUES (%(route)s, %(owner)s)
+            INSERT INTO routes (route, owner, name, comment)
+            VALUES (%(route)s, %(owner)s, %(name)s, %(comment)s)
             RETURNING *
         """
-        return self._insert(insert, {'route': route, 'owner': owner})
+        return self._insert(insert, vars(route))
 
     def delete_route(self, id):
         update = """
@@ -244,6 +261,15 @@ class Database:
         else:
             select += ' AND deleted = FALSE'
         return self._fetchone(select, (id,))
+
+    def get_note_by_owner(self, owner_id: str, deleted=False):
+        select = 'SELECT * FROM notes WHERE owner = %s'
+
+        if deleted:
+            select += ' AND deleted = TRUE'
+        else:
+            select += ' AND deleted = FALSE'
+        return self._fetchall(select, (owner_id,))
 
     def create_note(self, note):
         insert = """
@@ -401,6 +427,15 @@ class Database:
         else:
             select += ' AND deleted = FALSE'
         return self._fetchone(select, (id,))
+
+    def get_trips_by_owner(self, owner_id: str, deleted=False):
+        select = 'SELECT * FROM trips WHERE owner = %s'
+
+        if deleted:
+            select += ' AND deleted = TRUE'
+        else:
+            select += ' AND deleted = FALSE'
+        return self._fetchall(select, (owner_id,))
 
     def get_trip_notes(self, id):
         select = 'SELECT note_id FROM trips_notes_references WHERE trip_id = %s'

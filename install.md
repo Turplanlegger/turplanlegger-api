@@ -7,7 +7,7 @@
 
 ### Packages
 Install build tools:  
-``sudo apt-get install build-essential`
+`sudo apt-get install build-essential`
 
 Install python3.10-dev:  
 `sudo apt-get install python3.10-dev`
