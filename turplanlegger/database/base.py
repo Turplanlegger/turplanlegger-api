@@ -380,8 +380,8 @@ class Database:
     # Trip
     def create_trip(self, trip):
         insert_trip = """
-            INSERT INTO trips (name, owner, private)
-            VALUES (%(name)s, %(owner)s, %(private)s)
+            INSERT INTO trips (name, owner, private, start_time, end_time)
+            VALUES (%(name)s, %(owner)s, %(private)s,  %(start_time)s,  %(end_time)s)
             RETURNING *
         """
         return self._insert(insert_trip, vars(trip))
