@@ -137,3 +137,19 @@ def get_my_trips():
             'No trips were found for the requested user',
             404
         )
+
+
+@api.route('/trip/<trip_id>', methods=['DELETE'])
+@auth
+def delete_trip(trip_id):
+
+    trip = Trip.find_trip(trip_id)
+    if not trip:
+        raise ApiProblem('Failed to change owner of trip', 'The requested trip was not found', 404)
+
+    try:
+        trip.delete()
+    except Exception as e:
+        raise ApiProblem('Failed to delete trip', str(e), 500)
+
+    return jsonify(status='ok')

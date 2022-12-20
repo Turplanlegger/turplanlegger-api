@@ -90,6 +90,7 @@ class Trip:
             'name': self.name,
             'start_time': self.start_time,
             'end_time': self.end_time,
+            'private': self.private,
             'notes': self.notes,
             'routes': self.routes,
             'item_lists': self.item_lists,
@@ -102,7 +103,7 @@ class Trip:
         return trip
 
     def delete(self) -> bool:
-        """Deletes the Route object from the database
+        """Deletes the Trip object from the database
         Returns True if deleted"""
         return db.delete_trip(self.id)
 

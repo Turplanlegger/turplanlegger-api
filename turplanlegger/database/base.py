@@ -282,7 +282,7 @@ class Database:
     def delete_note(self, id):
         update = """
             UPDATE notes
-                SET deleted=TRUE, deleted_time=CURRENT_TIMESTAMP
+                SET deleted=TRUE, delete_time=CURRENT_TIMESTAMP
                 WHERE id = %(id)s AND deleted = FALSE
             RETURNING deleted
         """
@@ -385,6 +385,15 @@ class Database:
             RETURNING *
         """
         return self._insert(insert_trip, vars(trip))
+
+    def delete_trip(self, trip_id):
+        update = """
+            UPDATE trips
+                SET deleted=TRUE, delete_time=CURRENT_TIMESTAMP
+                WHERE id = %(id)s AND deleted = FALSE
+            RETURNING deleted
+        """
+        return self._updateone(update, {'id': trip_id}, returning=True)
 
     def change_trip_owner(self, id, owner):
         update = """
