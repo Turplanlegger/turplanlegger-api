@@ -343,6 +343,7 @@ class Database:
         insert = """
             INSERT INTO users (id, name, last_name, email, auth_method, password,  private)
             VALUES (%(id)s, %(name)s, %(last_name)s, %(email)s, %(auth_method)s, %(password)s, %(private)s)
+            ON CONFLICT DO NOTHING
             RETURNING *
         """
         return self._insert(insert, vars(user))
