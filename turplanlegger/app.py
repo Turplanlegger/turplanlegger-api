@@ -1,18 +1,18 @@
 from typing import Any, Dict
 
 from flask import Flask
-from flask_cors import CORS
 
 from turplanlegger.database.base import Database
 from turplanlegger.exceptions import ExceptionHandlers
 from turplanlegger.utils.config import Config
+from turplanlegger.utils.cors import Cors
 from turplanlegger.utils.logger import Logger
 
 handlers = ExceptionHandlers()
 config = Config()
 logger = Logger()
 db = Database()
-cors = CORS()
+cors = Cors()
 
 
 def create_app(config_override: Dict[str, Any] = None,
