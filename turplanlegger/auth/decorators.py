@@ -41,19 +41,22 @@ def auth(func):
             raise AuthError('Auth failed', 401)
 
         user = User.find_user(jwt.subject)
-
         if user is not None:
             if user.deleted:
                 raise AuthError('Inactive user', 401)
 
             current_app.logger.debug(f'user {user.id} logged in')
             g.user = user
-        else:
-            try:
-                user = JWT.parse_user_from_token(token)
-                User.create(user)
-            except Exception as e:
-                raise ApiProblem('Failed to create user', str(e), 500)
+            return func(*args, **kwargs)
 
+        try:
+            user = User.create(JWT.parse_user_from_token(token))
+        except Exception as e:
+            raise ApiProblem('Failed to create user', str(e), 500)
+
+        if user is None:
+            raise ApiProblem('Failed to create user', 'Try again', 500)
+
+        g.user = user
         return func(*args, **kwargs)
     return wrapped
