@@ -57,6 +57,7 @@ def auth(func):
         if user is None:
             raise ApiProblem('Failed to create user', 'Try again', 500)
 
+        current_app.logger.debug(f'user {user.id} signed up')
         g.user = user
         return func(*args, **kwargs)
     return wrapped
