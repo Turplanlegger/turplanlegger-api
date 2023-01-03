@@ -109,6 +109,26 @@ class TripsTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['owner'], self.user1.id)
 
+    def test_delete_trip(self):
+        response = self.client.post('/trip', data=json.dumps(self.trip), headers=self.headers_json)
+
+        self.assertEqual(response.status_code, 201)
+
+        data = json.loads(response.data.decode('utf-8'))
+        id = data['id']
+
+        response = self.client.delete(f'/trip/{id}', headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(f'/trip/{id}', headers=self.headers)
+        self.assertEqual(response.status_code, 404)
+
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Trip not found')
+        self.assertEqual(data['detail'], 'The requested trip was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/trip/{id}')
+
     def test_create_trip_add_note(self):
         response = self.client.post('/trip', data=json.dumps(self.trip), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
