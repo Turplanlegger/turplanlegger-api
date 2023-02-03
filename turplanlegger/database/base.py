@@ -103,15 +103,13 @@ class Database:
         return self._fetchone(select, [id])
 
     # Item List
-    def get_public_item_list(self, id, deleted=False):
-        select = """
-            SELECT * FROM item_lists WHERE private = FALSE
-        """
+    def get_public_item_lists(self, deleted=False):
+        select = 'SELECT * FROM item_lists WHERE private = FALSE'
         if deleted:
             select += ' AND deleted = TRUE'
         else:
             select += ' AND deleted = FALSE'
-        return self._fetchone(select, [id])
+        return self._fetchall(select, [])
 
     def get_item_list_by_owner(self, owner_id: str, deleted=False):
         select = """

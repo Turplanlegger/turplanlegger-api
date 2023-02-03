@@ -102,9 +102,7 @@ class ItemListsTestCase(unittest.TestCase):
         )
         if response.status_code != 200:
             raise RuntimeError('Failed to login')
-
         data = json.loads(response.data.decode('utf-8'))
-
         cls.headers_json = {
             'Content-type': 'application/json',
             'Authorization': f'Bearer {data["token"]}'
@@ -112,6 +110,23 @@ class ItemListsTestCase(unittest.TestCase):
         cls.headers = {
             'Authorization': f'Bearer {data["token"]}'
         }
+
+        response = cls.client.post(
+            '/login',
+            data=json.dumps({'email': cls.user2.email, 'password': 'test'}),
+            headers={'Content-type': 'application/json'}
+        )
+        if response.status_code != 200:
+            raise RuntimeError('Failed to login')
+        data = json.loads(response.data.decode('utf-8'))
+        cls.user2_headers_json = {
+            'Content-type': 'application/json',
+            'Authorization': f'Bearer {data["token"]}'
+        }
+        cls.user2_headers = {
+            'Authorization': f'Bearer {data["token"]}'
+        }
+
 
     def tearDown(self):
         db.truncate_table('lists_items')
@@ -395,7 +410,7 @@ class ItemListsTestCase(unittest.TestCase):
         self.assertEqual(len(data['item_list']['items']), 3)
         self.assertEqual(len(data['item_list']['items_checked']), 2)
 
-    def test_get_my_lisst(self):
+    def test_get_my_list(self):
         response = self.client.post(
             '/item_list',
             data=json.dumps(self.item_list),
@@ -421,6 +436,7 @@ class ItemListsTestCase(unittest.TestCase):
         self.assertEqual(data['item_list'][0]['id'], 1)
         self.assertEqual(data['item_list'][0]['name'], self.item_list['name'])
         self.assertEqual(data['item_list'][0]['owner'], self.user1.id)
+        self.assertEqual(data['item_list'][0]['private'], self.item_list['private'])
         self.assertEqual(data['item_list'][0]['items'][0]['content'], self.item_list['items'][0])
         self.assertEqual(data['item_list'][0]['items'][0]['owner'], data['item_list'][0]['owner'])
         self.assertEqual(data['item_list'][0]['items'][0]['item_list'], data['item_list'][0]['id'])
@@ -440,9 +456,102 @@ class ItemListsTestCase(unittest.TestCase):
         self.assertEqual(data['item_list'][1]['id'], 2)
         self.assertEqual(data['item_list'][1]['name'], self.item_list2['name'])
         self.assertEqual(data['item_list'][1]['owner'], self.user1.id)
+        self.assertEqual(data['item_list'][1]['private'], True)
         self.assertEqual(data['item_list'][1]['items'][0]['content'], self.item_list2['items'][0])
         self.assertEqual(data['item_list'][1]['items'][0]['owner'], data['item_list'][1]['owner'])
         self.assertEqual(data['item_list'][1]['items'][0]['item_list'], data['item_list'][1]['id'])
         self.assertEqual(data['item_list'][1]['items_checked'][0]['content'], self.item_list2['items_checked'][0])
         self.assertEqual(data['item_list'][1]['items_checked'][0]['owner'], data['item_list'][1]['owner'])
         self.assertEqual(data['item_list'][1]['items_checked'][0]['item_list'], data['item_list'][1]['id'])
+
+    def test_get_all_public_list(self):
+        # User1
+        response = self.client.post(
+            '/item_list',
+            data=json.dumps(self.item_list),
+            headers=self.headers_json
+        )
+        self.assertEqual(response.status_code, 201)
+
+        response = self.client.post(
+            '/item_list',
+            data=json.dumps(self.item_list2),
+            headers=self.headers_json
+        )
+        self.assertEqual(response.status_code, 201)
+
+        response = self.client.post(
+            '/item_list',
+            data=json.dumps(self.item_list_public),
+            headers=self.headers_json
+        )
+        self.assertEqual(response.status_code, 201)
+
+        response = self.client.get(
+            '/item_list/mine',
+            headers=self.headers
+        )
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        response = self.client.get(
+            '/item_list/mine',
+            headers=self.headers
+        )
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['count'], 3)
+
+        # User2
+        response = self.client.post(
+            '/item_list',
+            data=json.dumps(self.item_list),
+            headers=self.user2_headers_json
+        )
+        self.assertEqual(response.status_code, 201)
+
+        response = self.client.post(
+            '/item_list',
+            data=json.dumps(self.item_list2),
+            headers=self.user2_headers_json
+        )
+        self.assertEqual(response.status_code, 201)
+
+        response = self.client.post(
+            '/item_list',
+            data=json.dumps(self.item_list_public),
+            headers=self.user2_headers_json
+        )
+        self.assertEqual(response.status_code, 201)
+
+        response = self.client.get(
+            '/item_list/mine',
+            headers=self.user2_headers
+        )
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        response = self.client.get(
+            '/item_list/mine',
+            headers=self.user2_headers
+        )
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['count'], 3)
+
+        response = self.client.get(
+            '/item_list/public',
+            headers=self.headers
+        )
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['count'], 2)
+
+        response = self.client.get(
+            '/item_list/public',
+            headers=self.user2_headers
+        )
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['count'], 2)

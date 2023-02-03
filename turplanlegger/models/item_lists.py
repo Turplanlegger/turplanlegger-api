@@ -171,6 +171,18 @@ class ItemList:
         """
         return [ItemList.get_item_list(item_list) for item_list in db.get_item_list_by_owner(owner_id)]
 
+    @staticmethod
+    def find_public_item_lists() -> '[ItemList]':
+        """Fetches all public ItemLists
+
+        Args:
+            owner_id (str): Id (uuid4) of owner
+
+        Returns:
+            A list of ItemList objects
+        """
+        return [ItemList.get_item_list(item_list) for item_list in db.get_public_item_lists()]
+
     def change_owner(self) -> 'ItemList':
         """Changes owner of the ItemList"""
         return ItemList.get_item_list(db.change_item_list_owner(self.id, self.owner))
@@ -185,6 +197,7 @@ class ItemList:
         Returns:
             An ItemList instance
         """
+
         if rec is None:
             return None
 

@@ -196,3 +196,22 @@ def get_my_item_lists():
             'No item lists were found for the requested user',
             404
         )
+
+@api.route('/item_list/public', methods=['GET'])
+@auth
+def get_public_item_lists():
+
+    item_lists = ItemList.find_public_item_lists()
+
+    if item_lists:
+        return jsonify(
+            status='ok',
+            count=len(item_lists),
+            item_list=[item_list.serialize for item_list in item_lists]
+        )
+    else:
+        raise ApiProblem(
+            'Item lists not found',
+            'No public item lists were found',
+            404
+        )
