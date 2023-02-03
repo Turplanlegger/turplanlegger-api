@@ -1,6 +1,15 @@
 # Turplanlegger
 Python API for planning trips
 
+## Install
+```bash
+pip install .
+```
+
+### Development
+```bash
+pip install .[dev]
+```
 
 ## Testing
 Run test:
