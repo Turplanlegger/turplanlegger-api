@@ -40,6 +40,7 @@ dev = [
     "pytest-cov==4.0.0",
     "python-dotenv==0.21.1",
     "wheel==0.38.4",
+    "flake8>=6.0.0"
 ]
 prod = [
     "uwsgi==2.0.21"
@@ -49,7 +50,36 @@ prod = [
 Homepage = "https://github.com/sixcare/turplanlegger"
 
 [tool.hatch.version]
-path = "turplanlegger/__init__.py"
+path = "turplanlegger/__about__.py"
+
+[tool.hatch.envs.default]
+dependencies = [
+  "pytest",
+  "pytest-cov",
+  "pytest-csv>=3.0.0",
+]
+[tool.hatch.envs.default.scripts]
+cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=turpanlegger --cov=tests {args}"
+no-cov = "cov --no-cov {args}"
+lint = "pre-commit run -a"
+
+[[tool.hatch.envs.test.matrix]]
+python = ["310", "311"]
+
+[tool.coverage.run]
+branch = true
+parallel = true
+omit = [
+  "turpanlegger/__about__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
+
 
 [tool.hatch.build.targets.sdist]
 include = [
