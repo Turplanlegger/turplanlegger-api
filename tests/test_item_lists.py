@@ -50,7 +50,8 @@ class ItemListsTestCase(unittest.TestCase):
             'items_checked': [
                 'item four',
                 'item five'
-            ]
+            ],
+            'private': True
         }
 
         cls.item_list2 = {
@@ -60,10 +61,9 @@ class ItemListsTestCase(unittest.TestCase):
             ],
             'items_checked': [
                 'only one checked',
-            ],
-            'private': True
+            ]
         }
-        
+
         cls.item_list_public = {
             'name': 'Test list public',
             'items': [
@@ -124,13 +124,14 @@ class ItemListsTestCase(unittest.TestCase):
     def test_create_list_minimal_input(self):
         response = self.client.post(
             '/item_list',
+            data=json.dumps({}),
             headers=self.headers_json
         )
 
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
 
-        self.assertEqual(data['item_list']['private'], True])
+        self.assertEqual(data['item_list']['private'], True)
         self.assertEqual(data['item_list']['owner'], self.user1.id)
 
     def test_create_list(self):
@@ -177,7 +178,7 @@ class ItemListsTestCase(unittest.TestCase):
 
         self.assertEqual(data['item_list']['name'], 'Empty test list')
         self.assertEqual(data['item_list']['owner'], self.user1.id)
-        self.assertEqual(data['item_list']['private'], self.item_list['private'])
+        self.assertEqual(data['item_list']['private'], self.empty_item_list['private'])
         self.assertIsInstance(data['item_list']['items'], list)
         self.assertEqual(len(data['item_list']['items']), 0)
 
