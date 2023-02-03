@@ -14,7 +14,7 @@ services:
       - turplanleggerdb
 
   turplanleggerdb:
-    image: postgres:14.0
+    image: postgres:latest
     container_name: turplanleggerdb
     ports:
       - '5432:5432'
