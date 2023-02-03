@@ -36,11 +36,11 @@ class ItemList:
     """
 
     def __init__(
-            self,
-            owner: str,
-            private: bool = True,
-            **kwargs
-        ) -> None:
+        self,
+        owner: str,
+        private: bool = True,
+        **kwargs
+    ) -> None:
         if not owner:
             raise ValueError("missing mandatory field 'owner'")
         if not isinstance(owner, str):
