@@ -127,7 +127,6 @@ class ItemListsTestCase(unittest.TestCase):
             'Authorization': f'Bearer {data["token"]}'
         }
 
-
     def tearDown(self):
         db.truncate_table('lists_items')
         db.truncate_table('item_lists')

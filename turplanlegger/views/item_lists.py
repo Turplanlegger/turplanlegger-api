@@ -197,6 +197,7 @@ def get_my_item_lists():
             404
         )
 
+
 @api.route('/item_list/public', methods=['GET'])
 @auth
 def get_public_item_lists():
