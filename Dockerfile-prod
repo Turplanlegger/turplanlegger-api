@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:23.04
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG DATABASE_URI=postgresql://turadm:passord@turplanlegger_postgres:5432/turplanlegger?connect_timeout=10&application_name=turplanleggerapi
