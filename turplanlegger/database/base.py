@@ -22,7 +22,6 @@ class Database:
         with app.open_resource('database/schema.sql') as f:
             try:
                 self.conn.cursor().execute(f.read())
-                self.conn.commit()
             except Exception as e:
                 raise
                 self.logger.exception(e)
@@ -44,7 +43,8 @@ class Database:
                     conninfo=self.uri,
                     dbname=self.dbname,
                     client_encoding='UTF8',
-                    row_factory=namedtuple_row
+                    row_factory=namedtuple_row,
+                    autocommit=True
                 )
                 break
             except Exception as e:
@@ -83,13 +83,11 @@ class Database:
         ]:
             cursor.execute(f'DROP TABLE IF EXISTS {table} CASCADE')
 
-        conn.commit()
         conn.close()
 
     def truncate_table(self, table: str):
         cursor = self.conn.cursor()
         cursor.execute(f'TRUNCATE TABLE {table} RESTART IDENTITY CASCADE')
-        self.conn.commit()
 
     # Item List
     def get_item_list(self, id, deleted=False):
@@ -467,7 +465,6 @@ class Database:
         cursor = self.conn.cursor()
         # self._log(cursor, '_insert', query, vars)
         cursor.execute(query, vars)
-        self.conn.commit()
         return cursor.fetchone()
 
     def _fetchone(self, query, vars):
@@ -495,7 +492,6 @@ class Database:
         cursor = self.conn.cursor()
         # self._log(cursor, '-updateone', query, vars)
         cursor.execute(query, vars)
-        self.conn.commit()
         return cursor.fetchone() if returning else None
 
     def _deleteone(self, query, vars, returning=False):
@@ -505,7 +501,6 @@ class Database:
         cursor = self.conn.cursor()
         # self._log(cursor, '_deleteone', query, vars)
         cursor.execute(query, vars)
-        self.conn.commit()
         return cursor.fetchone() if returning else None
 
     def _log(self, cursor, query, vars):
