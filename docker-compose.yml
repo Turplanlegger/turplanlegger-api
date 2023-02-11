@@ -1,0 +1,29 @@
+version: '3.9'
+
+services:
+  turplanlegger-api:
+    build:
+      context: .
+      args:
+        - DATABASE_URI=${DATABASE_URI:-postgresql://turadm:you-need-a-new-password@turplanlegger_postgres:5432/turplanlegger?connect_timeout=10&application_name=turplanleggerapi}
+        - BASE_URL=${BASE_URL:-turplanlegger-api}
+        - SECRET_KEY=${SECRET_KEY}
+        - SECRET_KEY_ID=${SECRET_KEY_ID}
+    container_name: turplanlegger-api
+    ports:
+      - '5000:5000'
+      - '9191:9191'
+    depends_on:
+      - turplanlegger-db
+    links:
+      - turplanlegger-db
+
+  turplanlegger-db:
+    image: postgres:15.2
+    container_name: turplanlegger-db
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-turadm}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-passord}
+      - POSTGRES_DB=${POSTGRES_DB:-turplanlegger}
