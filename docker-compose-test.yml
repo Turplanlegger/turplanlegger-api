@@ -1,21 +1,19 @@
-version: '3.3'
-services:
-  flask:
-    build: .
-    container_name: turplanlegger
-    command: 'python3 -m unittest discover tests'
-    ports:
-      - '80:8080'
-    volumes:
-      - ./:/turplanlegger
-    depends_on:
-      - turplanleggerdb
-    links:
-      - turplanleggerdb
+version: '3.4'
 
-  turplanleggerdb:
-    image: postgres:14.0
-    container_name: turplanleggerdb
+services:
+  turplanlegger-api:
+    build:
+      context: .
+      dockerfile: ./test.Dockerfile
+    container_name: turplanlegger-api
+    depends_on:
+      - turplanlegger-db
+    links:
+      - turplanlegger-db
+
+  turplanlegger-db:
+    image: postgres:15.0
+    container_name: turplanlegger-db
     ports:
       - '5432:5432'
     environment:
