@@ -29,10 +29,22 @@ git commit tests/test_result.csv -m "Unitetest result"
 ## Docker
 
 ### Test
-`docker-compose -f docker-compose.test.yml up --abort-on-container-exit  --exit-code-from turplanlegger-api`
+```bash
+docker-compose -f docker-compose.test.yml build
+docker-compose -f docker-compose.test.yml up --abort-on-container-exit  --exit-code-from turplanlegger-test
+```
 
 ### Dev
-`docker-compose -f docker-compose.dev.yml up --abort-on-container-exit  --exit-code-from turplanlegger-api`
+```bash
+docker-compose -f docker-compose.dev.yml build
+docker-compose -f docker-compose.dev.yml up --abort-on-container-exit  --exit-code-from turplanlegger-api
+```
 
 ### Prod
-`docker-compose up --abort-on-container-exit  --exit-code-from turplanlegger-api`
+Remember to set environment variables:  
+- `DATABASE_URI` - Connection string for databse
+- `SECRET_KEY` - Secret key for application
+- `SECRET_KEY_ID` - Used for token identification
+```bash
+docker-compose up --abort-on-container-exit  --exit-code-from turplanlegger-api
+```

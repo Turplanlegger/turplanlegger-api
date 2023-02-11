@@ -33,6 +33,7 @@ dependencies = [
 ]
 [project.optional-dependencies]
 dev = [
+    "hatch==1.6.3",
     "pre-commit==2.20.0",
     "pylint==2.15.10",
     "pytest==7.2.1",
