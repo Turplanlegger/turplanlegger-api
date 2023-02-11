@@ -1,5 +1,11 @@
 FROM python:3.11
 
+
+ARG DATABASE_URI
+ARG BASE_URL=postgresql://turadm:passord@turplanlegger-db:5432/turplanlegger?connect_timeout=10&application_name=turplanleggerapi
+ARG SECRET_KEY=hemmelig
+ARG SECRET_KEY_ID=1
+
 RUN pip install --upgrade pip
 
 WORKDIR /turplanlegger
@@ -10,11 +16,9 @@ RUN pip install --no-cache-dir .['dev'] hatch
 
 RUN mkdir /etc/turplanlegger && touch /etc/turplanlegger/turplanlegger.conf
 
-RUN echo 'DATABASE_URI="host=turplanlegger-db dbname=postgres user=user password=pass"' >> /etc/turplanlegger/turplanlegger.conf && \
- echo 'DATABASE_NAME="postgres"' >> /etc/turplanlegger/turplanlegger.conf && \
- echo 'DATABASE_MAX_RETRIES=5' >> /etc/turplanlegger/turplanlegger.conf && \
+RUN echo "DATABASE_URI='${DATABASE_URI}'" >> /etc/turplanlegger/turplanlegger.conf && \
  echo 'LOG_TO_FILE=True' >> /etc/turplanlegger/turplanlegger.conf && \
- echo 'SECRET_KEY="DEFAULT"' >> /etc/turplanlegger/turplanlegger.conf && \
- echo 'SECRET_KEY_ID="1"' >> /etc/turplanlegger/turplanlegger.conf
+ echo "SECRET_KEY='${SECRET_KEY}'" >> /etc/turplanlegger/turplanlegger.conf && \
+ echo "SECRET_KEY_ID='${SECRET_KEY_ID}'" >> /etc/turplanlegger/turplanlegger.conf
 
  CMD [ "hatch", "run", "cov" ]
