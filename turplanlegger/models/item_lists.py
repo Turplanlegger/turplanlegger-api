@@ -175,9 +175,6 @@ class ItemList:
     def find_public_item_lists() -> '[ItemList]':
         """Fetches all public ItemLists
 
-        Args:
-            owner_id (str): Id (uuid4) of owner
-
         Returns:
             A list of ItemList objects
         """
