@@ -3,26 +3,25 @@
 ## Ubuntu 22.04
 
 ### Postgres
-`sudo apt-get install postgresql-14`
+`sudo apt-get install postgresql-15`
 
 ### Packages
 Install build tools:  
 `sudo apt-get install build-essential`
 
-Install python3.10-dev:  
-`sudo apt-get install python3.10-dev`
+Install python3.11-dev:  
+`sudo apt-get install python3.11-dev`
 
 Install libq-dev:  
 `sudo apt-get install libpq-dev`
 
 ### Python venv
 ```bash
-sudo apt-get install python3.10-venv
+sudo apt-get install python3.11-venv
 mkdir venv
 python3 -m venv venv
 source venv/bin/active
-pip3 install -r requirements.txt
-pip3 install -r requirements-dev.txt
+pip install . ['dev']
 ```
 
 ### Config
@@ -31,7 +30,7 @@ Create a config directory and file:
 
 ### Start development instance
 ```bash
-export FLASK_APP=turplanlegger FLASK_ENV=development
+export FLASK_APP=turplanlegger
 flask run --debugger --port 8080 --with-threads --reload
 ```
 
@@ -42,5 +41,6 @@ https://docs.docker.com/get-docker/
 
 ### Start development instance
 ```bash
-docker-compose up
+docker-compose -f docker-compose.dev.yml build
+docker-compose -f docker-compose.dev.yml up --abort-on-container-exit  --exit-code-from turplanlegger-dev
 ```
