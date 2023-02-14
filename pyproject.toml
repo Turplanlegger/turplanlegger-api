@@ -33,6 +33,7 @@ dependencies = [
 ]
 [project.optional-dependencies]
 dev = [
+    "hatch==1.6.3",
     "pre-commit==2.20.0",
     "pylint==2.15.10",
     "pytest==7.2.1",
@@ -62,8 +63,6 @@ dependencies = [
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=turpanlegger --cov=tests {args}"
 no-cov = "cov --no-cov {args}"
 lint = "pre-commit run -a"
-unittest = "python3 -m unittest {args}"
-unittest-all = "pytho3 -m unittest {args} tests/test_*.py"
 
 [[tool.hatch.envs.test.matrix]]
 python = ["310", "311"]
