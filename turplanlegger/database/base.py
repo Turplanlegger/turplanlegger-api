@@ -2,6 +2,7 @@ import time
 
 import psycopg
 from psycopg.rows import namedtuple_row
+from psycopg_pool import ConnectionPool
 
 
 class Database:
@@ -16,7 +17,13 @@ class Database:
         self.dbname = app.config.get('DATABASE_NAME')
         self.max_retries = app.config.get('DATABASE_MAX_RETRIES', 5)
 
-        self.conn = self.connect()
+        self.pool = ConnectionPool(
+                conninfo=self.uri,
+                dbname=self.dbname,
+                client_encoding='UTF8',
+                row_factory=namedtuple_row)
+
+
         self.logger.debug('Database connected')
 
         with app.open_resource('database/schema.sql') as f:
@@ -34,35 +41,6 @@ class Database:
                 email=app.config.get('ADMIN_EMAIL'),
                 password=app.config.get('ADMIN_PASSWORD')
             )
-
-    def connect(self):
-        retry = 0
-        while True:
-            try:
-                conn = psycopg.connect(
-                    conninfo=self.uri,
-                    dbname=self.dbname,
-                    client_encoding='UTF8',
-                    row_factory=namedtuple_row,
-                    autocommit=True
-                )
-                break
-            except Exception as e:
-                self.logger.exception(str(e))
-                retry += 1
-                if retry > self.max_retries:
-                    conn = None
-                    break
-                else:
-                    backoff = 2 ** retry
-                    print(f'Retry attempt {retry}/{self.max_retries} (wait={backoff}s)...')
-                    time.sleep(backoff)
-
-        if conn:
-            return conn
-        else:
-            raise RuntimeError('Database connect error. Failed to connect'
-                               f' after {self.max_retries} retries.')
 
     def close(self, db):
         db.close()
@@ -82,12 +60,13 @@ class Database:
             'trips_item_lists_references'
         ]:
             cursor.execute(f'DROP TABLE IF EXISTS {table} CASCADE')
-
+        conn.commit()
         conn.close()
 
     def truncate_table(self, table: str):
         cursor = self.conn.cursor()
         cursor.execute(f'TRUNCATE TABLE {table} RESTART IDENTITY CASCADE')
+        self.conn.commit()
 
     # Item List
     def get_item_list(self, id, deleted=False):
@@ -474,6 +453,7 @@ class Database:
         cursor = self.conn.cursor()
         # self._log(cursor, '_fetchone', query, vars)
         cursor.execute(query, vars)
+        self.conn.commit()
         return cursor.fetchone()
 
     def _fetchall(self, query, vars):
@@ -501,6 +481,7 @@ class Database:
         cursor = self.conn.cursor()
         # self._log(cursor, '_deleteone', query, vars)
         cursor.execute(query, vars)
+        self.conn.commit()
         return cursor.fetchone() if returning else None
 
     def _log(self, cursor, query, vars):
