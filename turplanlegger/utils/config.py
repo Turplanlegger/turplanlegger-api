@@ -45,8 +45,8 @@ class Config:
             self.config['ADMIN_PASSWORD'] = self.conf_ent('ADMIN_PASSWORD', 'admin')
 
         # Database
-        self.config['DATABASE_URI'] = self.conf_ent('DATABASE_URI')
-        self.config['DATABASE_NAME'] = self.conf_ent('DATABASE_NAME')
+        self.config['DATABASE_URI'] = 'postgresql://turadm:passord@localhost:5432/turplanlegger?connect_timeout=10&application_name=turplanleggerapi'
+        self.config['DATABASE_NAME'] = 'turplanlegger'
         self.config['DATABASE_MAX_RETRIES'] = self.conf_ent('DATABASE_MAX_RETRIES', 5)
 
         # Logging

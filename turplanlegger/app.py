@@ -1,3 +1,4 @@
+import atexit
 from typing import Any, Dict
 
 from flask import Flask

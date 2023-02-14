@@ -20,8 +20,8 @@ Install libq-dev:
 sudo apt-get install python3.11-venv
 mkdir venv
 python3 -m venv venv
-source venv/bin/active
-pip install . ['dev']
+source venv/bin/activate
+pip install .['dev']
 ```
 
 ### Config

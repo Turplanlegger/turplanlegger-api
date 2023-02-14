@@ -1,8 +1,11 @@
+import atexit
 import time
 
 import psycopg
 from psycopg.rows import namedtuple_row
 from psycopg_pool import ConnectionPool
+
+from turplanlegger import app
 
 
 class Database:
@@ -18,20 +21,22 @@ class Database:
         self.max_retries = app.config.get('DATABASE_MAX_RETRIES', 5)
 
         self.pool = ConnectionPool(
-                conninfo=self.uri,
-                dbname=self.dbname,
-                client_encoding='UTF8',
-                row_factory=namedtuple_row)
-
-
-        self.logger.debug('Database connected')
+            conninfo=self.uri,
+            kwargs={
+                'dbname':self.dbname,
+                'client_encoding':'UTF8',
+                'row_factory':namedtuple_row})
+        
+        self.pool.open()
+        self.logger.debug('Database pool opened')
 
         with app.open_resource('database/schema.sql') as f:
             try:
-                self.conn.cursor().execute(f.read())
+                 with self.pool.connection() as conn:
+                    conn.cursor().execute(f.read())
             except Exception as e:
-                raise
                 self.logger.exception(e)
+                raise
 
         if (app.config.get('CREATE_ADMIN_USER', False)
                 and not self.check_admin_user(app.config.get('ADMIN_EMAIL'))):
@@ -46,28 +51,29 @@ class Database:
         db.close()
 
     def destroy(self):
-        conn = self.conn
-        cursor = conn.cursor()
-        for table in [
-            'trips',
-            'item_lists',
-            'lists_items',
-            'users',
-            'routes',
-            'notes',
-            'trips_notes_references',
-            'trips_routes_references',
-            'trips_item_lists_references'
-        ]:
-            cursor.execute(f'DROP TABLE IF EXISTS {table} CASCADE')
-        conn.commit()
-        conn.close()
+        with self.pool.connection() as conn:
+            cursor = conn.cursor()
+            for table in [
+                'trips',
+                'item_lists',
+                'lists_items',
+                'users',
+                'routes',
+                'notes',
+                'trips_notes_references',
+                'trips_routes_references',
+                'trips_item_lists_references'
+            ]:
+                cursor.execute(f'DROP TABLE IF EXISTS {table} CASCADE')
+            conn.commit()
+            conn.close()
 
     def truncate_table(self, table: str):
-        cursor = self.conn.cursor()
-        cursor.execute(f'TRUNCATE TABLE {table} RESTART IDENTITY CASCADE')
-        self.conn.commit()
-
+        with self.pool.connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(f'TRUNCATE TABLE {table} RESTART IDENTITY CASCADE')
+            conn.commit()
+    
     # Item List
     def get_item_list(self, id, deleted=False):
         select = """
@@ -78,15 +84,6 @@ class Database:
         else:
             select += ' AND deleted = FALSE'
         return self._fetchone(select, [id])
-
-    # Item List
-    def get_public_item_lists(self, deleted=False):
-        select = 'SELECT * FROM item_lists WHERE private = FALSE'
-        if deleted:
-            select += ' AND deleted = TRUE'
-        else:
-            select += ' AND deleted = FALSE'
-        return self._fetchall(select, [])
 
     def get_item_list_by_owner(self, owner_id: str, deleted=False):
         select = """
@@ -100,8 +97,8 @@ class Database:
 
     def create_item_list(self, item_list):
         insert = """
-            INSERT INTO item_lists (name, private, owner)
-            VALUES (%(name)s, %(private)s, %(owner)s)
+            INSERT INTO item_lists (name, type, owner)
+            VALUES (%(name)s, %(type)s, %(owner)s)
             RETURNING *
         """
         return self._insert(insert, vars(item_list))
@@ -450,48 +447,53 @@ class Database:
         """
         Insert, with return.
         """
-        cursor = self.conn.cursor()
-        # self._log(cursor, '_insert', query, vars)
-        cursor.execute(query, vars)
-        return cursor.fetchone()
+        with self.pool.connection() as conn:
+            cursor = conn.cursor()
+            # self._log(cursor, '_insert', query, vars)
+            cursor.execute(query, vars)
+            return cursor.fetchone()
 
     def _fetchone(self, query, vars):
         """
         Return none or one row.
         """
-        cursor = self.conn.cursor()
-        # self._log(cursor, '_fetchone', query, vars)
-        cursor.execute(query, vars)
-        self.conn.commit()
-        return cursor.fetchone()
+        with self.pool.connection() as conn:
+            cursor = conn.cursor()
+            # self._log(cursor, '_fetchone', query, vars)
+            cursor.execute(query, vars)
+            conn.commit()
+            return cursor.fetchone()
 
     def _fetchall(self, query, vars):
         """
         Return none or multiple row.
         """
-        cursor = self.conn.cursor()
-        # self._log(cursor, '_fetchall', query, vars)
-        cursor.execute(query, vars)
-        return cursor.fetchall()
+        with self.pool.connection() as conn:
+            cursor = conn.cursor()
+            # self._log(cursor, '_fetchall', query, vars)
+            cursor.execute(query, vars)
+            return cursor.fetchall()
 
     def _updateone(self, query, vars, returning=False):
         """
         Update, with optional return.
         """
-        cursor = self.conn.cursor()
-        # self._log(cursor, '-updateone', query, vars)
-        cursor.execute(query, vars)
-        return cursor.fetchone() if returning else None
+        with self.pool.connection() as conn:
+            cursor = conn.cursor()
+            # self._log(cursor, '-updateone', query, vars)
+            cursor.execute(query, vars)
+            return cursor.fetchone() if returning else None
 
     def _deleteone(self, query, vars, returning=False):
         """
         Delete, with optional return.
         """
-        cursor = self.conn.cursor()
-        # self._log(cursor, '_deleteone', query, vars)
-        cursor.execute(query, vars)
-        self.conn.commit()
-        return cursor.fetchone() if returning else None
+        with self.pool.connection() as conn:
+            cursor = conn.cursor()
+            # self._log(cursor, '_deleteone', query, vars)
+            cursor.execute(query, vars)
+            conn.commit()
+            return cursor.fetchone() if returning else None
 
     def _log(self, cursor, query, vars):
         # self.logger.debug('{stars}\n{query}\n{stars}'.format(
