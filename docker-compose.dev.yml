@@ -37,6 +37,8 @@ services:
       interval: 30s
       retries: 5
       timeout: 5s
+    ports:
+      - '5432:5432'
     environment:
       - POSTGRES_USER=${PG_PASS:-turadm}
       - POSTGRES_PASSWORD=${PG_USER:-passord}
