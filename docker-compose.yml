@@ -1,29 +1,55 @@
 version: '3.9'
 
 services:
-  turplanlegger-api:
+  turplanlegger-api-prod:
     build:
       context: .
       args:
-        - DATABASE_URI=${DATABASE_URI:-postgresql://turadm:you-need-a-new-password@turplanlegger_postgres:5432/turplanlegger?connect_timeout=10&application_name=turplanleggerapi}
-        - BASE_URL=${BASE_URL:-turplanlegger-api}
-        - SECRET_KEY=${SECRET_KEY}
-        - SECRET_KEY_ID=${SECRET_KEY_ID}
-    container_name: turplanlegger-api
+        - BASE_URL=${TP_BASE_URL:-turplanlegger-api-prod}
+        - DATABASE_URI=${TP_DATABASE_URI}
+        - SECRET_KEY=${TP_SECRET_KEY}
+        - SECRET_KEY_ID=${TP_SECRET_KEY_ID}
+    container_name: turplanlegger-api-prod
+    hostname: turplanlegger-api-prod
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:5000/test"]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 5s
     ports:
-      - '5000:5000'
+      - '${TP_PORT:-5000}:5000'
       - '9191:9191'
     depends_on:
-      - turplanlegger-db
-    links:
-      - turplanlegger-db
+      - turplanlegger-db-prod
+    networks:
+      - turplanlegger-network-prod
 
-  turplanlegger-db:
-    image: postgres:15.2
-    container_name: turplanlegger-db
-    ports:
-      - '5432:5432'
+  turplanlegger-db-prod:
+    image: postgres:15.2-alpine
+    container_name: turplanlegger-db-prod
+    hostname:  turplanlegger-db-prod
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 5s
+    volumes:
+      - database:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=${POSTGRES_USER:-turadm}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-passord}
       - POSTGRES_DB=${POSTGRES_DB:-turplanlegger}
+    networks:
+      - turplanlegger-network-prod
+
+volumes:
+  database:
+    driver: local
+
+networks:
+  turplanlegger-network-prod:
+    name: turplanlegger-network-prod
