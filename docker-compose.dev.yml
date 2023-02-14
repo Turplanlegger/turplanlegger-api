@@ -6,22 +6,44 @@ services:
       context: .
       dockerfile: ./dev.Dockerfile
       args:
-        - DATABASE_URI=${DATABASE_URI:-postgresql://turadm:passord@turplanlegger-db:5432/turplanlegger?connect_timeout=10&application_name=turplanleggerapi}
-        - BASE_URL=${BASE_URL:-turplanlegger-api}
-        - SECRET_KEY=${SECRET_KEY:-hemmelig}
-        - SECRET_KEY_ID=${SECRET_KEY_ID:-1}
+        - DATABASE_URI=${TP_DATABASE_URI:-postgresql://turadm:passord@turplanlegger-db:5432/turplanlegger?connect_timeout=10&application_name=turplanleggerapi}
+        - BASE_URL=${TP_BASE_URL:-turplanlegger-api}
+        - SECRET_KEY=${TP_SECRET_KEY:-hemmelig}
+        - SECRET_KEY_ID=${TP_SECRET_KEY_ID:-1}
     container_name: turplanlegger-dev
+    hostname:  turplanlegger-dev
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:8080/test"]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 5s
+    ports:
+      - '${TP_PORT:-8080}:8080'
     depends_on:
       - turplanlegger-db
-    links:
-      - turplanlegger-db
+    networks:
+      - turplanlegger-network
 
   turplanlegger-db:
-    image: postgres:15.2
+    image: postgres:15.2-alpine
     container_name: turplanlegger-db
-    ports:
-      - '5432:5432'
+    hostname:  turplanlegger-db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 5s
     environment:
-      - POSTGRES_USER=turadm
-      - POSTGRES_PASSWORD=passord
-      - POSTGRES_DB=turplanlegger
+      - POSTGRES_USER=${PG_PASS:-turadm}
+      - POSTGRES_PASSWORD=${PG_USER:-passord}
+      - POSTGRES_DB=${PG_DB:-turplanlegger}
+    networks:
+      - turplanlegger-network
+
+networks:
+  turplanlegger-network:
+    name: turplanlegger-network
