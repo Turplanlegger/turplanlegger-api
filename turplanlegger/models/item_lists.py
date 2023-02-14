@@ -17,13 +17,15 @@ class ItemList:
 
     Args:
         owner (str): The UUID4 of the owner of the object
-        type (str): The type of list
+        private (bool): Flag if the trip is private
+                        Default so False (public)
         **kwargs: Arbitrary keyword arguments.
 
     Attributes:
         id (int): Optional, the ID of the object
         owner (str): The UUID4 of the owner of the object
-        type (str): The type of list
+        private (bool): Flag if the trip is private
+                        Default so False (public)
         name (str): Optional, name of the list
                     Default: empty list
         items (list): List of items that are unchecked
@@ -33,15 +35,18 @@ class ItemList:
                                 Default: datetime.now()
     """
 
-    def __init__(self, owner: str, type: str, **kwargs) -> None:
+    def __init__(
+        self,
+        owner: str,
+        private: bool = True,
+        **kwargs
+    ) -> None:
         if not owner:
             raise ValueError("missing mandatory field 'owner'")
         if not isinstance(owner, str):
             raise TypeError("'owner' must be str")
-        if not type:
-            raise ValueError("missing mandatory field 'type'")
-        if not isinstance(type, str):
-            raise TypeError("'type' must be string")
+        if not isinstance(private, bool):
+            raise TypeError("'private' must be boolean")
 
         name = kwargs.get('name', None)
         if name is not None and len(name) > 512:
@@ -50,7 +55,7 @@ class ItemList:
         self.id = kwargs.get('id', None)
         self.owner = owner
         self.name = name
-        self.type = type
+        self.private = private
         self.items = kwargs.get('items', [])
         self.items_checked = kwargs.get('items_checked', [])
         self.create_time = kwargs.get('create_time', None) or datetime.now()
@@ -84,7 +89,7 @@ class ItemList:
             id=json.get('id', None),
             owner=g.user.id,
             name=json.get('name', None),
-            type=json.get('type', None),
+            private=json.get('private', True),
             items=items,
             items_checked=items_checked
         )
@@ -96,7 +101,7 @@ class ItemList:
             'id': self.id,
             'owner': self.owner,
             'name': self.name,
-            'type': self.type,
+            'private': self.private,
             'items': [item.serialize for item in self.items],
             'items_checked': [item.serialize for item in self.items_checked],
             'create_time': self.create_time
@@ -150,7 +155,7 @@ class ItemList:
             id (int): Id of ItemList
 
         Returns:
-            A ItemList
+            A ItemList along with its ListItems
         """
         return ItemList.get_item_list(db.get_item_list(id))
 
@@ -166,6 +171,15 @@ class ItemList:
         """
         return [ItemList.get_item_list(item_list) for item_list in db.get_item_list_by_owner(owner_id)]
 
+    @staticmethod
+    def find_public_item_lists() -> '[ItemList]':
+        """Fetches all public ItemLists
+
+        Returns:
+            A list of ItemList objects
+        """
+        return [ItemList.get_item_list(item_list) for item_list in db.get_public_item_lists()]
+
     def change_owner(self) -> 'ItemList':
         """Changes owner of the ItemList"""
         return ItemList.get_item_list(db.change_item_list_owner(self.id, self.owner))
@@ -180,6 +194,7 @@ class ItemList:
         Returns:
             An ItemList instance
         """
+
         if rec is None:
             return None
 
@@ -187,7 +202,7 @@ class ItemList:
             id=rec.id,
             owner=rec.owner,
             name=rec.name,
-            type=rec.type,
+            private=rec.private,
             items=ListItem.find_list_items(rec.id, checked=False),
             items_checked=ListItem.find_list_items(rec.id, checked=True),
             create_time=rec.create_time
