@@ -4,6 +4,7 @@ from flask import Flask
 
 from turplanlegger.database.base import Database
 from turplanlegger.exceptions import ExceptionHandlers
+from turplanlegger.utils.http_client import HttpClient
 from turplanlegger.utils.config import Config
 from turplanlegger.utils.cors import Cors
 from turplanlegger.utils.logger import Logger
@@ -13,6 +14,7 @@ config = Config()
 logger = Logger()
 db = Database()
 cors = Cors()
+http_client = HttpClient()
 
 
 def create_app(config_override: Dict[str, Any] = None,
@@ -25,6 +27,8 @@ def create_app(config_override: Dict[str, Any] = None,
     logger.setup_logging(app)
 
     handlers.register(app)
+
+    http_client.init_app(app)
 
     db.init_db(app)
 
