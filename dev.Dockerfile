@@ -20,4 +20,5 @@ RUN echo "DATABASE_URI='${DATABASE_URI}'" >> /etc/turplanlegger/turplanlegger.co
  echo "SECRET_KEY='${SECRET_KEY}'" >> /etc/turplanlegger/turplanlegger.conf && \
  echo "SECRET_KEY_ID='${SECRET_KEY_ID}'" >> /etc/turplanlegger/turplanlegger.conf
 
- CMD [ "flask", "run", "--debugger", "--port", "8080", "--with-threads", "--reload" ]
+EXPOSE 8080
+CMD [ "flask", "run", "--debugger", "--port", "8080", "--host", "0.0.0.0", "--with-threads", "--reload" ]
