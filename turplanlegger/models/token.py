@@ -122,6 +122,7 @@ class JWT:
             headers={'kid': current_app.config['SECRET_KEY_ID']})
 
     def __repr__(self) -> str:
-        return (f'Jwt(iss={self.issuer}, sub={self.subject}, aud={self.audience}, '
-                f'exp={self.expiration}, nbf={self.not_before}, iat={self.issued_at})'
-                f'jti={self.jwt_id}, typ={self.type}')
+        return (f'Jwt(iss={self.issuer}, sub={self.subject}, '
+                f'aud={self.audience}, exp={self.expiration}, '
+                f'nbf={self.not_before}, iat={self.issued_at} '
+                f'jti={self.jwt_id}, typ={self.type})')
