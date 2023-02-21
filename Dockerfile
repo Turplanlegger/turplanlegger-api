@@ -1,7 +1,7 @@
 FROM python:3.11
 
-ARG DATABASE_URI=postgresql://turadm:you-need-a-new-password@turplanlegger-db:5432/turplanlegger?connect_timeout=10&application_name=turplanleggerapi
-ARG BASE_URL=turplanlegger-api
+ARG BASE_URL=turplanlegger-api-prod
+ARG DATABASE_URI
 ARG SECRET_KEY
 ARG SECRET_KEY_ID
 
