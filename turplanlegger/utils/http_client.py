@@ -1,6 +1,5 @@
-
-from flask import Flask
 import httpx
+from flask import Flask
 
 
 class HttpClient:

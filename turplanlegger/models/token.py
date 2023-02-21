@@ -1,15 +1,11 @@
 import datetime
-import json
 from typing import Any, Dict
 
 import jwt
+from flask import current_app
+from httpx import HTTPError
 from jwt import DecodeError, ExpiredSignatureError, InvalidAudienceError
 
-from flask import current_app
-
-from httpx import HTTPError
-
-from turplanlegger.exceptions import ApiProblem
 from turplanlegger.models.user import User
 
 JSON = Dict[str, Any]
