@@ -83,16 +83,14 @@ class Database:
                 'trips_item_lists_references'
             ]:
                 cursor.execute(f'DROP TABLE IF EXISTS {table} CASCADE')
-            conn.commit()
-            conn.close()
 
     def truncate_table(self, table: str):
         with self.pool.connection() as conn:
             cursor = conn.cursor()
             cursor.execute(f'TRUNCATE TABLE {table} RESTART IDENTITY CASCADE')
-            conn.commit()
 
     # Item List
+
     def get_item_list(self, id, deleted=False):
         select = """
             SELECT * FROM item_lists WHERE id = %s
@@ -486,7 +484,7 @@ class Database:
             cursor = conn.cursor()
             # self._log(cursor, '_fetchone', query, vars)
             cursor.execute(query, vars)
-            conn.commit()
+
             return cursor.fetchone()
 
     def _fetchall(self, query, vars):
@@ -517,7 +515,7 @@ class Database:
             cursor = conn.cursor()
             # self._log(cursor, '_deleteone', query, vars)
             cursor.execute(query, vars)
-            conn.commit()
+
             return cursor.fetchone() if returning else None
 
     def _log(self, cursor, query, vars):
