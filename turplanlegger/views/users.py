@@ -1,4 +1,4 @@
-from flask import jsonify, request
+from flask import g, jsonify, request
 
 from turplanlegger.auth.decorators import auth
 from turplanlegger.exceptions import ApiProblem
@@ -106,3 +106,15 @@ def toggle_private_user(user_id: str):
         raise ApiProblem('Failed to toggle users private setting', str(e), 500)
 
     return jsonify(status='ok')
+
+
+@api.route('/whoami', methods=['GET'])
+@auth
+def lookup_self():
+
+    user = User.find_user(g.user.id)
+
+    if user:
+        return jsonify(status='ok', count=1, user=user.serialize)
+    else:
+        raise ApiProblem('User not found', 'The requested user was not found', 404)
