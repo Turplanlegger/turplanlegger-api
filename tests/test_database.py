@@ -1,8 +1,6 @@
 import datetime
 import json
 import unittest
-from uuid import uuid4
-
 from collections import namedtuple
 
 from turplanlegger.app import create_app, db
@@ -62,8 +60,8 @@ class UsersTestCase(unittest.TestCase):
 
     def test_bogus_query_should_rollback(self):
         insert = """
-            INSERT INTO users (id, name, last_name, email, auth_method, password,  private, create_time)
-            VALUES (%(id)s, %(name)s, %(last_name)s, %(email)s, %(auth_method)s, %(password)s, %(private)s, %(create_time)s)
+            INSERT INTO users (id, name, last_name, email, auth_method, password,  private, create_time) VALUES
+            (%(id)s, %(name)s, %(last_name)s, %(email)s, %(auth_method)s, %(password)s, %(private)s, %(create_time)s)
             RETURNING *
         """
 
@@ -95,8 +93,9 @@ class UsersTestCase(unittest.TestCase):
             'create_time': now
         }
 
-        Row = namedtuple('Row', ['id','name', 'last_name', 'email', 'auth_method', 'password', 'private', 'create_time', 'deleted', 'delete_time'])
+        Row = namedtuple('Row', ['id', 'name', 'last_name', 'email', 'auth_method',
+                         'password', 'private', 'create_time', 'deleted', 'delete_time'])
         correct = Row('1', 'n', 'l', 'e', 'a', 'adsadsa', False, now, False, None)
-        
+
         res = db._insert(insert, correct_vars)
         self.assertEqual(correct, res)

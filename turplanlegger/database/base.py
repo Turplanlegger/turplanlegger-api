@@ -1,11 +1,5 @@
-import atexit
-import time
-
-import psycopg
 from psycopg.rows import namedtuple_row
 from psycopg_pool import ConnectionPool
-
-from turplanlegger import app
 
 
 class Database:
@@ -23,15 +17,15 @@ class Database:
         self.pool = ConnectionPool(
             conninfo=self.uri,
             kwargs={
-                'dbname':self.dbname,
-                'client_encoding':'UTF8',
-                'row_factory':namedtuple_row})
-        
+                'dbname': self.dbname,
+                'client_encoding': 'UTF8',
+                'row_factory': namedtuple_row})
+
         self.logger.debug('Database pool opened')
 
         with app.open_resource('database/schema.sql') as f:
             try:
-                 with self.pool.connection() as conn:
+                with self.pool.connection() as conn:
                     conn.cursor().execute(f.read())
             except Exception as e:
                 self.logger.exception(e)
@@ -72,7 +66,7 @@ class Database:
             cursor = conn.cursor()
             cursor.execute(f'TRUNCATE TABLE {table} RESTART IDENTITY CASCADE')
             conn.commit()
-    
+
     # Item List
     def get_item_list(self, id, deleted=False):
         select = """
