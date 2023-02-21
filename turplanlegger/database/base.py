@@ -46,6 +46,8 @@ class Database:
                         'dbname': self.dbname,
                         'client_encoding': 'UTF8',
                         'row_factory': namedtuple_row})
+
+                # Test that we are able to connect to database
                 with pool.connection(timeout=1.0):
                     self.logger.debug('Testing database connection')
                 break

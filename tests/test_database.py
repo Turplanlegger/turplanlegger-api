@@ -1,11 +1,9 @@
 import datetime
-import json
 import unittest
 from collections import namedtuple
 
 from turplanlegger.app import create_app, db
 from turplanlegger.auth.utils import hash_password
-from turplanlegger.models.user import User
 
 
 class UsersTestCase(unittest.TestCase):
@@ -23,33 +21,6 @@ class UsersTestCase(unittest.TestCase):
         cls.app = create_app(config)
         cls.client = cls.app.test_client()
         cls.hashed_password = hash_password('test')
-
-    def setUp(self):
-        self.test_user = User.create(
-            User(
-                name='Ola',
-                last_name='Nordamnn',
-                email='old.nordmann@norge.no',
-                auth_method='basic',
-                password=self.hashed_password
-            )
-        )
-
-        response = self.client.post(
-            '/login',
-            data=json.dumps({'email': self.test_user.email, 'password': 'test'}),
-            headers={'Content-type': 'application/json'}
-        )
-        self.assertEqual(response.status_code, 200)
-        data = json.loads(response.data.decode('utf-8'))
-
-        self.headers_json = {
-            'Content-type': 'application/json',
-            'Authorization': f'Bearer {data["token"]}'
-        }
-        self.headers = {
-            'Authorization': f'Bearer {data["token"]}'
-        }
 
     def tearDown(self):
         db.truncate_table('users')
