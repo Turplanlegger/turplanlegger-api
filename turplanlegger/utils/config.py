@@ -26,7 +26,7 @@ class Config:
         self.config.from_pyfile(default_config_path)
 
         # Override config if other configfile exists
-        config_path = os.getenv('TURPLANLEGGER_CONFIG_PATH', '/etc/turplanlegger/turplanlegger.conf')
+        config_path = os.getenv('TP_CONFIG_PATH', '/etc/turplanlegger/turplanlegger.conf')
         if (exists(config_path)):
             self.config.from_pyfile(config_path)
 
@@ -58,10 +58,16 @@ class Config:
         return self.config
 
     def conf_ent(self, key, default=None):
-        rv = self.config.get(key, default)
+        envar = f'TP_{key}'
+
+        if envar in os.environ:
+            rv = os.environ.get(envar, default)
+        else:
+            rv = self.config.get(key, default)
 
         if rv is None:
             raise RuntimeError(
-                f'Config entry {key} is required, please set it')
+                f'Config entry {key} is required, please set it'
+            )
 
         return rv
