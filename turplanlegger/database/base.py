@@ -96,11 +96,19 @@ class Database:
 
     def create_item_list(self, item_list):
         insert = """
-            INSERT INTO item_lists (name, owner)
-            VALUES (%(name)s, %(owner)s)
+            INSERT INTO item_lists (name, private, owner)
+            VALUES (%(name)s, %(private)s, %(owner)s)
             RETURNING *
         """
         return self._insert(insert, vars(item_list))
+
+    def get_public_item_lists(self, deleted=False):
+        select = 'SELECT * FROM item_lists WHERE private = FALSE'
+        if deleted:
+            select += ' AND deleted = TRUE'
+        else:
+            select += ' AND deleted = FALSE'
+        return self._fetchall(select, [])
 
     def delete_item_list(self, id):
         update = """
