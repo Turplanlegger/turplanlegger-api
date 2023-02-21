@@ -1,3 +1,5 @@
+import time
+
 from psycopg.rows import namedtuple_row
 from psycopg_pool import ConnectionPool
 
@@ -14,13 +16,7 @@ class Database:
         self.dbname = app.config.get('DATABASE_NAME')
         self.max_retries = app.config.get('DATABASE_MAX_RETRIES', 5)
 
-        self.pool = ConnectionPool(
-            conninfo=self.uri,
-            kwargs={
-                'dbname': self.dbname,
-                'client_encoding': 'UTF8',
-                'row_factory': namedtuple_row})
-
+        self.pool = self.connect()
         self.logger.debug('Database pool opened')
 
         with app.open_resource('database/schema.sql') as f:
@@ -39,6 +35,35 @@ class Database:
                 email=app.config.get('ADMIN_EMAIL'),
                 password=app.config.get('ADMIN_PASSWORD')
             )
+
+    def connect(self):
+        retry = 0
+        while True:
+            try:
+                pool = ConnectionPool(
+                    conninfo=self.uri,
+                    kwargs={
+                        'dbname': self.dbname,
+                        'client_encoding': 'UTF8',
+                        'row_factory': namedtuple_row})
+                with pool.connection(timeout=1.0):
+                    self.logger.debug('Testing database connection')
+                break
+            except Exception as e:
+                self.logger.exception(str(e))
+                retry += 1
+                if retry > self.max_retries:
+                    pool = None
+                    break
+                else:
+                    backoff = 2 ** retry
+                    self.logger.warning(f'Retry attempt {retry}/{self.max_retries} (wait={backoff}s)...')
+                    time.sleep(backoff)
+        if pool:
+            return pool
+        else:
+            raise RuntimeError('Database connect error. Failed to connect'
+                               f' after {self.max_retries} retries.')
 
     def close(self, db):
         db.close()
