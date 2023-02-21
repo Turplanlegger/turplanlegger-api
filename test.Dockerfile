@@ -1,7 +1,7 @@
 FROM python:3.11
 
 ARG DATABASE_URI
-ARG BASE_URL=postgresql://turadm:passord@turplanlegger-db:5432/turplanlegger?connect_timeout=10&application_name=turplanleggerapi
+ARG BASE_URL
 ARG SECRET_KEY=hemmelig
 ARG SECRET_KEY_ID=1
 
