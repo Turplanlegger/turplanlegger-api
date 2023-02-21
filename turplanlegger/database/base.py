@@ -101,6 +101,14 @@ class Database:
             select += ' AND deleted = FALSE'
         return self._fetchone(select, [id])
 
+    def create_item_list(self, item_list):
+        insert = """
+            INSERT INTO item_lists (name, private, owner)
+            VALUES (%(name)s, %(private)s, %(owner)s)
+            RETURNING *
+        """
+        return self._insert(insert, vars(item_list))
+
     def get_item_list_by_owner(self, owner_id: str, deleted=False):
         select = """
             SELECT * FROM item_lists WHERE owner = %s
@@ -110,14 +118,6 @@ class Database:
         else:
             select += ' AND deleted = FALSE'
         return self._fetchall(select, (owner_id,))
-
-    def create_item_list(self, item_list):
-        insert = """
-            INSERT INTO item_lists (name, private, owner)
-            VALUES (%(name)s, %(private)s, %(owner)s)
-            RETURNING *
-        """
-        return self._insert(insert, vars(item_list))
 
     def get_public_item_lists(self, deleted=False):
         select = 'SELECT * FROM item_lists WHERE private = FALSE'
