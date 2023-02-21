@@ -27,7 +27,6 @@ class Database:
                 'client_encoding':'UTF8',
                 'row_factory':namedtuple_row})
         
-        self.pool.open()
         self.logger.debug('Database pool opened')
 
         with app.open_resource('database/schema.sql') as f:
@@ -97,8 +96,8 @@ class Database:
 
     def create_item_list(self, item_list):
         insert = """
-            INSERT INTO item_lists (name, type, owner)
-            VALUES (%(name)s, %(type)s, %(owner)s)
+            INSERT INTO item_lists (name, owner)
+            VALUES (%(name)s, %(owner)s)
             RETURNING *
         """
         return self._insert(insert, vars(item_list))
@@ -326,7 +325,6 @@ class Database:
         insert = """
             INSERT INTO users (id, name, last_name, email, auth_method, password,  private)
             VALUES (%(id)s, %(name)s, %(last_name)s, %(email)s, %(auth_method)s, %(password)s, %(private)s)
-            ON CONFLICT DO NOTHING
             RETURNING *
         """
         return self._insert(insert, vars(user))

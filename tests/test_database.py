@@ -64,7 +64,6 @@ class UsersTestCase(unittest.TestCase):
         insert = """
             INSERT INTO users (id, name, last_name, email, auth_method, password,  private, create_time)
             VALUES (%(id)s, %(name)s, %(last_name)s, %(email)s, %(auth_method)s, %(password)s, %(private)s, %(create_time)s)
-            ON CONFLICT DO NOTHING
             RETURNING *
         """
 
