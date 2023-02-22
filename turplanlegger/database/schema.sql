@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS routes (
 CREATE TABLE IF NOT EXISTS item_lists (
     id serial PRIMARY KEY,
     name text,
-    type text,
+    private boolean DEFAULT TRUE,
     owner text REFERENCES users (id),
     create_time timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted boolean DEFAULT FALSE,

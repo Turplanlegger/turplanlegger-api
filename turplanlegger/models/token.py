@@ -1,10 +1,9 @@
 import datetime
-import json
 from typing import Any, Dict
-from urllib.request import urlopen
 
 import jwt
 from flask import current_app
+from httpx import HTTPError
 from jwt import DecodeError, ExpiredSignatureError, InvalidAudienceError
 
 from turplanlegger.models.user import User
@@ -78,9 +77,17 @@ class JWT:
         )
 
     def find_correct_key(token: str, unverified_header: str) -> str:
-        jsonurl = urlopen(current_app.config['AZURE_AD_B2C_KEY_URL'])
-        jwks = json.loads(jsonurl.read())
+        try:
+            response = current_app.http_client.get(
+                current_app.config['AZURE_AD_B2C_KEY_URL']
+            )
+            response.raise_for_status()
+        except HTTPError:
+            raise
+
+        jwks = response.json()
         rsa_key = ''
+
         for key in jwks['keys']:
             if key['kid'] == unverified_header['kid']:
                 rsa_key = jwt.algorithms.RSAAlgorithm.from_jwk({
@@ -122,6 +129,7 @@ class JWT:
             headers={'kid': current_app.config['SECRET_KEY_ID']})
 
     def __repr__(self) -> str:
-        return (f'Jwt(iss={self.issuer}, sub={self.subject}, aud={self.audience}, '
-                f'exp={self.expiration}, nbf={self.not_before}, iat={self.issued_at})'
-                f'jti={self.jwt_id}, typ={self.type}')
+        return (f'Jwt(iss={self.issuer}, sub={self.subject}, '
+                f'aud={self.audience}, exp={self.expiration}, '
+                f'nbf={self.not_before}, iat={self.issued_at} '
+                f'jti={self.jwt_id}, typ={self.type})')

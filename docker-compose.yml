@@ -1,24 +1,55 @@
-version: '3.3'
-services:
-  flask:
-    build: .
-    container_name: turplanlegger
-    command: 'flask run --debugger -h 0.0.0.0 --port 8080 --with-threads --reload'
-    ports:
-      - '80:8080'
-    volumes:
-      - ./:/turplanlegger
-    depends_on:
-      - turplanleggerdb
-    links:
-      - turplanleggerdb
+version: '3.9'
 
-  turplanleggerdb:
-    image: postgres:14.0
-    container_name: turplanleggerdb
+services:
+  turplanlegger-api-prod:
+    build:
+      context: .
+      args:
+        - BASE_URL=${TP_BASE_URL:-turplanlegger-api-prod}
+        - DATABASE_URI=${TP_DATABASE_URI}
+        - SECRET_KEY=${TP_SECRET_KEY}
+        - SECRET_KEY_ID=${TP_SECRET_KEY_ID}
+    container_name: turplanlegger-api-prod
+    hostname: turplanlegger-api-prod
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:5000/test"]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 5s
     ports:
-      - '5432:5432'
+      - '${TP_PORT:-5000}:5000'
+      - '9191:9191'
+    depends_on:
+      - turplanlegger-db-prod
+    networks:
+      - turplanlegger-network-prod
+
+  turplanlegger-db-prod:
+    image: postgres:15.2-alpine
+    container_name: turplanlegger-db-prod
+    hostname:  turplanlegger-db-prod
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 5s
+    volumes:
+      - database:/var/lib/postgresql/data
     environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=pass
-      - POSTGRES_DB=postgres
+      - POSTGRES_USER=${POSTGRES_USER:-turadm}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-passord}
+      - POSTGRES_DB=${POSTGRES_DB:-turplanlegger}
+    networks:
+      - turplanlegger-network-prod
+
+volumes:
+  database:
+    driver: local
+
+networks:
+  turplanlegger-network-prod:
+    name: turplanlegger-network-prod
