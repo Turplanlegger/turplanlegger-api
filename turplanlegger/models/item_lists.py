@@ -68,7 +68,7 @@ class ItemList:
             f'items_count: {len(self.items)}, items: {self.items}, '
             f'items_checked_count: {len(self.items_checked)}, items_checked: {self.items_checked}, '
             f'create_time: {self.create_time})'
-            )
+        )
 
     @classmethod
     def parse(cls, json: JSON) -> 'ItemList':

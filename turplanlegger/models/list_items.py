@@ -1,6 +1,7 @@
-from flask import g
 from datetime import datetime
 from typing import Dict, NamedTuple
+
+from flask import g
 
 from turplanlegger.app import db
 
