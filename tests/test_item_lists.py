@@ -43,13 +43,13 @@ class ItemListsTestCase(unittest.TestCase):
         cls.item_list = {
             'name': 'Test list',
             'items': [
-                'item one',
-                'item two',
-                'item three'
+                {'content': 'item one'},
+                {'content': 'item two'},
+                {'content': 'item three'}
             ],
             'items_checked': [
-                'item four',
-                'item five'
+                {'content': 'item four'},
+                {'content': 'item five'}
             ],
             'private': True
         }
@@ -57,23 +57,23 @@ class ItemListsTestCase(unittest.TestCase):
         cls.item_list2 = {
             'name': 'Test list 2',
             'items': [
-                'This list has less items',
+                {'content': 'This list has less items'},
             ],
             'items_checked': [
-                'only one checked',
+                {'content': 'only one checked'},
             ]
         }
 
         cls.item_list_public = {
             'name': 'Test list public',
             'items': [
-                'item one',
-                'item two',
-                'item three'
+                {'content': 'item one'},
+                {'content': 'item two'},
+                {'content': 'item three'}
             ],
             'items_checked': [
-                'item four',
-                'item five'
+                {'content': 'item four'},
+                {'content': 'item five'}
             ],
             'private': False
         }
@@ -87,11 +87,11 @@ class ItemListsTestCase(unittest.TestCase):
 
         cls.item_to_add = {
             'items': [
-                'item one',
-                'item two',
+                {'content': 'item one'},
+                {'content': 'item two'},
             ],
             'items_checked': [
-                'item three'
+                {'content': 'item three'}
             ]
         }
 
@@ -431,37 +431,127 @@ class ItemListsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
 
-        self.assertEqual(data['count'], 2)
-        self.assertEqual(data['item_list'][0]['id'], 1)
-        self.assertEqual(data['item_list'][0]['name'], self.item_list['name'])
-        self.assertEqual(data['item_list'][0]['owner'], self.user1.id)
-        self.assertEqual(data['item_list'][0]['private'], self.item_list['private'])
-        self.assertEqual(data['item_list'][0]['items'][0]['content'], self.item_list['items'][0])
-        self.assertEqual(data['item_list'][0]['items'][0]['owner'], data['item_list'][0]['owner'])
-        self.assertEqual(data['item_list'][0]['items'][0]['item_list'], data['item_list'][0]['id'])
-        self.assertEqual(data['item_list'][0]['items'][1]['content'], self.item_list['items'][1])
-        self.assertEqual(data['item_list'][0]['items'][1]['owner'], data['item_list'][0]['owner'])
-        self.assertEqual(data['item_list'][0]['items'][1]['item_list'], data['item_list'][0]['id'])
-        self.assertEqual(data['item_list'][0]['items'][2]['content'], self.item_list['items'][2])
-        self.assertEqual(data['item_list'][0]['items'][2]['owner'], data['item_list'][0]['owner'])
-        self.assertEqual(data['item_list'][0]['items'][2]['item_list'], data['item_list'][0]['id'])
-        self.assertEqual(data['item_list'][0]['items_checked'][0]['content'], self.item_list['items_checked'][0])
-        self.assertEqual(data['item_list'][0]['items_checked'][0]['owner'], data['item_list'][0]['owner'])
-        self.assertEqual(data['item_list'][0]['items_checked'][0]['item_list'], data['item_list'][0]['id'])
-        self.assertEqual(data['item_list'][0]['items_checked'][1]['content'], self.item_list['items_checked'][1])
-        self.assertEqual(data['item_list'][0]['items_checked'][1]['owner'], data['item_list'][0]['owner'])
-        self.assertEqual(data['item_list'][0]['items_checked'][1]['item_list'], data['item_list'][0]['id'])
+        self.assertEqual(
+            data['count'],
+            2
+        )
+        self.assertEqual(
+            data['item_list'][0]['id'],
+            1
+        )
+        self.assertEqual(
+            data['item_list'][0]['name'],
+            self.item_list['name']
+        )
+        self.assertEqual(
+            data['item_list'][0]['owner'],
+            self.user1.id
+        )
+        self.assertEqual(
+            data['item_list'][0]['private'],
+            self.item_list['private']
+        )
+        self.assertEqual(
+            data['item_list'][0]['items'][0]['content'],
+            self.item_list['items'][0]['content']
+        )
+        self.assertEqual(
+            data['item_list'][0]['items'][0]['owner'],
+            data['item_list'][0]['owner']
+        )
+        self.assertEqual(
+            data['item_list'][0]['items'][0]['item_list'],
+            data['item_list'][0]['id']
+        )
+        self.assertEqual(
+            data['item_list'][0]['items'][1]['content'],
+            self.item_list['items'][1]['content']
+        )
+        self.assertEqual(
+            data['item_list'][0]['items'][1]['owner'],
+            data['item_list'][0]['owner']
+        )
+        self.assertEqual(
+            data['item_list'][0]['items'][1]['item_list'],
+            data['item_list'][0]['id']
+        )
+        self.assertEqual(
+            data['item_list'][0]['items'][2]['content'],
+            self.item_list['items'][2]['content']
+        )
+        self.assertEqual(
+            data['item_list'][0]['items'][2]['owner'],
+            data['item_list'][0]['owner']
+        )
+        self.assertEqual(
+            data['item_list'][0]['items'][2]['item_list'],
+            data['item_list'][0]['id']
+        )
+        self.assertEqual(
+            data['item_list'][0]['items_checked'][0]['content'],
+            self.item_list['items_checked'][0]['content']
+        )
+        self.assertEqual(
+            data['item_list'][0]['items_checked'][0]['owner'],
+            data['item_list'][0]['owner']
+        )
+        self.assertEqual(
+            data['item_list'][0]['items_checked'][0]['item_list'],
+            data['item_list'][0]['id']
+        )
+        self.assertEqual(
+            data['item_list'][0]['items_checked'][1]['content'],
+            self.item_list['items_checked'][1]['content']
+        )
+        self.assertEqual(
+            data['item_list'][0]['items_checked'][1]['owner'],
+            data['item_list'][0]['owner']
+        )
+        self.assertEqual(
+            data['item_list'][0]['items_checked'][1]['item_list'],
+            data['item_list'][0]['id']
+        )
 
-        self.assertEqual(data['item_list'][1]['id'], 2)
-        self.assertEqual(data['item_list'][1]['name'], self.item_list2['name'])
-        self.assertEqual(data['item_list'][1]['owner'], self.user1.id)
-        self.assertEqual(data['item_list'][1]['private'], True)
-        self.assertEqual(data['item_list'][1]['items'][0]['content'], self.item_list2['items'][0])
-        self.assertEqual(data['item_list'][1]['items'][0]['owner'], data['item_list'][1]['owner'])
-        self.assertEqual(data['item_list'][1]['items'][0]['item_list'], data['item_list'][1]['id'])
-        self.assertEqual(data['item_list'][1]['items_checked'][0]['content'], self.item_list2['items_checked'][0])
-        self.assertEqual(data['item_list'][1]['items_checked'][0]['owner'], data['item_list'][1]['owner'])
-        self.assertEqual(data['item_list'][1]['items_checked'][0]['item_list'], data['item_list'][1]['id'])
+        self.assertEqual(
+            data['item_list'][1]['id'],
+            2
+        )
+        self.assertEqual(
+            data['item_list'][1]['name'],
+            self.item_list2['name']
+        )
+        self.assertEqual(
+            data['item_list'][1]['owner'],
+            self.user1.id
+        )
+        self.assertEqual(
+            data['item_list'][1]['private'],
+            True
+        )
+        self.assertEqual(
+            data['item_list'][1]['items'][0]['content'],
+            self.item_list2['items'][0]['content']
+        )
+        self.assertEqual(
+            data['item_list'][1]['items'][0]['owner'],
+            data['item_list'][1]['owner']
+        )
+        self.assertEqual(
+            data['item_list'][1]['items'][0]['item_list'],
+            data['item_list'][1]['id']
+        )
+        self.assertEqual(
+            data['item_list'][1]['items_checked'][0]['content'],
+            self.item_list2['items_checked'][0]['content']
+        )
+        self.assertEqual(
+            data['item_list'][1]['items_checked'][0]['owner'],
+            data['item_list'][1]['owner']
+        )
+        self.assertEqual(
+            data['item_list'][1]['items_checked'][0]['item_list'],
+            data['item_list'][1]['id']
+        )
 
     def test_get_all_public_list(self):
         # User1
