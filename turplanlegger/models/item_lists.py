@@ -70,20 +70,15 @@ class ItemList:
         Returns:
             A ItemList object
         """
-
         items = json.get('items', [])
         if not isinstance(items, list):
             raise TypeError("'items' must be JSON list")
-        for i, item in enumerate(items):
-            if item is not None and len(item) > 512:
-                raise ValueError(f"item {i+1}:'{item}' is too long, max 512 char")
+        items[:] = [ItemList.parse(item) for item in items]
 
         items_checked = json.get('items_checked', [])
         if not isinstance(items_checked, list):
             raise TypeError("'items_checed' must be JSON list")
-        for i, item in enumerate(items_checked):
-            if item is not None and len(item) > 512:
-                raise ValueError(f"checked item {i+1}:'{item}' is too long, max 512 char")
+        items_checked[:] = [ItemList.parse(item) for item in items_checked]
 
         return ItemList(
             id=json.get('id', None),
@@ -114,21 +109,11 @@ class ItemList:
         """
         item_list = self.get_item_list(db.create_item_list(self))
         if self.items:
-            items = [ListItem(
-                owner=item_list.owner,
-                item_list=item_list.id,
-                checked=False,
-                content=item) for item in self.items]
-            items = [item.create() for item in items]
+            items = [item.create() for item in self.items]
             item_list.items, self.items = [items, items]
 
         if self.items_checked:
-            items_checked = [ListItem(
-                owner=item_list.owner,
-                item_list=item_list.id,
-                checked=True,
-                content=item) for item in self.items_checked]
-            items_checked = [item.create() for item in items_checked]
+            items_checked = [item.create() for item in self.items_checked]
             item_list.items_checked, self.items_checked = [items_checked, items_checked]
 
         return item_list
