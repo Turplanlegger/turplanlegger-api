@@ -64,8 +64,9 @@ class ItemList:
         return (
             'ItemList('
             f'id: {self.id}, owner: {self.owner}, '
-            f'name: {self.name}, items: {self.items},'
-            f'items_checked: {self.items_checked}, '
+            f'name: {self.name}, '
+            f'items_count: {len(self.items)}, items: {self.items}, '
+            f'items_checked_count: {len(self.items_checked)}, items_checked: {self.items_checked}, '
             f'create_time: {self.create_time})'
             )
 
@@ -82,12 +83,12 @@ class ItemList:
         items = json.get('items', [])
         if not isinstance(items, list):
             raise TypeError("'items' must be JSON list")
-        items[:] = [ItemList.parse(item) for item in items]
+        items[:] = [ListItem.parse_for_item_list(item, False) for item in items]
 
         items_checked = json.get('items_checked', [])
         if not isinstance(items_checked, list):
             raise TypeError("'items_checed' must be JSON list")
-        items_checked[:] = [ItemList.parse(item) for item in items_checked]
+        items_checked[:] = [ListItem.parse_for_item_list(item, True) for item in items_checked]
 
         return ItemList(
             id=json.get('id', None),
@@ -113,16 +114,23 @@ class ItemList:
 
     def create(self) -> 'ItemList':
         """Create a ItemList in the database
-        Will also create ListItems object
-        and add them to the ItemList object
+        Will also add ItemList.id and create ListItems instances
+        and add them to the ItemList instance
         """
         item_list = self.get_item_list(db.create_item_list(self))
+
         if self.items:
-            items = [item.create() for item in self.items]
+            items = []
+            for item in self.items:
+                item.item_list = item_list.id
+                items.append(item.create())
             item_list.items, self.items = [items, items]
 
         if self.items_checked:
-            items_checked = [item.create() for item in self.items_checked]
+            items_checked = []
+            for item in self.items_checked:
+                item.item_list = item_list.id
+                items_checked.append(item.create())
             item_list.items_checked, self.items_checked = [items_checked, items_checked]
 
         return item_list

@@ -1,3 +1,4 @@
+from flask import g
 from datetime import datetime
 from typing import Dict, NamedTuple
 
@@ -26,15 +27,11 @@ class ListItem:
                                 Default: datetime.now()
     """
 
-    def __init__(self, owner: str, item_list: int, checked: bool, **kwargs) -> None:
+    def __init__(self, owner: str, checked: bool, **kwargs) -> None:
         if not owner:
             raise ValueError("missing mandatory field 'owner'")
         if not isinstance(owner, str):
             raise TypeError("'owner' must be str")
-        if not item_list:
-            raise ValueError("missing mandatory field 'item_list'")
-        if not isinstance(item_list, int):
-            raise TypeError("'item_list' must be integer")
         if not isinstance(checked, bool):
             raise TypeError("'checked' must be boolean")
 
@@ -44,7 +41,7 @@ class ListItem:
 
         self.id = kwargs.get('id', None)
         self.owner = owner
-        self.item_list = item_list
+        self.item_list = kwargs.get('item_list', None)
         self.checked = checked
 
         self.content = kwargs.get('content')
@@ -53,8 +50,8 @@ class ListItem:
     def __repr__(self):
         return (
             'ListItem('
-            f'id: {self.id}, owner: {self.owner} '
-            f'item_list: {self.item_list}, checked: {self.checked} '
+            f'id: {self.id}, owner: {self.owner}, '
+            f'item_list: {self.item_list}, checked: {self.checked}, '
             f'content: {self.content}, create_time: {self.create_time})'
         )
 
@@ -74,6 +71,28 @@ class ListItem:
             owner=json.get('owner', None),
             item_list=json.get('item_list', None),
             checked=json.get('checked', False),
+            content=json.get('content', None)
+        )
+
+    @classmethod
+    def parse_for_item_list(cls, json: JSON, checked: bool = False) -> 'ListItem':
+        """Parse input JSON when creating ListItems
+           while creating ItemList.
+           Owner is fetched from Flask.g
+
+        Args:
+            json (Dict[str, any]): JSON input object
+            checked (bool): Flag if ListItem is checked
+
+        Returns:
+            A ListItem object
+        """
+
+        return ListItem(
+            id=json.get('id', None),
+            owner=g.user.id,
+            item_list=json.get('item_list', None),
+            checked=checked,
             content=json.get('content', None)
         )
 
