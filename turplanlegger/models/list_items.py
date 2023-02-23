@@ -50,6 +50,14 @@ class ListItem:
         self.content = kwargs.get('content')
         self.create_time = kwargs.get('create_time', None) or datetime.now()
 
+    def __repr__(self):
+        return (
+            'ListItem('
+            f'id: {self.id}, owner: {self.owner} '
+            f'item_list: {self.item_list}, checked: {self.checked} '
+            f'content: {self.content}, create_time: {self.create_time})'
+        )
+
     @classmethod
     def parse(cls, json: JSON) -> 'ListItem':
         """Parse input JSON and return a ListItem object.
