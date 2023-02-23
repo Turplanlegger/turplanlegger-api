@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS lists_items (
     id serial PRIMARY KEY,
     content text,
     checked boolean DEFAULT FALSE,
-    item_list int REFERENCES item_lists (id),
+    item_list int REFERENCES item_lists (id) NOT NULL,
     owner text REFERENCES users (id),
     create_time timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted boolean DEFAULT FALSE,
