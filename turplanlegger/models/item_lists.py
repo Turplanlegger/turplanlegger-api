@@ -60,6 +60,15 @@ class ItemList:
         self.items_checked = kwargs.get('items_checked', [])
         self.create_time = kwargs.get('create_time', None) or datetime.now()
 
+    def __repr__(self):
+        return (
+            'ItemList('
+            f'id: {self.id}, owner: {self.owner}, '
+            f'name: {self.name}, items: {self.items},'
+            f'items_checked: {self.items_checked}, '
+            f'create_time: {self.create_time})'
+            )
+
     @classmethod
     def parse(cls, json: JSON) -> 'ItemList':
         """Parse input JSON and return a ItemList object.
