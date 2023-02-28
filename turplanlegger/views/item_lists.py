@@ -76,7 +76,7 @@ def add_item_list_items(item_list_id):
                     'owner': g.user.id,
                     'item_list': item_list.id,
                     'checked': False,
-                    'content': item
+                    'content': item.get('content')
                 }
             ) for item in items
         ]
@@ -86,7 +86,7 @@ def add_item_list_items(item_list_id):
                     'owner': g.user.id,
                     'item_list': item_list.id,
                     'checked': True,
-                    'content': item
+                    'content':  item.get('content')
                 }
             ) for item in items_checked
         ]
