@@ -60,6 +60,16 @@ class ItemList:
         self.items_checked = kwargs.get('items_checked', [])
         self.create_time = kwargs.get('create_time', None) or datetime.now()
 
+    def __repr__(self):
+        return (
+            'ItemList('
+            f'id: {self.id}, owner: {self.owner}, '
+            f'name: {self.name}, '
+            f'items_count: {len(self.items)}, items: {self.items}, '
+            f'items_checked_count: {len(self.items_checked)}, items_checked: {self.items_checked}, '
+            f'create_time: {self.create_time})'
+        )
+
     @classmethod
     def parse(cls, json: JSON) -> 'ItemList':
         """Parse input JSON and return a ItemList object.
@@ -70,20 +80,15 @@ class ItemList:
         Returns:
             A ItemList object
         """
-
         items = json.get('items', [])
         if not isinstance(items, list):
             raise TypeError("'items' must be JSON list")
-        for i, item in enumerate(items):
-            if item is not None and len(item) > 512:
-                raise ValueError(f"item {i+1}:'{item}' is too long, max 512 char")
+        items[:] = [ListItem.parse_for_item_list(item, False) for item in items]
 
         items_checked = json.get('items_checked', [])
         if not isinstance(items_checked, list):
             raise TypeError("'items_checed' must be JSON list")
-        for i, item in enumerate(items_checked):
-            if item is not None and len(item) > 512:
-                raise ValueError(f"checked item {i+1}:'{item}' is too long, max 512 char")
+        items_checked[:] = [ListItem.parse_for_item_list(item, True) for item in items_checked]
 
         return ItemList(
             id=json.get('id', None),
@@ -109,26 +114,23 @@ class ItemList:
 
     def create(self) -> 'ItemList':
         """Create a ItemList in the database
-        Will also create ListItems object
-        and add them to the ItemList object
+        Will also add ItemList.id and create ListItems instances
+        and add them to the ItemList instance
         """
         item_list = self.get_item_list(db.create_item_list(self))
+
         if self.items:
-            items = [ListItem(
-                owner=item_list.owner,
-                item_list=item_list.id,
-                checked=False,
-                content=item) for item in self.items]
-            items = [item.create() for item in items]
+            items = []
+            for item in self.items:
+                item.item_list = item_list.id
+                items.append(item.create())
             item_list.items, self.items = [items, items]
 
         if self.items_checked:
-            items_checked = [ListItem(
-                owner=item_list.owner,
-                item_list=item_list.id,
-                checked=True,
-                content=item) for item in self.items_checked]
-            items_checked = [item.create() for item in items_checked]
+            items_checked = []
+            for item in self.items_checked:
+                item.item_list = item_list.id
+                items_checked.append(item.create())
             item_list.items_checked, self.items_checked = [items_checked, items_checked]
 
         return item_list

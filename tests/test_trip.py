@@ -51,15 +51,14 @@ class TripsTestCase(unittest.TestCase):
         cls.item_list = {
             'name': 'Test list',
             'items': [
-                'item one',
-                'item two',
-                'item three'
+                {'content': 'item one'},
+                {'content': 'item two'},
+                {'content': 'item three'}
             ],
             'items_checked': [
-                'item four',
-                'item five'
+                {'content': 'item four'},
+                {'content': 'item five'}
             ],
-            'type': 'check'
         }
         cls.trip = {
             'name': 'UTrippin?',
