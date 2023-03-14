@@ -61,6 +61,21 @@ class Config:
         return self.config
 
     def conf_ent(self, key, ent_type=None, default=None):
+        """Get and check config entry
+        Looks for config entry in environment variable by
+        key prepended with 'TP_'.
+        If config entry is found in environment variable, convert from
+        string to bool, int, list or tuple.
+
+        Args:
+            key (str): Config key
+            ent_type (instance): Expected instance of config value
+                                 Default: None
+            default (Any): The default value of the config entry
+
+        Returns:
+            rv: Config value
+        """
         envar = f'TP_{key}'
 
         if envar in os.environ:
@@ -70,6 +85,14 @@ class Config:
                     rv = False
                 if key.lower() in ['yes', 'true', 'ja', '1']:
                     rv = True
+            if ent_type is int:
+                try:
+                    rv = int(rv)
+                except ValueError:
+                    raise RuntimeError(
+                        f'Config entry {key} is has to be int'
+                    )
+
             if ent_type in [list, tuple]:
                 rv = rv.split(',')
             if ent_type is tuple:
