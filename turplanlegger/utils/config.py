@@ -50,10 +50,13 @@ class Config:
         self.config['DATABASE_MAX_RETRIES'] = self.conf_ent('DATABASE_MAX_RETRIES', 5)
 
         # Logging
-        log_path = os.getenv('TURPLANLEGGER_LOG_PATH', '/var/log/turplanlegger.log')
-        self.config['LOG_FILE'] = self.conf_ent(
-            'LOG_FILE', log_path)
         self.config['LOG_LEVEL'] = self.conf_ent('LOG_LEVEL', 'INFO')
+        self.config['LOG_TO_FILE'] = self.conf_ent('LOG_TO_FILE', False)
+        if self.config['LOG_TO_FILE']:
+            self.config['LOG_PATH'] = self.conf_ent(
+                'LOG_PATH',
+                '/var/log/turplanlegger.log'
+            )
 
         return self.config
 

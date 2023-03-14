@@ -7,7 +7,9 @@ DATABASE_URI = """postgresql://postgres:postgres@localhost/turplanlegger
 DATABASE_NAME = 'turplanlegger'
 
 # Logging
+LOG_LEVEL = 'INFO'
 LOG_TO_FILE = False
+LOG_PATH = '/var/log/turplanlegger.log'
 
 # Misc
 CREATE_ADMIN_USER = False
