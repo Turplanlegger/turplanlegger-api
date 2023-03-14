@@ -58,6 +58,8 @@ class Config:
                 '/var/log/turplanlegger.log'
             )
 
+        self.config['CORS_ORIGINS'] = self.conf_ent('CORS_ORIGINS', list, ['http://localhost:3000'])
+
         return self.config
 
     def conf_ent(self, key, ent_type=None, default=None):
@@ -92,7 +94,6 @@ class Config:
                     raise RuntimeError(
                         f'Config entry {key} is has to be int'
                     )
-
             if ent_type in [list, tuple]:
                 rv = rv.split(',')
             if ent_type is tuple:
