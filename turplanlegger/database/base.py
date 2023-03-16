@@ -15,6 +15,13 @@ class Database:
         self.uri = app.config.get('DATABASE_URI')
         self.dbname = app.config.get('DATABASE_NAME')
         self.max_retries = app.config.get('DATABASE_MAX_RETRIES', 5)
+        self.min_pool_size = app.config.get('DATABASE_MIN_POOL_SIZE', 2)
+        self.max_pool_size = app.config.get('DATABASE_MAX_POOL_SIZE', 10)
+        self.timeout = app.config.get('DATABASE_TIMEOUT', 10)
+        self.max_waiting = app.config.get('DATABASE_MAX_WAITING', 0)
+        self.max_lifetime = app.config.get('DATABASE_MAX_LIFETIME', 1800)
+        self.max_idle = app.config.get('DATABASE_MAX_IDLE', 300)
+        self.reconnect_timeout = app.config.get('DATABASE_RECONNECT_TIMEOUT', 90)
 
         self.pool = self.connect()
         self.logger.debug('Database pool opened')
@@ -42,10 +49,19 @@ class Database:
             try:
                 pool = ConnectionPool(
                     conninfo=self.uri,
+                    min_size=self.min_pool_size,
+                    max_size=self.max_pool_size,
+                    timeout=self.timeout,
+                    max_waiting=self.max_waiting,
+                    max_lifetime=self.max_lifetime,
+                    max_idle=self.max_idle,
+                    reconnect_timeout=self.reconnect_timeout,
                     kwargs={
                         'dbname': self.dbname,
                         'client_encoding': 'UTF8',
-                        'row_factory': namedtuple_row})
+                        'row_factory': namedtuple_row
+                    }
+                )
 
                 # Test that we are able to connect to database
                 with pool.connection(timeout=1.0):
