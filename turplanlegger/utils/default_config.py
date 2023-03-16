@@ -16,7 +16,9 @@ DATABASE_MAX_IDLE = 300  # Seconds
 DATABASE_RECONNECT_TIMEOUT = 90  # Seconds
 
 # Logging
+LOG_LEVEL = 'INFO'
 LOG_TO_FILE = False
+LOG_PATH = '/var/log/turplanlegger.log'
 
 # Misc
 CREATE_ADMIN_USER = False
