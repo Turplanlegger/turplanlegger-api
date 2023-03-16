@@ -1,16 +1,15 @@
 version: '3.9'
 
 services:
-  turplanlegger-api-prod:
+  turplanlegger-api:
     build:
       context: .
-      args:
-        - BASE_URL=${TP_BASE_URL:-turplanlegger-api-prod}
-        - DATABASE_URI=${TP_DATABASE_URI}
-        - SECRET_KEY=${TP_SECRET_KEY}
-        - SECRET_KEY_ID=${TP_SECRET_KEY_ID}
-    container_name: turplanlegger-api-prod
-    hostname: turplanlegger-api-prod
+    environment:
+      - TP_DATABASE_URI=${TP_DATABASE_URI:-postgresql://turadm:passord@/turplanlegger?connect_timeout=10&application_name=turplanlegger-api}
+      - TP_DATABASE_NAME={$TP_DATABASE_NAME:-turplanlegger}
+      - TP_DATABASE_MAX_RETRIES
+      - TP_SECRET_KEY
+    hostname: turplanlegger-api
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -fs http://localhost:5000/test"]
@@ -20,16 +19,14 @@ services:
       timeout: 5s
     ports:
       - '${TP_PORT:-5000}:5000'
-      - '9191:9191'
     depends_on:
-      - turplanlegger-db-prod
+      - turplanlegger-db
     networks:
-      - turplanlegger-network-prod
+      - turplanlegger-network
 
-  turplanlegger-db-prod:
-    image: postgres:15.2-alpine
-    container_name: turplanlegger-db-prod
-    hostname:  turplanlegger-db-prod
+  turplanlegger-db:
+    image: postgres:15-alpine
+    hostname:  turplanlegger-db
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
@@ -44,12 +41,12 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-passord}
       - POSTGRES_DB=${POSTGRES_DB:-turplanlegger}
     networks:
-      - turplanlegger-network-prod
+      - turplanlegger-network
 
 volumes:
   database:
     driver: local
 
 networks:
-  turplanlegger-network-prod:
-    name: turplanlegger-network-prod
+  turplanlegger-network:
+    name: turplanlegger-network
