@@ -47,7 +47,6 @@ class Config:
         # Database
         self.config['DATABASE_URI'] = self.conf_ent('DATABASE_URI')
         self.config['DATABASE_NAME'] = self.conf_ent('DATABASE_NAME')
-        self.config['DATABASE_MAX_RETRIES'] = self.conf_ent('DATABASE_MAX_RETRIES', 5)
 
         # Logging
         log_path = os.getenv('TURPLANLEGGER_LOG_PATH', '/var/log/turplanlegger.log')
