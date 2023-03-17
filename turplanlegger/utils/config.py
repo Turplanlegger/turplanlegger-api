@@ -20,12 +20,7 @@ class Config:
         from flask import Config
         self.config = Config('/')
 
-        # Read default config
-        current_dir_path = os.path.dirname(os.path.abspath(__file__))
-        default_config_path = current_dir_path + '/default_config.py'
-        self.config.from_pyfile(default_config_path)
-
-        # Override config if other configfile exists
+        # Load custom config file
         config_path = os.getenv('TP_CONFIG_PATH', '/etc/turplanlegger/turplanlegger.conf')
         if (exists(config_path)):
             self.config.from_pyfile(config_path)
@@ -37,8 +32,13 @@ class Config:
         # App
         self.config['SECRET_KEY'] = self.conf_ent('SECRET_KEY', str)
         self.config['SECRET_KEY_ID'] = self.conf_ent('SECRET_KEY_ID', str)
-        self.config['AZURE_AD_B2C_KEY_URL'] = self.conf_ent('AZURE_AD_B2C_KEY_URL', str)
-        self.config['TOKEN_EXPIRE_TIME'] = self.conf_ent('TOKEN_EXPIRE_TIME', int)  # Seconds
+        self.config['AUDIENCE'] = self.conf_ent('AUDIENCE', str, '0149fc65-259e-4895-9034-e144c242f733')
+        self.config['AZURE_AD_B2C_KEY_URL'] = self.conf_ent(
+            'AZURE_AD_B2C_KEY_URL',
+            str,
+            'https://turplanlegger.b2clogin.com/turplanlegger.onmicrosoft.com/discovery/v2.0/keys?p=b2c_1_signin'
+        )
+        self.config['TOKEN_EXPIRE_TIME'] = self.conf_ent('TOKEN_EXPIRE_TIME', int, 86400)  # Seconds
         self.config['CREATE_ADMIN_USER'] = self.conf_ent('CREATE_ADMIN_USER', bool, False)
         if self.config['CREATE_ADMIN_USER']:
             self.config['ADMIN_EMAIL'] = self.conf_ent('ADMIN_EMAIL', str, 'test@test.com')
@@ -46,7 +46,16 @@ class Config:
 
         # Database
         self.config['DATABASE_URI'] = self.conf_ent('DATABASE_URI', str)
-        self.config['DATABASE_NAME'] = self.conf_ent('DATABASE_NAME', str)
+        self.config['DATABASE_NAME'] = self.conf_ent('DATABASE_NAME', str, 'turplanlegger')
+        self.config['DATABASE_MAX_RETRIES'] = self.conf_ent('DATABASE_MAX_RETRIES', int, 5)
+        self.config['DATABASE_MIN_POOL_SIZE'] = self.conf_ent('DATABASE_MIN_POOL_SIZE', int, 2)
+        self.config['DATABASE_MAX_POOL_SIZE'] = self.conf_ent('DATABASE_MAX_POOL_SIZE', int, 10)
+        self.config['DATABASE_TIMEOUT'] = self.conf_ent('DATABASE_TIMEOUT', int, 10)
+        self.config['DATABASE_MAX_WAITING'] = self.conf_ent('DATABASE_MAX_WAITING', int, 0)
+        self.config['DATABASE_MAX_LIFETIME'] = self.conf_ent('DATABASE_MAX_LIFETIME', int, 1800)
+        self.config['DATABASE_MAX_IDLE'] = self.conf_ent('DATABASE_MAX_IDLE', int, 300)
+        self.config['DATABASE_RECONNECT_TIMEOUT'] = self.conf_ent('DATABASE_RECONNECT_TIMEOUT', int, 90)
+        self.config['DATABASE_CONNECTION_TEST_TIMEOUT'] = self.conf_ent('DATABASE_CONNECTION_TEST_TIMEOUT', int, 1)
 
         # Logging
         self.config['LOG_LEVEL'] = self.conf_ent('LOG_LEVEL', str, 'INFO')
