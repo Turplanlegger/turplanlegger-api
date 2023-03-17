@@ -93,12 +93,12 @@ class Config:
             rv = os.environ.get(envar, default)
             if ent_type is bool:
                 if key.lower() in ['no', 'false', 'nei', '0']:
-                    rv = False
+                    return False
                 if key.lower() in ['yes', 'true', 'ja', '1']:
-                    rv = True
+                    return True
             if ent_type is int:
                 try:
-                    rv = int(rv)
+                    return int(rv)
                 except ValueError:
                     raise RuntimeError(
                         f'Config entry {key} is has to be int'
@@ -107,6 +107,7 @@ class Config:
                 rv = rv.split(',')
             if ent_type is tuple:
                 rv = tuple(rv)
+            return rv
         else:
             rv = self.config.get(key, default)
 
