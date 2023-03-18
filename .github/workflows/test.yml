@@ -4,8 +4,6 @@
 name: Code standards and unittests
 
 on:
-  push:
-    branches: [ main , release/* ]
   pull_request:
     branches: [ main, develop ]
 
