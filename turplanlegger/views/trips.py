@@ -119,7 +119,7 @@ def change_trip_owner(trip_id):
     return jsonify(status='ok')
 
 
-@api.route('/trip/mine', methods=['GET'])
+@api.route('/trips/mine', methods=['GET'])
 @auth
 def get_my_trips():
 

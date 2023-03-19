@@ -223,7 +223,7 @@ class TripsTestCase(unittest.TestCase):
         response = self.client.post('/trip', data=json.dumps(self.trip2), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
 
-        response = self.client.get('trip/mine', headers=self.headers)
+        response = self.client.get('/trips/mine', headers=self.headers)
         self.assertEqual(response.status_code, 200)
 
         data = json.loads(response.data.decode('utf-8'))
