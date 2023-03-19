@@ -425,7 +425,7 @@ class ItemListsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         response = self.client.get(
-            '/item_list/mine',
+            '/item_lists/mine',
             headers=self.headers
         )
         self.assertEqual(response.status_code, 200)
@@ -577,14 +577,14 @@ class ItemListsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         response = self.client.get(
-            '/item_list/mine',
+            '/item_lists/mine',
             headers=self.headers
         )
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
 
         response = self.client.get(
-            '/item_list/mine',
+            '/item_lists/mine',
             headers=self.headers
         )
         self.assertEqual(response.status_code, 200)
@@ -615,14 +615,14 @@ class ItemListsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         response = self.client.get(
-            '/item_list/mine',
+            '/item_lists/mine',
             headers=self.user2_headers
         )
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
 
         response = self.client.get(
-            '/item_list/mine',
+            '/item_lists/mine',
             headers=self.user2_headers
         )
         self.assertEqual(response.status_code, 200)
@@ -630,7 +630,7 @@ class ItemListsTestCase(unittest.TestCase):
         self.assertEqual(data['count'], 3)
 
         response = self.client.get(
-            '/item_list/public',
+            '/item_lists/public',
             headers=self.headers
         )
         self.assertEqual(response.status_code, 200)
@@ -638,7 +638,7 @@ class ItemListsTestCase(unittest.TestCase):
         self.assertEqual(data['count'], 2)
 
         response = self.client.get(
-            '/item_list/public',
+            '/item_lists/public',
             headers=self.user2_headers
         )
         self.assertEqual(response.status_code, 200)

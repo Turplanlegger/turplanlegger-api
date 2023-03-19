@@ -178,7 +178,7 @@ def change_item_list_owner(item_list_id):
     return jsonify(status='ok')
 
 
-@api.route('/item_list/mine', methods=['GET'])
+@api.route('/item_lists/mine', methods=['GET'])
 @auth
 def get_my_item_lists():
 
@@ -198,7 +198,7 @@ def get_my_item_lists():
         )
 
 
-@api.route('/item_list/public', methods=['GET'])
+@api.route('/item_lists/public', methods=['GET'])
 @auth
 def get_public_item_lists():
 
