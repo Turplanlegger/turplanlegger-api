@@ -58,6 +58,15 @@ CREATE TABLE IF NOT EXISTS trips (
     id serial PRIMARY KEY,
     name text NOT NULL,
     private boolean DEFAULT FALSE,
+    owner text REFERENCES users (id),
+    create_time timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted boolean DEFAULT FALSE,
+    delete_time timestamp without time zone
+);
+
+CREATE TABLE IF NOT EXISTS trip_dates (
+    id serial PRIMARY KEY,
+    trip_id int REFERENCES trips (id) NOT NULL,
     start_time timestamp without time zone CHECK (start_time < end_time),
     end_time timestamp without time zone CHECK (start_time < end_time),
     owner text REFERENCES users (id),
