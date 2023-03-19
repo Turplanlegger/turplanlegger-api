@@ -1,16 +1,32 @@
 version: '3.9'
 
 services:
-  turplanlegger-api-prod:
+  turplanlegger-api:
     build:
       context: .
-      args:
-        - BASE_URL=${TP_BASE_URL:-turplanlegger-api-prod}
-        - DATABASE_URI=${TP_DATABASE_URI}
-        - SECRET_KEY=${TP_SECRET_KEY}
-        - SECRET_KEY_ID=${TP_SECRET_KEY_ID}
-    container_name: turplanlegger-api-prod
-    hostname: turplanlegger-api-prod
+    environment:
+      - TP_DATABASE_URI=${TP_DATABASE_URI:-postgresql://turadm:passord@turplanlegger-db/turplanlegger?connect_timeout=10&application_name=turplanlegger-api}
+      - TP_DATABASE_NAME=${TP_DATABASE_NAME:-turplanlegger}
+      - TP_DATABASE_MAX_RETRIES=${TP_DATABASE_MAX_RETRIES:-2}
+      - TP_DATABASE_MIN_POOL_SIZE=${TP_DATABASE_MIN_POOL_SIZE:-2}
+      - TP_DATABASE_MAX_POOL_SIZE=${TP_DATABASE_MAX_POOL_SIZE:-10}
+      - TP_DATABASE_TIMEOUT=${TP_DATABASE_TIMEOUT:-10}
+      - TP_DATABASE_MAX_WAITING=${TP_DATABASE_MAX_WAITING:-0}
+      - TP_DATABASE_MAX_LIFETIME=${TP_DATABASE_MAX_LIFETIME:-1800}
+      - TP_DATABASE_MAX_IDLE=${TP_DATABASE_MAX_IDLE:-300}
+      - TP_DATABASE_RECONNECT_TIMEOUT=${TP_DATABASE_RECONNECT_TIMEOUT:-90}
+      - TP_DATABASE_CONNECTION_TEST_TIMEOUT=${TP_DATABASE_CONNECTION_TEST_TIMEOUT:-1}
+      - TP_LOG_LEVEL=${TP_LOG_LEVEL:-INFO}
+      - TP_CREATE_ADMIN_USER=${TP_CREATE_ADMIN_USER:-0}
+      - TP_ADMIN_EMAIL=${TP_ADMIN_EMAIL:-test@test.com}
+      - TP_ADMIN_PASSWORD=${TP_ADMIN_PASSWORD:-Changeme}
+      - TP_CORS_ORIGINS=${TP_CORS_ORIGINS:-http://localhost:3000}
+      - TP_AUDIENCE=${TP_AUDIENCE:-0149fc65-259e-4895-9034-e144c242f733}
+      - TP_AZURE_AD_B2C_KEY_URL=${TP_AZURE_AD_B2C_KEY_URL:-https://turplanlegger.b2clogin.com/turplanlegger.onmicrosoft.com/discovery/'v2.0/keys?p=b2c_1_signin}
+      - TP_TOKEN_EXPIRE_TIME=${TP_TOKEN_EXPIRE_TIME:-86400}
+      - TP_SECRET_KEY=${TP_SECRET_KEY}
+      - TP_SECRET_KEY_ID=${TP_SECRET_KEY_ID}
+    hostname: turplanlegger-api
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -fs http://localhost:5000/test"]
@@ -20,16 +36,14 @@ services:
       timeout: 5s
     ports:
       - '${TP_PORT:-5000}:5000'
-      - '9191:9191'
     depends_on:
-      - turplanlegger-db-prod
+      - turplanlegger-db
     networks:
-      - turplanlegger-network-prod
+      - turplanlegger-network
 
-  turplanlegger-db-prod:
-    image: postgres:15.2-alpine
-    container_name: turplanlegger-db-prod
-    hostname:  turplanlegger-db-prod
+  turplanlegger-db:
+    image: postgres:15-alpine
+    hostname:  turplanlegger-db
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
@@ -40,16 +54,16 @@ services:
     volumes:
       - database:/var/lib/postgresql/data
     environment:
-      - POSTGRES_USER=${POSTGRES_USER:-turadm}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-passord}
-      - POSTGRES_DB=${POSTGRES_DB:-turplanlegger}
+      - POSTGRES_USER=${TP_POSTGRES_USER:-turadm}
+      - POSTGRES_PASSWORD=${TP_POSTGRES_PASSWORD:-passord}
+      - POSTGRES_DB=${TP_POSTGRES_DB:-turplanlegger}
     networks:
-      - turplanlegger-network-prod
+      - turplanlegger-network
 
 volumes:
   database:
     driver: local
 
 networks:
-  turplanlegger-network-prod:
-    name: turplanlegger-network-prod
+  turplanlegger-network:
+    name: turplanlegger-network
