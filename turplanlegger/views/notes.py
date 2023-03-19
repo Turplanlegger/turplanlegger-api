@@ -110,7 +110,7 @@ def update_note(note_id):
         raise ApiProblem('Failed to update note', 'Unknown error', 500)
 
 
-@api.route('/note/mine', methods=['GET'])
+@api.route('/notes/mine', methods=['GET'])
 @auth
 def get_my_notes():
 

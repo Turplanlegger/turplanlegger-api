@@ -219,7 +219,7 @@ class NotesTestCase(unittest.TestCase):
         response = self.client.post('/note', data=json.dumps(self.note_full2), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
 
-        response = self.client.get('/note/mine', headers=self.headers)
+        response = self.client.get('/notes/mine', headers=self.headers)
         self.assertEqual(response.status_code, 200)
 
         data = json.loads(response.data.decode('utf-8'))
