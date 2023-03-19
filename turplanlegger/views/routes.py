@@ -76,7 +76,7 @@ def change_route_owner(route_id):
     return jsonify(status='ok')
 
 
-@api.route('/route/mine', methods=['GET'])
+@api.route('/routes/mine', methods=['GET'])
 @auth
 def get_my_routes():
 

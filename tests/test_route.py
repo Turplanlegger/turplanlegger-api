@@ -192,7 +192,7 @@ class RoutesTestCase(unittest.TestCase):
         response = self.client.post('/route', data=json.dumps(self.route), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
 
-        response = self.client.get('/route/mine', headers=self.headers)
+        response = self.client.get('/routes/mine', headers=self.headers)
         self.assertEqual(response.status_code, 200)
 
         data = json.loads(response.data.decode('utf-8'))
