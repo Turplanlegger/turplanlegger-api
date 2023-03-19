@@ -37,7 +37,7 @@ def delete_item_list(item_list_id):
     return jsonify(status='ok')
 
 
-@api.route('/item_list', methods=['POST'])
+@api.route('/item_lists', methods=['POST'])
 @auth
 def add_item_list():
     try:

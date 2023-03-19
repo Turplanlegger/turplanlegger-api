@@ -36,7 +36,7 @@ def delete_note(note_id):
     return jsonify(status='ok')
 
 
-@api.route('/note', methods=['POST'])
+@api.route('/notes', methods=['POST'])
 @auth
 def add_note():
     try:
