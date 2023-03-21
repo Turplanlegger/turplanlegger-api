@@ -8,7 +8,7 @@ from turplanlegger.models.list_items import ListItem
 from . import api
 
 
-@api.route('/item_list/<item_list_id>', methods=['GET'])
+@api.route('/item_lists/<item_list_id>', methods=['GET'])
 @auth
 def get_item_list(item_list_id):
 
@@ -20,7 +20,7 @@ def get_item_list(item_list_id):
         raise ApiProblem('Item list not found', 'The requested item list was not found', 404)
 
 
-@api.route('/item_list/<item_list_id>', methods=['DELETE'])
+@api.route('/item_lists/<item_list_id>', methods=['DELETE'])
 @auth
 def delete_item_list(item_list_id):
 
@@ -37,7 +37,7 @@ def delete_item_list(item_list_id):
     return jsonify(status='ok')
 
 
-@api.route('/item_list', methods=['POST'])
+@api.route('/item_lists', methods=['POST'])
 @auth
 def add_item_list():
     try:
@@ -56,7 +56,7 @@ def add_item_list():
         raise ApiProblem('Failed to create item list', 'Unknown error', 500)
 
 
-@api.route('/item_list/<item_list_id>/add', methods=['PATCH'])
+@api.route('/item_lists/<item_list_id>/add', methods=['PATCH'])
 @auth
 def add_item_list_items(item_list_id):
 
@@ -102,7 +102,7 @@ def add_item_list_items(item_list_id):
     return jsonify(status='ok', count_items=len(items), count_items_checked=len(items_checked))
 
 
-@api.route('/item_list/<item_list_id>/rename', methods=['PATCH'])
+@api.route('/item_lists/<item_list_id>/rename', methods=['PATCH'])
 @auth
 def rename_item_list(item_list_id):
 
@@ -119,7 +119,7 @@ def rename_item_list(item_list_id):
         raise ApiProblem('Failed to rename item list', 'Unknown error', 500)
 
 
-@api.route('/item_list/<item_list_id>/toggle_check', methods=['PATCH'])
+@api.route('/item_lists/<item_list_id>/toggle_check', methods=['PATCH'])
 @auth
 def toggle_list_item_check(item_list_id):
 
@@ -146,7 +146,7 @@ def toggle_list_item_check(item_list_id):
     return jsonify(status='ok')
 
 
-@api.route('/item_list/<item_list_id>/owner', methods=['PATCH'])
+@api.route('/item_lists/<item_list_id>/owner', methods=['PATCH'])
 @auth
 def change_item_list_owner(item_list_id):
 

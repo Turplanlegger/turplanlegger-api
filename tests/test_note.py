@@ -85,7 +85,7 @@ class NotesTestCase(unittest.TestCase):
 
     def test_add_note_ok(self):
 
-        response = self.client.post('/note', data=json.dumps(self.note_full), headers=self.headers_json)
+        response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
@@ -94,11 +94,11 @@ class NotesTestCase(unittest.TestCase):
         self.assertEqual(data['name'], 'Best note ever')
 
     def test_get_note(self):
-        response = self.client.post('/note', data=json.dumps(self.note_full), headers=self.headers_json)
+        response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
 
-        response = self.client.get(f'/note/{data["id"]}', headers=self.headers)
+        response = self.client.get(f'/notes/{data["id"]}', headers=self.headers)
         self.assertEqual(response.status_code, 200)
 
         data = json.loads(response.data.decode('utf-8'))
@@ -107,116 +107,116 @@ class NotesTestCase(unittest.TestCase):
         self.assertEqual(data['note']['name'], self.note_full['name'])
 
     def test_get_note_not_found(self):
-        response = self.client.post('/note', data=json.dumps(self.note_full), headers=self.headers_json)
+        response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
 
-        response = self.client.get('/note/2', headers=self.headers)
+        response = self.client.get('/notes/2', headers=self.headers)
         self.assertEqual(response.status_code, 404)
 
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['title'], 'Note not found')
         self.assertEqual(data['detail'], 'The requested note was not found')
         self.assertEqual(data['type'], 'about:blank')
-        self.assertEqual(data['instance'], 'http://localhost/note/2')
+        self.assertEqual(data['instance'], 'http://localhost/notes/2')
 
     def test_delete_note(self):
-        response = self.client.post('/note', data=json.dumps(self.note_full), headers=self.headers_json)
+        response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
         id = data['id']
 
-        response = self.client.delete(f'/note/{id}', headers=self.headers)
+        response = self.client.delete(f'/notes/{id}', headers=self.headers)
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get(f'/note/{id}', headers=self.headers)
+        response = self.client.get(f'/notes/{id}', headers=self.headers)
         self.assertEqual(response.status_code, 404)
 
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['title'], 'Note not found')
         self.assertEqual(data['detail'], 'The requested note was not found')
         self.assertEqual(data['type'], 'about:blank')
-        self.assertEqual(data['instance'], f'http://localhost/note/{id}')
+        self.assertEqual(data['instance'], f'http://localhost/notes/{id}')
 
     def test_delete_note_not_found(self):
-        response = self.client.post('/note', data=json.dumps(self.note_full), headers=self.headers_json)
+        response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
 
-        response = self.client.delete('/note/2', headers=self.headers)
+        response = self.client.delete('/notes/2', headers=self.headers)
         self.assertEqual(response.status_code, 404)
 
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['title'], 'Note not found')
         self.assertEqual(data['detail'], 'The requested note was not found')
         self.assertEqual(data['type'], 'about:blank')
-        self.assertEqual(data['instance'], 'http://localhost/note/2')
+        self.assertEqual(data['instance'], 'http://localhost/notes/2')
 
     def test_change_note_owner(self):
-        response = self.client.post('/note', data=json.dumps(self.note_full), headers=self.headers_json)
+        response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
 
-        response = self.client.patch(f'/note/{data["id"]}/owner',
+        response = self.client.patch(f'/notes/{data["id"]}/owner',
                                      data=json.dumps({'owner': self.user2.id}), headers=self.headers_json)
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get(f'/note/{data["id"]}', headers=self.headers)
+        response = self.client.get(f'/notes/{data["id"]}', headers=self.headers)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['note']['owner'], self.user2.id)
 
     def test_change_note_owner_note_not_found(self):
-        response = self.client.post('/note', data=json.dumps(self.note_full), headers=self.headers_json)
+        response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
 
         response = self.client.patch(
-            '/note/2/owner', data=json.dumps({'owner': self.user2.id}), headers=self.headers_json)
+            '/notes/2/owner', data=json.dumps({'owner': self.user2.id}), headers=self.headers_json)
         self.assertEqual(response.status_code, 404)
 
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['title'], 'Note not found')
         self.assertEqual(data['detail'], 'The requested note was not found')
         self.assertEqual(data['type'], 'about:blank')
-        self.assertEqual(data['instance'], 'http://localhost/note/2/owner')
+        self.assertEqual(data['instance'], 'http://localhost/notes/2/owner')
 
     def test_change_note_owner_no_owner_given(self):
-        response = self.client.post('/note', data=json.dumps(self.note_full), headers=self.headers_json)
+        response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
 
-        response = self.client.patch('/note/1/owner', data=json.dumps({}), headers=self.headers_json)
+        response = self.client.patch('/notes/1/owner', data=json.dumps({}), headers=self.headers_json)
         self.assertEqual(response.status_code, 400)
 
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['title'], 'Owner is not int')
         self.assertEqual(data['detail'], 'Owner must be passed as an str')
         self.assertEqual(data['type'], 'about:blank')
-        self.assertEqual(data['instance'], 'http://localhost/note/1/owner')
+        self.assertEqual(data['instance'], 'http://localhost/notes/1/owner')
 
     def test_rename_note(self):
-        response = self.client.post('/note', data=json.dumps(self.note_full), headers=self.headers_json)
+        response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
 
-        response = self.client.patch('/note/1/rename', data=json.dumps({'name': 'newlist'}), headers=self.headers_json)
+        response = self.client.patch('/notes/1/rename', data=json.dumps({'name': 'newlist'}), headers=self.headers_json)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['status'], 'ok')
 
     def test_update_note(self):
-        response = self.client.post('/note', data=json.dumps(self.note_full), headers=self.headers_json)
+        response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
 
         response = self.client.patch(
-            '/note/1/update', data=json.dumps({'content': 'newcontent'}), headers=self.headers_json)
+            '/notes/1/update', data=json.dumps({'content': 'newcontent'}), headers=self.headers_json)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['status'], 'ok')
 
     def test_get_my_note(self):
-        response = self.client.post('/note', data=json.dumps(self.note_full), headers=self.headers_json)
+        response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
-        response = self.client.post('/note', data=json.dumps(self.note_full2), headers=self.headers_json)
+        response = self.client.post('/notes', data=json.dumps(self.note_full2), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
 
         response = self.client.get('/notes/mine', headers=self.headers)

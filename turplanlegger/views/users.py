@@ -7,7 +7,7 @@ from turplanlegger.models.user import User
 from . import api
 
 
-@api.route('/user/<user_id>', methods=['GET'])
+@api.route('/users/<user_id>', methods=['GET'])
 @auth
 def get_user(user_id):
     user = User.find_user(user_id)
@@ -18,7 +18,7 @@ def get_user(user_id):
         raise ApiProblem('User not found', 'The requested user was not found', 404)
 
 
-@api.route('/user', methods=['GET'])
+@api.route('/users', methods=['GET'])
 @auth
 def lookup_user():
     try:
@@ -40,7 +40,7 @@ def lookup_user():
         raise ApiProblem('User not found', 'The requested user was not found', 404)
 
 
-@api.route('/user', methods=['POST'])
+@api.route('/users', methods=['POST'])
 @auth
 def add_user():
     try:
@@ -59,7 +59,7 @@ def add_user():
         raise ApiProblem('Failed to create user', 'Unknown error', 500)
 
 
-@api.route('/user/<user_id>', methods=['DELETE'])
+@api.route('/users/<user_id>', methods=['DELETE'])
 @auth
 def delete_user(user_id: str):
     user = User.find_user(user_id)
@@ -75,7 +75,7 @@ def delete_user(user_id: str):
     return jsonify(status='ok')
 
 
-@api.route('/user/<user_id>/rename', methods=['PATCH'])
+@api.route('/users/<user_id>/rename', methods=['PATCH'])
 @auth
 def rename_user(user_id: str):
     user = User.find_user(user_id)
@@ -92,7 +92,7 @@ def rename_user(user_id: str):
         raise ApiProblem('Failed to rename user', 'Unknown error', 500)
 
 
-@api.route('/user/<user_id>/private', methods=['PATCH'])
+@api.route('/users/<user_id>/private', methods=['PATCH'])
 @auth
 def toggle_private_user(user_id: str):
     user = User.find_user(user_id)

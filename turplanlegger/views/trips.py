@@ -10,7 +10,7 @@ from turplanlegger.models.trip import Trip
 from . import api
 
 
-@api.route('/trip/<trip_id>', methods=['GET'])
+@api.route('/trips/<trip_id>', methods=['GET'])
 @auth
 def get_trip(trip_id):
 
@@ -21,7 +21,7 @@ def get_trip(trip_id):
         raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
 
 
-@api.route('/trip', methods=['POST'])
+@api.route('/trips', methods=['POST'])
 @auth
 def add_trip():
     try:
@@ -37,7 +37,7 @@ def add_trip():
     return jsonify(trip.serialize), 201
 
 
-@api.route('/trip/note', methods=['PATCH'])
+@api.route('/trips/notes', methods=['PATCH'])
 @auth
 def add_note_to_trip():
 
@@ -57,7 +57,7 @@ def add_note_to_trip():
     return jsonify(trip.serialize), 201
 
 
-@api.route('/trip/route', methods=['PATCH'])
+@api.route('/trips/routes', methods=['PATCH'])
 @auth
 def add_route_to_trip():
 
@@ -77,7 +77,7 @@ def add_route_to_trip():
     return jsonify(trip.serialize), 201
 
 
-@api.route('/trip/item_list', methods=['PATCH'])
+@api.route('/trips/item_lists', methods=['PATCH'])
 @auth
 def add_item_list_to_trip():
 
@@ -97,7 +97,7 @@ def add_item_list_to_trip():
     return jsonify(trip.serialize), 201
 
 
-@api.route('/trip/<trip_id>/owner', methods=['PATCH'])
+@api.route('/trips/<trip_id>/owner', methods=['PATCH'])
 @auth
 def change_trip_owner(trip_id):
 
@@ -139,7 +139,7 @@ def get_my_trips():
         )
 
 
-@api.route('/trip/<trip_id>', methods=['DELETE'])
+@api.route('/trips/<trip_id>', methods=['DELETE'])
 @auth
 def delete_trip(trip_id):
 
