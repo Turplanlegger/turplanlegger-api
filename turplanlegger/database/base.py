@@ -484,6 +484,39 @@ class Database:
         select = 'SELECT item_list_id FROM trips_item_lists_references WHERE item_list_id = %s'
         return self._fetchall(select, (id,))
 
+    # Trip Date
+    def create_trip(self, trip_date):
+        insert_trip = """
+            INSERT INTO trips (
+                start_time, end_time, owner
+            )
+            VALUES (
+                %(start_time)s,  %(end_time)s, %(owner)s
+            )
+            RETURNING *
+        """
+        return self._insert(
+            insert_trip,
+            {
+                "start_time": trip_date.start_time,
+                "end_time": trip_date.end_time,
+                "owner": trip_date.owner
+            }
+        )
+
+    def get_trip_date(self, id, deleted=None):
+        select = 'SELECT * FROM trip_dates WHERE id = %s'
+
+        if deleted is None:
+            return self._fetchone(select, (id,))
+
+        if deleted is True:
+            select += ' AND deleted = TRUE'
+        else:
+            select += ' AND deleted = FALSE'
+
+        return self._fetchone(select, (id,))
+
     # Helpers
     def _insert(self, query, vars):
         """
