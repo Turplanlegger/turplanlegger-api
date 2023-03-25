@@ -90,6 +90,15 @@ class TripsTestCase(unittest.TestCase):
                 }
             ]
         }
+        cls.trip_with_invalid_date = {
+            'name': 'no trip for u',
+            'dates': [
+                {
+                    'start_time': datetime.now().isoformat(),
+                    'end_time': (datetime.now() - timedelta(minutes=5)).isoformat()
+                }
+            ]
+        }
 
         response = cls.client.post(
             '/login',
@@ -247,17 +256,27 @@ class TripsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
         response = self.client.post('/trips', data=json.dumps(self.trip2), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
+        response = self.client.post('/trips', data=json.dumps(self.trip_with_date), headers=self.headers_json)
+        self.assertEqual(response.status_code, 201)
 
         response = self.client.get('/trips/mine', headers=self.headers)
         self.assertEqual(response.status_code, 200)
 
         data = json.loads(response.data.decode('utf-8'))
 
-        self.assertEqual(data['count'], 2)
+        self.assertEqual(data['count'], 3)
         self.assertEqual(data['trip'][0]['owner'], self.user1.id)
         self.assertEqual(data['trip'][0]['name'], self.trip['name'])
         self.assertEqual(data['trip'][1]['owner'], self.user1.id)
         self.assertEqual(data['trip'][1]['name'], self.trip2['name'])
+
+        self.assertEqual(data['trip'][2]['name'], self.trip_with_date['name'])
+        self.assertEqual(data['trip'][2]['owner'], data['trip'][2]['dates'][0]['owner'])
+        self.assertEqual(data['trip'][2]['dates'][0]['trip_id'], 3)
+        self.assertEqual(data['trip'][2]['id'], data['trip'][2]['dates'][0]['trip_id'])
+        self.assertEqual(data['trip'][2]['dates'][0]['start_time'], self.trip_with_date['dates'][0]['start_time'])
+        self.assertEqual(data['trip'][2]['dates'][0]['end_time'], self.trip_with_date['dates'][0]['end_time'])
+        self.assertEqual(data['trip'][2]['owner'], self.user1.id)
 
     def test_create_trip_with_date(self):
         response = self.client.post(
@@ -304,3 +323,12 @@ class TripsTestCase(unittest.TestCase):
         self.assertEqual(data['dates'][1]['start_time'], self.trip_with_multiple_dates['dates'][1]['start_time'])
         self.assertEqual(data['dates'][1]['end_time'], self.trip_with_multiple_dates['dates'][1]['end_time'])
         self.assertEqual(data['owner'], self.user1.id)
+
+    def test_create_trip_with_invalid_date(self):
+        response = self.client.post(
+            '/trips',
+            data=json.dumps(self.trip_with_invalid_date),
+            headers=self.headers_json
+        )
+
+        self.assertEqual(response.status_code, 400)

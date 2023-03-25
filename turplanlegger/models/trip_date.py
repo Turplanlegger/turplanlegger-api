@@ -118,7 +118,7 @@ class TripDate:
         Returns:
             A list of TripDate instances
         """
-        return [td for td in db.get_trip_dates_by_trip(trip_id)]
+        return [TripDate.get_trip_date(date) for date in db.get_trip_dates_by_trip(trip_id)]
 
     @classmethod
     def get_trip_date(cls, rec: NamedTuple) -> 'TripDate':
