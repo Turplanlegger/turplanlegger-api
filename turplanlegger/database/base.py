@@ -485,23 +485,19 @@ class Database:
         return self._fetchall(select, (id,))
 
     # Trip Date
-    def create_trip(self, trip_date):
-        insert_trip = """
-            INSERT INTO trips (
-                start_time, end_time, owner
+    def create_trip_date(self, trip_date):
+        insert = """
+            INSERT INTO trip_dates (
+                trip_id, start_time, end_time, owner
             )
             VALUES (
-                %(start_time)s,  %(end_time)s, %(owner)s
+                %(trip_id)s, %(start_time)s,  %(end_time)s, %(owner)s
             )
             RETURNING *
         """
         return self._insert(
-            insert_trip,
-            {
-                "start_time": trip_date.start_time,
-                "end_time": trip_date.end_time,
-                "owner": trip_date.owner
-            }
+            insert,
+            vars(trip_date)
         )
 
     def get_trip_date(self, id, deleted=None):
@@ -516,6 +512,15 @@ class Database:
             select += ' AND deleted = FALSE'
 
         return self._fetchone(select, (id,))
+
+    def delete_trip_date(self, trip_date_id):
+        update = """
+            UPDATE trip_dates
+                SET deleted=TRUE, delete_time=CURRENT_TIMESTAMP
+                WHERE id = %(id)s AND deleted = FALSE
+            RETURNING deleted
+        """
+        return self._updateone(update, {'id': trip_date_id}, returning=True)
 
     # Helpers
     def _insert(self, query, vars):

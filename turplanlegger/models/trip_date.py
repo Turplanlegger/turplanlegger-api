@@ -66,11 +66,17 @@ class TripDate:
         Returns:
             An TripDate instance
         """
+        start_time = json.get('start_time', None)
+        end_time = json.get('end_time', None)
+
+        if start_time > end_time:
+            raise ValueError('start_time can not be before end_time')
+
         return TripDate(
             id=json.get('id', None),
             owner=g.user.id,
-            start_time=json.get('start_time', None),
-            end_time=json.get('end_time', None)
+            start_time=start_time,
+            end_time=end_time
         )
 
     @property
@@ -78,6 +84,7 @@ class TripDate:
         """Serialize the TripDate instance and returns it as Dict(str, any)"""
         return {
             'id': self.id,
+            'trip_id': self.trip_id,
             'owner': self.owner,
             'start_time': self.start_time,
             'end_time': self.end_time,
@@ -108,6 +115,7 @@ class TripDate:
 
         return TripDate(
             id=rec.id,
+            trip_id=rec.trip_id,
             owner=rec.owner,
             start_time=rec.start_time,
             end_time=rec.end_time,
