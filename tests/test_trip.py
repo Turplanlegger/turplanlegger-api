@@ -82,7 +82,7 @@ class TripsTestCase(unittest.TestCase):
             'dates': [
                 {
                     'start_time': datetime.now().isoformat(),
-                    'end_time': datetime.now() + timedelta(minutes=5)
+                    'end_time': (datetime.now() + timedelta(minutes=10)).isoformat()
                 },
                 {
                     'start_time': (datetime.now() + timedelta(days=5)).isoformat(),
@@ -276,4 +276,31 @@ class TripsTestCase(unittest.TestCase):
         self.assertEqual(data['id'], data['dates'][0]['trip_id'])
         self.assertEqual(data['dates'][0]['start_time'], self.trip_with_date['dates'][0]['start_time'])
         self.assertEqual(data['dates'][0]['end_time'], self.trip_with_date['dates'][0]['end_time'])
+        self.assertEqual(data['owner'], self.user1.id)
+
+    def test_create_trip_with_multiple_dates(self):
+        response = self.client.post(
+            '/trips',
+            data=json.dumps(self.trip_with_multiple_dates),
+            headers=self.headers_json
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertIsInstance(data['id'], int)
+        self.assertEqual(data['name'], self.trip_with_multiple_dates['name'])
+        self.assertEqual(data['owner'], data['dates'][0]['owner'])
+        self.assertEqual(data['dates'][0]['id'], 1)
+        self.assertEqual(data['dates'][0]['trip_id'], 1)
+        self.assertEqual(data['id'], data['dates'][0]['trip_id'])
+        self.assertEqual(data['dates'][0]['start_time'], self.trip_with_multiple_dates['dates'][0]['start_time'])
+        self.assertEqual(data['dates'][0]['end_time'], self.trip_with_multiple_dates['dates'][0]['end_time'])
+        self.assertEqual(data['name'], self.trip_with_multiple_dates['name'])
+        self.assertEqual(data['owner'], data['dates'][1]['owner'])
+        self.assertEqual(data['dates'][1]['id'], 2)
+        self.assertEqual(data['dates'][1]['trip_id'], 1)
+        self.assertEqual(data['id'], data['dates'][1]['trip_id'])
+        self.assertEqual(data['dates'][1]['start_time'], self.trip_with_multiple_dates['dates'][1]['start_time'])
+        self.assertEqual(data['dates'][1]['end_time'], self.trip_with_multiple_dates['dates'][1]['end_time'])
         self.assertEqual(data['owner'], self.user1.id)
