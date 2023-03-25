@@ -1,6 +1,8 @@
 import json
 import unittest
 
+from datetime import datetime, timedelta
+
 from turplanlegger.app import create_app, db
 from turplanlegger.auth.utils import hash_password
 from turplanlegger.models.user import User
@@ -66,6 +68,28 @@ class TripsTestCase(unittest.TestCase):
         cls.trip2 = {
             'name': 'Petter b trippin',
         }
+        cls.trip_with_date = {
+            'name': 'where u trippin',
+            'dates': [
+                {
+                    'start_time': datetime.now().isoformat(),
+                    'end_time': (datetime.now() + timedelta(minutes=5)).isoformat()
+                }
+            ]
+        }
+        cls.trip_with_multiple_dates = {
+            'name': 'trippin pete',
+            'dates': [
+                {
+                    'start_time': datetime.now().isoformat(),
+                    'end_time': datetime.now() + timedelta(minutes=5)
+                },
+                {
+                    'start_time': (datetime.now() + timedelta(days=5)).isoformat(),
+                    'end_time': (datetime.now() + timedelta(days=8)).isoformat()
+                }
+            ]
+        }
 
         response = cls.client.post(
             '/login',
@@ -88,6 +112,7 @@ class TripsTestCase(unittest.TestCase):
 
     def tearDown(self):
         db.truncate_table('trips')
+        db.truncate_table('trip_dates')
         db.truncate_table('routes')
         db.truncate_table('item_lists')
         db.truncate_table('lists_items')
@@ -233,3 +258,22 @@ class TripsTestCase(unittest.TestCase):
         self.assertEqual(data['trip'][0]['name'], self.trip['name'])
         self.assertEqual(data['trip'][1]['owner'], self.user1.id)
         self.assertEqual(data['trip'][1]['name'], self.trip2['name'])
+
+    def test_create_trip_with_date(self):
+        response = self.client.post(
+            '/trips',
+            data=json.dumps(self.trip_with_date),
+            headers=self.headers_json
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertIsInstance(data['id'], int)
+        self.assertEqual(data['name'], self.trip_with_date['name'])
+        self.assertEqual(data['owner'], data['dates'][0]['owner'])
+        self.assertEqual(data['dates'][0]['trip_id'], 1)
+        self.assertEqual(data['id'], data['dates'][0]['trip_id'])
+        self.assertEqual(data['dates'][0]['start_time'], self.trip_with_date['dates'][0]['start_time'])
+        self.assertEqual(data['dates'][0]['end_time'], self.trip_with_date['dates'][0]['end_time'])
+        self.assertEqual(data['owner'], self.user1.id)

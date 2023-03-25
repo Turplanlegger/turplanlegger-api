@@ -27,7 +27,7 @@ class Trip:
         id (int): Optional, the ID of the object
         private (bool): Flag if the trip is private
                         Default so False (public)
-        trip_dates (list): List if TripDates that are related to the trip
+        dates (list): List if TripDates that are related to the trip
         notes (list): List of note ids that are related to the trip
         routes (list): List of route ids that are related to the trip
         item_list (list): List of item list ids that are related to
@@ -54,11 +54,21 @@ class Trip:
         self.name = name
         self.id = kwargs.get('id', None)
         self.private = kwargs.get('private', False)
-        self.trip_dates = kwargs.get('trip_dates', [])
+        self.dates = kwargs.get('dates', [])
         self.notes = kwargs.get('notes', [])
         self.routes = kwargs.get('routes', [])
         self.item_lists = kwargs.get('item_lists', [])
         self.create_time = kwargs.get('create_time', None) or datetime.now()
+
+    def __repr__(self):
+        return (
+            'Trip('
+            f'id: {self.id}, owner: {self.owner}, '
+            f'private: {self.private}, dates: {self.dates}, '
+            f'notes: {self.notes}, routes: {self.routes}, '
+            f'item_lists: {self.item_lists}, '
+            f'create_time: {self.create_time})'
+        )
 
     @classmethod
     def parse(cls, json: JSON) -> 'Trip':
@@ -71,15 +81,15 @@ class Trip:
             An trip instance
         """
 
-        trip_dates = json.get('trip_dates', [])
-        for trip_date in trip_dates:
-            trip_dates[:] = TripDate.parse(trip_date)
-
+        dates = json.get('dates', [])
+        if not isinstance(dates, list):
+            raise TypeError('dates has to be a list of objects with start and end dates')
+        dates[:] = [TripDate.parse(date) for date in dates]
         return Trip(
             id=json.get('id', None),
             owner=g.user.id,
             name=json.get('name', None),
-            trip_dates=trip_dates,
+            dates=dates,
         )
 
     @property
@@ -89,7 +99,7 @@ class Trip:
             'id': self.id,
             'owner': self.owner,
             'name': self.name,
-            'trip_dates': [td.serialize for td in self.trip_dates],
+            'dates': [date.serialize for date in self.dates],
             'private': self.private,
             'notes': self.notes,
             'routes': self.routes,
@@ -98,8 +108,14 @@ class Trip:
         }
 
     def create(self) -> 'Trip':
-        """Creates the Trip instance in the database"""
+        """Creates the Trip instance along with any trip_dates in the database"""
         trip = self.get_trip(db.create_trip(self))
+        if self.dates:
+            dates = []
+            for date in self.dates:
+                date.trip_id = trip.id
+                dates.append(date.create())
+            trip.dates = dates
         return trip
 
     def delete(self) -> bool:
@@ -193,7 +209,7 @@ class Trip:
             private=rec.private,
             create_time=rec.create_time
         )
-        trip.trip_dates = TripDate.find_by_trip_id(trip.id)
+        trip.dates = TripDate.find_by_trip_id(trip.id)
         trip.notes = [item.note_id for item in db.get_trip_notes(trip.id)]
         trip.routes = [item.route_id for item in db.get_trip_routes(trip.id)]
         trip.item_lists = [item.item_list_id for item in db.get_trip_item_lists(trip.id)]

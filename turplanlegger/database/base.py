@@ -406,8 +406,8 @@ class Database:
     # Trip
     def create_trip(self, trip):
         insert_trip = """
-            INSERT INTO trips (name, owner, private, start_time, end_time)
-            VALUES (%(name)s, %(owner)s, %(private)s,  %(start_time)s,  %(end_time)s)
+            INSERT INTO trips (name, owner, private)
+            VALUES (%(name)s, %(owner)s, %(private)s)
             RETURNING *
         """
         return self._insert(insert_trip, vars(trip))
@@ -511,18 +511,18 @@ class Database:
         else:
             select += ' AND deleted = FALSE'
 
-    def get_trip_dates_by_trip(self, id, deleted=None):
+    def get_trip_dates_by_trip(self, trip_id, deleted=None):
         select = 'SELECT * FROM trip_dates WHERE trip_id = %s'
 
         if deleted is None:
-            return self._fetchone(select, (id,))
+            return self._fetchall(select, (trip_id,))
 
         if deleted is True:
             select += ' AND deleted = TRUE'
         else:
             select += ' AND deleted = FALSE'
 
-        return self._fetchall(select, (id,))
+        return self._fetchall(select, (trip_id,))
 
     def delete_trip_date(self, trip_date_id):
         update = """

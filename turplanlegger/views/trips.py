@@ -27,12 +27,11 @@ def add_trip():
     try:
         trip = Trip.parse(request.json)
     except (ValueError, TypeError) as e:
-        raise ApiProblem('Failed to parse route', str(e), 400)
-
+        raise ApiProblem('Failed to parse trip', str(e), 400)
     try:
         trip = trip.create()
     except Exception as e:
-        raise ApiProblem('Failed to create route', str(e), 500)
+        raise ApiProblem('Failed to create trip', str(e), 500)
 
     return jsonify(trip.serialize), 201
 

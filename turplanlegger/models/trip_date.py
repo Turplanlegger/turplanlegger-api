@@ -29,7 +29,7 @@ class TripDate:
                                 Default: datetime.now()
         deleted (bool): Flag if the object has been logically deleted
                         Default : False
-        deleted_time (datetime): Datetime instance of time of deletion
+        delete_time (datetime): Datetime instance of time of deletion
 
 
     """
@@ -54,8 +54,16 @@ class TripDate:
         self.trip_id = kwargs.get('trip_id', None)
         self.create_time = kwargs.get('create_time', None) or datetime.now()
         self.deleted = kwargs.get('deleted', False)
-        self.deleted_time = kwargs.get('deleted_time', None)
+        self.delete_time = kwargs.get('delete_time', None)
 
+    def __repr__(self):
+        return (
+            'TripDate('
+            f'id: {self.id}, trip_id: {self.trip_id}, owner: {self.owner}, '
+            f'start_time: {self.start_time}, end_time: {self.end_time}, '
+            f'deleted: {self.deleted}, delete_time: {self.delete_time}, '
+            f'create_time: {self.create_time})'
+        )
     @classmethod
     def parse(cls, json: JSON) -> 'TripDate':
         """Parse input JSON and return an TripDate instance.
@@ -66,8 +74,8 @@ class TripDate:
         Returns:
             An TripDate instance
         """
-        start_time = json.get('start_time', None)
-        end_time = json.get('end_time', None)
+        start_time = datetime.fromisoformat(json.get('start_time', None))
+        end_time = datetime.fromisoformat(json.get('end_time', None))
 
         if start_time > end_time:
             raise ValueError('start_time can not be before end_time')
@@ -86,14 +94,14 @@ class TripDate:
             'id': self.id,
             'trip_id': self.trip_id,
             'owner': self.owner,
-            'start_time': self.start_time,
-            'end_time': self.end_time,
+            'start_time': self.start_time.isoformat(),
+            'end_time': self.end_time.isoformat(),
             'create_time': self.create_time
         }
 
     def create(self) -> 'TripDate':
         """Creates the TripDate instance in the database"""
-        return self.get_trip(db.create_trip_date(self))
+        return self.get_trip_date(db.create_trip_date(self))
 
     def delete(self) -> bool:
         """Deletes the TripDate object from the database
@@ -133,5 +141,5 @@ class TripDate:
             end_time=rec.end_time,
             create_time=rec.create_time,
             deleted=rec.deleted,
-            deleted_time=rec.deleted_time
+            delete_time=rec.delete_time
         )
