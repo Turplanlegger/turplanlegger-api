@@ -511,7 +511,18 @@ class Database:
         else:
             select += ' AND deleted = FALSE'
 
-        return self._fetchone(select, (id,))
+    def get_trip_dates_by_trip(self, id, deleted=None):
+        select = 'SELECT * FROM trip_dates WHERE trip_id = %s'
+
+        if deleted is None:
+            return self._fetchone(select, (id,))
+
+        if deleted is True:
+            select += ' AND deleted = TRUE'
+        else:
+            select += ' AND deleted = FALSE'
+
+        return self._fetchall(select, (id,))
 
     def delete_trip_date(self, trip_date_id):
         update = """

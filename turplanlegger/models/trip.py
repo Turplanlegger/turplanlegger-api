@@ -4,12 +4,13 @@ from typing import Dict, NamedTuple
 from flask import g
 
 from turplanlegger.app import db
+from turplanlegger.models.trip_date import TripDate
 
 JSON = Dict[str, any]
 
 
 class Trip:
-    """Trip object gathers ItemLists with ListItems,
+    """Trip object gathers TripDates, ItemLists with ListItems,
     Notes and Routes to plan a trip.
 
     The trip object can contain multiple ItemLists,
@@ -26,8 +27,7 @@ class Trip:
         id (int): Optional, the ID of the object
         private (bool): Flag if the trip is private
                         Default so False (public)
-        start_time (datetime): Start time of the trip
-        end_time (datetime): End time of the trip
+        trip_dates (list): List if TripDates that are related to the trip
         notes (list): List of note ids that are related to the trip
         routes (list): List of route ids that are related to the trip
         item_list (list): List of item list ids that are related to
@@ -54,8 +54,7 @@ class Trip:
         self.name = name
         self.id = kwargs.get('id', None)
         self.private = kwargs.get('private', False)
-        self.start_time = kwargs.get('start_time', None)
-        self.end_time = kwargs.get('end_time', None)
+        self.trip_dates = kwargs.get('trip_dates', [])
         self.notes = kwargs.get('notes', [])
         self.routes = kwargs.get('routes', [])
         self.item_lists = kwargs.get('item_lists', [])
@@ -72,13 +71,15 @@ class Trip:
             An trip instance
         """
 
+        trip_dates = json.get('trip_dates', [])
+        for trip_date in trip_dates:
+            trip_dates[:] = TripDate.parse(trip_date)
+
         return Trip(
             id=json.get('id', None),
             owner=g.user.id,
             name=json.get('name', None),
-            private=json.get('private', False),
-            start_time=json.get('start_time', None),
-            end_time=json.get('end_time', None)
+            trip_dates=trip_dates,
         )
 
     @property
@@ -88,8 +89,7 @@ class Trip:
             'id': self.id,
             'owner': self.owner,
             'name': self.name,
-            'start_time': self.start_time,
-            'end_time': self.end_time,
+            'trip_dates': [td.serialize for td in self.trip_dates],
             'private': self.private,
             'notes': self.notes,
             'routes': self.routes,
@@ -191,10 +191,9 @@ class Trip:
             owner=rec.owner,
             name=rec.name,
             private=rec.private,
-            start_time=rec.start_time,
-            end_time=rec.end_time,
             create_time=rec.create_time
         )
+        trip.trip_dates = TripDate.find_by_trip_id(trip.id)
         trip.notes = [item.note_id for item in db.get_trip_notes(trip.id)]
         trip.routes = [item.route_id for item in db.get_trip_routes(trip.id)]
         trip.item_lists = [item.item_list_id for item in db.get_trip_item_lists(trip.id)]

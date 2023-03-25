@@ -100,6 +100,18 @@ class TripDate:
         Returns True if deleted"""
         return db.delete_trip_date(self.id)
 
+    @staticmethod
+    def find_by_trip_id(trip_id: int) -> ['TripDate']:
+        """Looks up trip dates by trip id
+
+        Args:
+            trip_id (int): id of trip
+
+        Returns:
+            A list of TripDate instances
+        """
+        return [td for td in db.get_trip_dates_by_trip(trip_id)]
+
     @classmethod
     def get_trip_date(cls, rec: NamedTuple) -> 'TripDate':
         """Converts a database record to an TripDate instance
