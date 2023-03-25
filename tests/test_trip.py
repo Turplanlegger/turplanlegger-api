@@ -98,6 +98,22 @@ class TripsTestCase(unittest.TestCase):
                 }
             ]
         }
+        cls.trip_with_date_no_start = {
+            'name': 'no trip for u2',
+            'dates': [
+                {
+                    'end_time': (datetime.now() - timedelta(minutes=5)).isoformat()
+                }
+            ]
+        }
+        cls.trip_with_date_no_end = {
+            'name': 'no trip for u3',
+            'dates': [
+                {
+                    'start_time': datetime.now().isoformat(),
+                }
+            ]
+        }
 
         response = cls.client.post(
             '/login',
@@ -330,7 +346,20 @@ class TripsTestCase(unittest.TestCase):
             data=json.dumps(self.trip_with_invalid_date),
             headers=self.headers_json
         )
+        self.assertEqual(response.status_code, 400)
 
+        response = self.client.post(
+            '/trips',
+            data=json.dumps(self.trip_with_date_no_start),
+            headers=self.headers_json
+        )
+        self.assertEqual(response.status_code, 400)
+
+        response = self.client.post(
+            '/trips',
+            data=json.dumps(self.trip_with_date_no_end),
+            headers=self.headers_json
+        )
         self.assertEqual(response.status_code, 400)
 
     def test_add_date_to_trip(self):
