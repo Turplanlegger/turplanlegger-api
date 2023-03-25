@@ -101,7 +101,7 @@ class TripsTestCase(unittest.TestCase):
         db.destroy()
 
     def test_create_trip_ok(self):
-        response = self.client.post('/trip', data=json.dumps(self.trip), headers=self.headers_json)
+        response = self.client.post('/trips', data=json.dumps(self.trip), headers=self.headers_json)
 
         self.assertEqual(response.status_code, 201)
 
@@ -109,81 +109,81 @@ class TripsTestCase(unittest.TestCase):
         self.assertEqual(data['owner'], self.user1.id)
 
     def test_delete_trip(self):
-        response = self.client.post('/trip', data=json.dumps(self.trip), headers=self.headers_json)
+        response = self.client.post('/trips', data=json.dumps(self.trip), headers=self.headers_json)
 
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
         id = data['id']
 
-        response = self.client.delete(f'/trip/{id}', headers=self.headers)
+        response = self.client.delete(f'/trips/{id}', headers=self.headers)
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get(f'/trip/{id}', headers=self.headers)
+        response = self.client.get(f'/trips/{id}', headers=self.headers)
         self.assertEqual(response.status_code, 404)
 
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['title'], 'Trip not found')
         self.assertEqual(data['detail'], 'The requested trip was not found')
         self.assertEqual(data['type'], 'about:blank')
-        self.assertEqual(data['instance'], f'http://localhost/trip/{id}')
+        self.assertEqual(data['instance'], f'http://localhost/trips/{id}')
 
     def test_create_trip_add_note(self):
-        response = self.client.post('/trip', data=json.dumps(self.trip), headers=self.headers_json)
+        response = self.client.post('/trips', data=json.dumps(self.trip), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
         trip_id = data['id']
 
         # Create note
-        response = self.client.post('/note', data=json.dumps(self.note), headers=self.headers_json)
+        response = self.client.post('/notes', data=json.dumps(self.note), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
         note_id = data['id']
 
         # Add note to trip
         response = self.client.patch(
-            '/trip/note', data=json.dumps({'trip_id': trip_id, 'note_id': note_id}), headers=self.headers_json)
+            '/trips/notes', data=json.dumps({'trip_id': trip_id, 'note_id': note_id}), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
 
-        response = self.client.get(f'/trip/{trip_id}', headers=self.headers)
+        response = self.client.get(f'/trips/{trip_id}', headers=self.headers)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(data['trip']['notes'], [note_id])
 
     def test_create_trip_add_route(self):
-        response = self.client.post('/trip', data=json.dumps(self.trip), headers=self.headers_json)
+        response = self.client.post('/trips', data=json.dumps(self.trip), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
         trip_id = data['id']
 
         # Create route
-        response = self.client.post('/route', data=json.dumps(self.route), headers=self.headers_json)
+        response = self.client.post('/routes', data=json.dumps(self.route), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
         route_id = data['id']
 
         # Add route to trip
         response = self.client.patch(
-            '/trip/route', data=json.dumps({'trip_id': trip_id, 'route_id': route_id}), headers=self.headers_json)
+            '/trips/routes', data=json.dumps({'trip_id': trip_id, 'route_id': route_id}), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
 
-        response = self.client.get(f'/trip/{trip_id}', headers=self.headers)
+        response = self.client.get(f'/trips/{trip_id}', headers=self.headers)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(data['trip']['routes'], [route_id])
 
     def test_create_trip_add_item_list(self):
-        response = self.client.post('/trip', data=json.dumps(self.trip), headers=self.headers_json)
+        response = self.client.post('/trips', data=json.dumps(self.trip), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
         trip_id = data['id']
 
         # Create item_list
-        response = self.client.post('/item_list', data=json.dumps(self.item_list), headers=self.headers_json)
+        response = self.client.post('/item_lists', data=json.dumps(self.item_list), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
@@ -191,39 +191,39 @@ class TripsTestCase(unittest.TestCase):
 
         # Add item_list to trip
         response = self.client.patch(
-            '/trip/item_list',
+            '/trips/item_lists',
             data=json.dumps({'trip_id': trip_id, 'item_list_id': item_list_id}),
             headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
 
-        response = self.client.get(f'/trip/{trip_id}', headers=self.headers)
+        response = self.client.get(f'/trips/{trip_id}', headers=self.headers)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(data['trip']['item_lists'], [item_list_id])
 
     def test_change_trip_owner(self):
-        response = self.client.post('/trip', data=json.dumps(self.trip), headers=self.headers_json)
+        response = self.client.post('/trips', data=json.dumps(self.trip), headers=self.headers_json)
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(response.status_code, 201)
 
-        response = self.client.patch(f'/trip/{data["id"]}/owner',
+        response = self.client.patch(f'/trips/{data["id"]}/owner',
                                      data=json.dumps({'owner': self.user2.id}), headers=self.headers_json)
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get(f'/trip/{data["id"]}', headers=self.headers)
+        response = self.client.get(f'/trips/{data["id"]}', headers=self.headers)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['trip']['owner'], self.user2.id)
 
     def test_get_my_trips(self):
-        response = self.client.post('/trip', data=json.dumps(self.trip), headers=self.headers_json)
+        response = self.client.post('/trips', data=json.dumps(self.trip), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
-        response = self.client.post('/trip', data=json.dumps(self.trip2), headers=self.headers_json)
+        response = self.client.post('/trips', data=json.dumps(self.trip2), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
 
-        response = self.client.get('trip/mine', headers=self.headers)
+        response = self.client.get('/trips/mine', headers=self.headers)
         self.assertEqual(response.status_code, 200)
 
         data = json.loads(response.data.decode('utf-8'))

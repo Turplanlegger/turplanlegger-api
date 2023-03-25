@@ -137,7 +137,7 @@ class ItemListsTestCase(unittest.TestCase):
 
     def test_create_list_minimal_input(self):
         response = self.client.post(
-            '/item_list',
+            '/item_lists',
             data=json.dumps({}),
             headers=self.headers_json
         )
@@ -150,7 +150,7 @@ class ItemListsTestCase(unittest.TestCase):
 
     def test_create_list(self):
         response = self.client.post(
-            '/item_list',
+            '/item_lists',
             data=json.dumps(self.item_list),
             headers=self.headers_json
         )
@@ -184,7 +184,7 @@ class ItemListsTestCase(unittest.TestCase):
 
     def test_create_empty_list(self):
         response = self.client.post(
-            '/item_list',
+            '/item_lists',
             data=json.dumps(self.empty_item_list),
             headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
@@ -198,7 +198,7 @@ class ItemListsTestCase(unittest.TestCase):
 
     def test_get_list(self):
         response = self.client.post(
-            '/item_list',
+            '/item_lists',
             data=json.dumps(self.item_list),
             headers=self.headers_json
         )
@@ -208,7 +208,7 @@ class ItemListsTestCase(unittest.TestCase):
         list_id = data['id']
 
         response = self.client.get(
-            f'/item_list/{list_id}',
+            f'/item_lists/{list_id}',
             headers=self.headers
         )
         self.assertEqual(response.status_code, 200)
@@ -239,7 +239,7 @@ class ItemListsTestCase(unittest.TestCase):
 
     def test_list_not_found(self):
         response = self.client.post(
-            '/item_list',
+            '/item_lists',
             data=json.dumps(self.item_list),
             headers=self.headers_json
         )
@@ -247,7 +247,7 @@ class ItemListsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         response = self.client.get(
-            '/item_list/2',
+            '/item_lists/2',
             headers=self.headers
         )
         self.assertEqual(response.status_code, 404)
@@ -255,11 +255,11 @@ class ItemListsTestCase(unittest.TestCase):
         self.assertEqual(data['title'], 'Item list not found')
         self.assertEqual(data['detail'], 'The requested item list was not found')
         self.assertEqual(data['type'], 'about:blank')
-        self.assertEqual(data['instance'], 'http://localhost/item_list/2')
+        self.assertEqual(data['instance'], 'http://localhost/item_lists/2')
 
     def test_delete_list(self):
         response = self.client.post(
-            '/item_list',
+            '/item_lists',
             data=json.dumps(self.item_list),
             headers=self.headers_json
         )
@@ -269,13 +269,13 @@ class ItemListsTestCase(unittest.TestCase):
         list_id = data['id']
 
         response = self.client.delete(
-            f'/item_list/{list_id}',
+            f'/item_lists/{list_id}',
             headers=self.headers
         )
         self.assertEqual(response.status_code, 200)
 
         response = self.client.get(
-            f'/item_list/{list_id}',
+            f'/item_lists/{list_id}',
             headers=self.headers
         )
         self.assertEqual(response.status_code, 404)
@@ -283,18 +283,18 @@ class ItemListsTestCase(unittest.TestCase):
         self.assertEqual(data['title'], 'Item list not found')
         self.assertEqual(data['detail'], 'The requested item list was not found')
         self.assertEqual(data['type'], 'about:blank')
-        self.assertEqual(data['instance'], f'http://localhost/item_list/{list_id}')
+        self.assertEqual(data['instance'], f'http://localhost/item_lists/{list_id}')
 
     def test_add_to_list(self):
         response = self.client.post(
-            '/item_list',
+            '/item_lists',
             data=json.dumps(self.empty_item_list),
             headers=self.headers_json
         )
         self.assertEqual(response.status_code, 201)
         created_data = json.loads(response.data.decode('utf-8'))
 
-        response = self.client.patch(f"/item_list/{created_data['id']}/add",
+        response = self.client.patch(f"/item_lists/{created_data['id']}/add",
                                      data=json.dumps(self.item_to_add), headers=self.headers_json)
         self.assertEqual(response.status_code, 200)
         added_data = json.loads(response.data.decode('utf-8'))
@@ -304,7 +304,7 @@ class ItemListsTestCase(unittest.TestCase):
         self.assertEqual(added_data['count_items_checked'], 1)
 
         response = self.client.get(
-            f"/item_list/{created_data['id']}",
+            f"/item_lists/{created_data['id']}",
             headers=self.headers
         )
         self.assertEqual(response.status_code, 200)
@@ -330,7 +330,7 @@ class ItemListsTestCase(unittest.TestCase):
 
     def test_rename_list(self):
         response = self.client.post(
-            '/item_list',
+            '/item_lists',
             data=json.dumps(self.empty_item_list),
             headers=self.headers_json
         )
@@ -340,14 +340,14 @@ class ItemListsTestCase(unittest.TestCase):
         list_id = create_data['id']
 
         response = self.client.patch(
-            f'/item_list/{list_id}/rename',
+            f'/item_lists/{list_id}/rename',
             data=json.dumps({'name': 'new list name'}),
             headers=self.headers_json
         )
         self.assertEqual(response.status_code, 200)
 
         response = self.client.get(
-            f'/item_list/{list_id}',
+            f'/item_lists/{list_id}',
             headers=self.headers
         )
         self.assertEqual(response.status_code, 200)
@@ -356,7 +356,7 @@ class ItemListsTestCase(unittest.TestCase):
 
     def test_change_list_owner(self):
         response = self.client.post(
-            '/item_list',
+            '/item_lists',
             data=json.dumps(self.empty_item_list),
             headers=self.headers_json
         )
@@ -366,14 +366,14 @@ class ItemListsTestCase(unittest.TestCase):
         list_id = create_data['id']
 
         response = self.client.patch(
-            f'/item_list/{list_id}/owner',
+            f'/item_lists/{list_id}/owner',
             data=json.dumps({'owner': self.user2.id}),
             headers=self.headers_json
         )
         self.assertEqual(response.status_code, 200)
 
         response = self.client.get(
-            f'/item_list/{list_id}',
+            f'/item_lists/{list_id}',
             headers=self.headers
         )
         self.assertEqual(response.status_code, 200)
@@ -381,7 +381,7 @@ class ItemListsTestCase(unittest.TestCase):
         self.assertEqual(data['item_list']['owner'], self.user2.id)
 
     def test_toggle_check(self):
-        response = self.client.post('/item_list', data=json.dumps(self.item_list), headers=self.headers_json)
+        response = self.client.post('/item_lists', data=json.dumps(self.item_list), headers=self.headers_json)
 
         self.assertEqual(response.status_code, 201)
         create_data = json.loads(response.data.decode('utf-8'))
@@ -393,14 +393,14 @@ class ItemListsTestCase(unittest.TestCase):
         ]
 
         response = self.client.patch(
-            f'/item_list/{list_id}/toggle_check',
+            f'/item_lists/{list_id}/toggle_check',
             data=json.dumps({'items': toggle_list_items}),
             headers=self.headers_json
         )
         self.assertEqual(response.status_code, 200)
 
         response = self.client.get(
-            f'/item_list/{list_id}',
+            f'/item_lists/{list_id}',
             headers=self.headers
         )
         self.assertEqual(response.status_code, 200)
@@ -411,21 +411,21 @@ class ItemListsTestCase(unittest.TestCase):
 
     def test_get_my_list(self):
         response = self.client.post(
-            '/item_list',
+            '/item_lists',
             data=json.dumps(self.item_list),
             headers=self.headers_json
         )
         self.assertEqual(response.status_code, 201)
 
         response = self.client.post(
-            '/item_list',
+            '/item_lists',
             data=json.dumps(self.item_list2),
             headers=self.headers_json
         )
         self.assertEqual(response.status_code, 201)
 
         response = self.client.get(
-            '/item_list/mine',
+            '/item_lists/mine',
             headers=self.headers
         )
         self.assertEqual(response.status_code, 200)
@@ -556,35 +556,35 @@ class ItemListsTestCase(unittest.TestCase):
     def test_get_all_public_list(self):
         # User1
         response = self.client.post(
-            '/item_list',
+            '/item_lists',
             data=json.dumps(self.item_list),
             headers=self.headers_json
         )
         self.assertEqual(response.status_code, 201)
 
         response = self.client.post(
-            '/item_list',
+            '/item_lists',
             data=json.dumps(self.item_list2),
             headers=self.headers_json
         )
         self.assertEqual(response.status_code, 201)
 
         response = self.client.post(
-            '/item_list',
+            '/item_lists',
             data=json.dumps(self.item_list_public),
             headers=self.headers_json
         )
         self.assertEqual(response.status_code, 201)
 
         response = self.client.get(
-            '/item_list/mine',
+            '/item_lists/mine',
             headers=self.headers
         )
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
 
         response = self.client.get(
-            '/item_list/mine',
+            '/item_lists/mine',
             headers=self.headers
         )
         self.assertEqual(response.status_code, 200)
@@ -594,35 +594,35 @@ class ItemListsTestCase(unittest.TestCase):
 
         # User2
         response = self.client.post(
-            '/item_list',
+            '/item_lists',
             data=json.dumps(self.item_list),
             headers=self.user2_headers_json
         )
         self.assertEqual(response.status_code, 201)
 
         response = self.client.post(
-            '/item_list',
+            '/item_lists',
             data=json.dumps(self.item_list2),
             headers=self.user2_headers_json
         )
         self.assertEqual(response.status_code, 201)
 
         response = self.client.post(
-            '/item_list',
+            '/item_lists',
             data=json.dumps(self.item_list_public),
             headers=self.user2_headers_json
         )
         self.assertEqual(response.status_code, 201)
 
         response = self.client.get(
-            '/item_list/mine',
+            '/item_lists/mine',
             headers=self.user2_headers
         )
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
 
         response = self.client.get(
-            '/item_list/mine',
+            '/item_lists/mine',
             headers=self.user2_headers
         )
         self.assertEqual(response.status_code, 200)
@@ -630,7 +630,7 @@ class ItemListsTestCase(unittest.TestCase):
         self.assertEqual(data['count'], 3)
 
         response = self.client.get(
-            '/item_list/public',
+            '/item_lists/public',
             headers=self.headers
         )
         self.assertEqual(response.status_code, 200)
@@ -638,7 +638,7 @@ class ItemListsTestCase(unittest.TestCase):
         self.assertEqual(data['count'], 2)
 
         response = self.client.get(
-            '/item_list/public',
+            '/item_lists/public',
             headers=self.user2_headers
         )
         self.assertEqual(response.status_code, 200)
