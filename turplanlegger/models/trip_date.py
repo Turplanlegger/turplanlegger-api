@@ -33,6 +33,7 @@ class TripDate:
 
 
     """
+
     def __init__(self, owner: str, start_time: datetime, end_time: datetime, **kwargs) -> None:
         if not owner:
             raise ValueError('Missing mandatory field \'owner\'')
@@ -64,6 +65,7 @@ class TripDate:
             f'deleted: {self.deleted}, delete_time: {self.delete_time}, '
             f'create_time: {self.create_time})'
         )
+
     @classmethod
     def parse(cls, json: JSON) -> 'TripDate':
         """Parse input JSON and return an TripDate instance.

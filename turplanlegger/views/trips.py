@@ -154,6 +154,7 @@ def delete_trip(trip_id):
 
     return jsonify(status='ok')
 
+
 @api.route('/trips/<trip_id>/dates', methods=['PATCH'])
 @auth
 def add_trip_date(trip_id):
@@ -174,6 +175,7 @@ def add_trip_date(trip_id):
         raise ApiProblem('Failed to add date to trip', str(e), 500)
 
     return jsonify(trip_date.serialize), 201
+
 
 @api.route('/trips/<trip_id>/dates/<trip_date_id>', methods=['delete'])
 @auth
