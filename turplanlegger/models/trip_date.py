@@ -39,12 +39,8 @@ class TripDate:
             raise ValueError('Missing mandatory field \'owner\'')
         if not isinstance(owner, str):
             raise TypeError('\'owner\' must be string')
-        if not start_time:
-            raise ValueError('Missing mandatory field \'start_time\'')
         if not isinstance(start_time, datetime):
             raise TypeError('\'start_time\' must be an datetime instance')
-        if not end_time:
-            raise ValueError('Missing mandatory field \'end_time\'')
         if not isinstance(end_time, datetime):
             raise TypeError('\'end_time\' must be an datetime instance')
 
@@ -76,8 +72,21 @@ class TripDate:
         Returns:
             An TripDate instance
         """
-        start_time = datetime.fromisoformat(json.get('start_time', None))
-        end_time = datetime.fromisoformat(json.get('end_time', None))
+        start_time = json.get('start_time', None)
+        if start_time is None:
+            raise ValueError('Missing mandatory field \'start_time\'')
+        try:
+            start_time = datetime.fromisoformat(start_time)
+        except ValueError:
+            raise ValueError('Field \'end_time\' must be ISO 8601 date as tring')
+
+        end_time = json.get('end_time', None)
+        if end_time is None:
+            raise ValueError('Missing mandatory field \'end_time\'')
+        try:
+            end_time = datetime.fromisoformat(end_time)
+        except ValueError:
+            raise ValueError('Field \'end_time\' must be ISO 8601 date as tring')
 
         if start_time > end_time:
             raise ValueError('start_time can not be before end_time')
