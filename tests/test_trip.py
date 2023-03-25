@@ -386,8 +386,50 @@ class TripsTestCase(unittest.TestCase):
         self.assertEqual(data['trip']['owner'], data['trip']['dates'][0]['owner'])
         self.assertEqual(data['trip']['dates'][0]['trip_id'], 1)
         self.assertEqual(data['trip']['id'], data['trip']['dates'][0]['trip_id'])
+        self.assertEqual(len(data['trip']['dates']), 2)
         self.assertEqual(data['trip']['dates'][0]['start_time'], self.trip_with_date['dates'][0]['start_time'])
         self.assertEqual(data['trip']['dates'][0]['end_time'], self.trip_with_date['dates'][0]['end_time'])
         self.assertEqual(data['trip']['dates'][1]['start_time'], start_time)
         self.assertEqual(data['trip']['dates'][1]['end_time'], end_time)
+        self.assertEqual(data['trip']['owner'], self.user1.id)
+
+    def test_remove_date(self):
+        response = self.client.post(
+            '/trips',
+            data=json.dumps(self.trip_with_multiple_dates),
+            headers=self.headers_json
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        data = json.loads(response.data.decode('utf-8'))
+        trip_id = data['id']
+        date_id = data['dates'][0]['id']
+
+        response = self.client.delete(
+            f'/trips/{trip_id}/dates/{date_id}',
+            headers=self.headers
+        )
+
+        data = json.loads(response.data.decode('utf-8'))
+        print(data)
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(
+            f'/trips/{trip_id}',
+            headers=self.headers
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['trip']['id'], 1)
+        self.assertEqual(data['trip']['name'], self.trip_with_multiple_dates['name'])
+        self.assertEqual(len(data['trip']['dates']), 1)
+        self.assertEqual(data['trip']['dates'][0]['owner'], data['trip']['owner'])
+        self.assertEqual(data['trip']['dates'][0]['id'], 2)
+        self.assertEqual(data['trip']['dates'][0]['trip_id'], 1)
+        self.assertEqual(data['trip']['dates'][0]['trip_id'], data['trip']['id'])
+        self.assertEqual(data['trip']['dates'][0]['start_time'], self.trip_with_multiple_dates['dates'][1]['start_time'])
+        self.assertEqual(data['trip']['dates'][0]['end_time'], self.trip_with_multiple_dates['dates'][1]['end_time'])
         self.assertEqual(data['trip']['owner'], self.user1.id)
