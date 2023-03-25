@@ -6,6 +6,7 @@ from turplanlegger.models.item_lists import ItemList
 from turplanlegger.models.note import Note
 from turplanlegger.models.route import Route
 from turplanlegger.models.trip import Trip
+from turplanlegger.models.trip_date import TripDate
 
 from . import api
 
@@ -152,3 +153,24 @@ def delete_trip(trip_id):
         raise ApiProblem('Failed to delete trip', str(e), 500)
 
     return jsonify(status='ok')
+
+@api.route('/trips/<trip_id>/dates', methods=['PATCH'])
+@auth
+def add_trip_date(trip_id):
+    trip = Trip.find_trip(trip_id)
+    if not trip:
+        raise ApiProblem('Failed to change owner of trip', 'The requested trip was not found', 404)
+
+    request.json['trip_id'] = trip_id
+
+    try:
+        trip_date = TripDate.parse(request.json)
+    except (ValueError, TypeError) as e:
+        raise ApiProblem('Failed to parse trip', str(e), 400)
+
+    try:
+        trip_date = trip_date.create()
+    except Exception as e:
+        raise ApiProblem('Failed to create trip_date', str(e), 500)
+
+    return jsonify(trip_date.serialize), 201

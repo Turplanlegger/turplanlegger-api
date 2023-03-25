@@ -81,7 +81,7 @@ class TripDate:
             raise ValueError('start_time can not be before end_time')
 
         return TripDate(
-            id=json.get('id', None),
+            trip_id=json.get('trip_id', None),
             owner=g.user.id,
             start_time=start_time,
             end_time=end_time
