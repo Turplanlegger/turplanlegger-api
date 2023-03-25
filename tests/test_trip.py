@@ -460,7 +460,9 @@ class TripsTestCase(unittest.TestCase):
         self.assertEqual(data['trip']['dates'][0]['id'], 2)
         self.assertEqual(data['trip']['dates'][0]['trip_id'], 1)
         self.assertEqual(data['trip']['dates'][0]['trip_id'], data['trip']['id'])
-        self.assertEqual(data['trip']['dates'][0]['start_time'],
-                         self.trip_with_multiple_dates['dates'][1]['start_time'])
+        self.assertEqual(
+            data['trip']['dates'][0]['start_time'],
+            self.trip_with_multiple_dates['dates'][1]['start_time']
+        )
         self.assertEqual(data['trip']['dates'][0]['end_time'], self.trip_with_multiple_dates['dates'][1]['end_time'])
         self.assertEqual(data['trip']['owner'], self.user1.id)
