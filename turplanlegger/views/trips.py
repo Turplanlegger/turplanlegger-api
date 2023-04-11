@@ -6,6 +6,7 @@ from turplanlegger.models.item_lists import ItemList
 from turplanlegger.models.note import Note
 from turplanlegger.models.route import Route
 from turplanlegger.models.trip import Trip
+from turplanlegger.models.trip_date import TripDate
 
 from . import api
 
@@ -27,12 +28,11 @@ def add_trip():
     try:
         trip = Trip.parse(request.json)
     except (ValueError, TypeError) as e:
-        raise ApiProblem('Failed to parse route', str(e), 400)
-
+        raise ApiProblem('Failed to parse trip', str(e), 400)
     try:
         trip = trip.create()
     except Exception as e:
-        raise ApiProblem('Failed to create route', str(e), 500)
+        raise ApiProblem('Failed to create trip', str(e), 500)
 
     return jsonify(trip.serialize), 201
 
@@ -151,5 +151,55 @@ def delete_trip(trip_id):
         trip.delete()
     except Exception as e:
         raise ApiProblem('Failed to delete trip', str(e), 500)
+
+    return jsonify(status='ok')
+
+
+@api.route('/trips/<trip_id>/dates', methods=['PATCH'])
+@auth
+def add_trip_date(trip_id):
+    trip = Trip.find_trip(trip_id)
+    if not trip:
+        raise ApiProblem('Failed to add date to trip', 'The requested trip was not found', 404)
+
+    request.json['trip_id'] = trip_id
+
+    try:
+        trip_date = TripDate.parse(request.json)
+    except (ValueError, TypeError):
+        raise ApiProblem('Failed to add date to trip', 'Parsing of the date failed', 400)
+
+    try:
+        trip_date = trip_date.create()
+    except Exception as e:
+        raise ApiProblem('Failed to add date to trip', str(e), 500)
+
+    return jsonify(trip_date.serialize), 201
+
+
+@api.route('/trips/<trip_id>/dates/<trip_date_id>', methods=['delete'])
+@auth
+def remove_trip_date(trip_id, trip_date_id):
+    trip = Trip.find_trip(trip_id)
+    if not trip:
+        raise ApiProblem('Failed to remove date from trip', 'The requested trip was not found', 404)
+
+    trip_date = None
+    for date in trip.dates:
+        if date.id == int(trip_date_id):
+            trip_date = date
+            break
+
+    if trip_date is None:
+        raise ApiProblem(
+            'Failed to remove date from trip',
+            'The requested date was not found in this trip',
+            404
+        )
+
+    try:
+        trip_date.delete()
+    except Exception:
+        raise ApiProblem('Failed to remove date from trip', 'Failed to delete date', 404)
 
     return jsonify(status='ok')

@@ -406,8 +406,8 @@ class Database:
     # Trip
     def create_trip(self, trip):
         insert_trip = """
-            INSERT INTO trips (name, owner, private, start_time, end_time)
-            VALUES (%(name)s, %(owner)s, %(private)s,  %(start_time)s,  %(end_time)s)
+            INSERT INTO trips (name, owner, private)
+            VALUES (%(name)s, %(owner)s, %(private)s)
             RETURNING *
         """
         return self._insert(insert_trip, vars(trip))
@@ -483,6 +483,55 @@ class Database:
     def get_trip_item_lists(self, id):
         select = 'SELECT item_list_id FROM trips_item_lists_references WHERE item_list_id = %s'
         return self._fetchall(select, (id,))
+
+    # Trip Date
+    def create_trip_date(self, trip_date):
+        insert = """
+            INSERT INTO trip_dates (
+                trip_id, start_time, end_time, owner
+            )
+            VALUES (
+                %(trip_id)s, %(start_time)s,  %(end_time)s, %(owner)s
+            )
+            RETURNING *
+        """
+        return self._insert(
+            insert,
+            vars(trip_date)
+        )
+
+    def get_trip_date(self, id, deleted=None):
+        select = 'SELECT * FROM trip_dates WHERE id = %s'
+
+        if deleted is None:
+            return self._fetchone(select, (id,))
+
+        if deleted is True:
+            select += ' AND deleted = TRUE'
+        else:
+            select += ' AND deleted = FALSE'
+
+    def get_trip_dates_by_trip(self, trip_id, deleted=None):
+        select = 'SELECT * FROM trip_dates WHERE trip_id = %s'
+
+        if deleted is None:
+            return self._fetchall(select, (trip_id,))
+
+        if deleted is True:
+            select += ' AND deleted = TRUE'
+        else:
+            select += ' AND deleted = FALSE'
+
+        return self._fetchall(select, (trip_id,))
+
+    def delete_trip_date(self, trip_date_id):
+        update = """
+            UPDATE trip_dates
+                SET deleted=TRUE, delete_time=CURRENT_TIMESTAMP
+                WHERE id = %(id)s AND deleted = FALSE
+            RETURNING deleted
+        """
+        return self._updateone(update, {'id': trip_date_id}, returning=True)
 
     # Helpers
     def _insert(self, query, vars):
