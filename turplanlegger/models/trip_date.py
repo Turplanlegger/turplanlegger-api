@@ -86,7 +86,7 @@ class TripDate:
         try:
             end_time = datetime.fromisoformat(end_time)
         except ValueError:
-            raise ValueError('Field \'end_time\' must be ISO 8601 date as tring')
+            raise ValueError('Field \'end_time\' must be ISO 8601 date as string')
 
         if start_time > end_time:
             raise ValueError('start_time can not be before end_time')
