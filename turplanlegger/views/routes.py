@@ -7,7 +7,7 @@ from turplanlegger.models.route import Route
 from . import api
 
 
-@api.route('/route/<route_id>', methods=['GET'])
+@api.route('/routes/<route_id>', methods=['GET'])
 @auth
 def get_route(route_id):
 
@@ -19,7 +19,7 @@ def get_route(route_id):
         raise ApiProblem('Route not found', 'The requested route was not found', 404)
 
 
-@api.route('/route/<route_id>', methods=['DELETE'])
+@api.route('/routes/<route_id>', methods=['DELETE'])
 @auth
 def delete_route(route_id):
 
@@ -36,7 +36,7 @@ def delete_route(route_id):
     return jsonify(status='ok')
 
 
-@api.route('/route', methods=['POST'])
+@api.route('/routes', methods=['POST'])
 @auth
 def add_route():
     try:
@@ -52,7 +52,7 @@ def add_route():
     return jsonify(route.serialize), 201
 
 
-@api.route('/route/<route_id>/owner', methods=['PATCH'])
+@api.route('/routes/<route_id>/owner', methods=['PATCH'])
 @auth
 def change_route_owner(route_id):
 
@@ -76,7 +76,7 @@ def change_route_owner(route_id):
     return jsonify(status='ok')
 
 
-@api.route('/route/mine', methods=['GET'])
+@api.route('/routes/mine', methods=['GET'])
 @auth
 def get_my_routes():
 

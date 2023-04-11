@@ -7,7 +7,7 @@ from turplanlegger.models.note import Note
 from . import api
 
 
-@api.route('/note/<note_id>', methods=['GET'])
+@api.route('/notes/<note_id>', methods=['GET'])
 @auth
 def get_note(note_id):
 
@@ -19,7 +19,7 @@ def get_note(note_id):
         raise ApiProblem('Note not found', 'The requested note was not found', 404)
 
 
-@api.route('/note/<note_id>', methods=['DELETE'])
+@api.route('/notes/<note_id>', methods=['DELETE'])
 @auth
 def delete_note(note_id):
 
@@ -36,7 +36,7 @@ def delete_note(note_id):
     return jsonify(status='ok')
 
 
-@api.route('/note', methods=['POST'])
+@api.route('/notes', methods=['POST'])
 @auth
 def add_note():
     try:
@@ -52,7 +52,7 @@ def add_note():
     return jsonify(note.serialize), 201
 
 
-@api.route('/note/<note_id>/owner', methods=['PATCH'])
+@api.route('/notes/<note_id>/owner', methods=['PATCH'])
 @auth
 def change_note_owner(note_id):
 
@@ -76,7 +76,7 @@ def change_note_owner(note_id):
     return jsonify(status='ok')
 
 
-@api.route('/note/<note_id>/rename', methods=['PATCH'])
+@api.route('/notes/<note_id>/rename', methods=['PATCH'])
 @auth
 def rename_note(note_id):
 
@@ -93,7 +93,7 @@ def rename_note(note_id):
         raise ApiProblem('Failed to rename note', 'Unknown error', 500)
 
 
-@api.route('/note/<note_id>/update', methods=['PATCH'])
+@api.route('/notes/<note_id>/update', methods=['PATCH'])
 @auth
 def update_note(note_id):
 
@@ -110,7 +110,7 @@ def update_note(note_id):
         raise ApiProblem('Failed to update note', 'Unknown error', 500)
 
 
-@api.route('/note/mine', methods=['GET'])
+@api.route('/notes/mine', methods=['GET'])
 @auth
 def get_my_notes():
 

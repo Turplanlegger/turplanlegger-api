@@ -15,6 +15,14 @@ class Database:
         self.uri = app.config.get('DATABASE_URI')
         self.dbname = app.config.get('DATABASE_NAME')
         self.max_retries = app.config.get('DATABASE_MAX_RETRIES', 5)
+        self.min_pool_size = app.config.get('DATABASE_MIN_POOL_SIZE', 2)
+        self.max_pool_size = app.config.get('DATABASE_MAX_POOL_SIZE', 10)
+        self.timeout = app.config.get('DATABASE_TIMEOUT', 10)
+        self.max_waiting = app.config.get('DATABASE_MAX_WAITING', 0)
+        self.max_lifetime = app.config.get('DATABASE_MAX_LIFETIME', 1800)
+        self.max_idle = app.config.get('DATABASE_MAX_IDLE', 300)
+        self.reconnect_timeout = app.config.get('DATABASE_RECONNECT_TIMEOUT', 90)
+        self.connection_test_timeout = app.config.get('DATABASE_CONNECTION_TEST_TIMEOUT', 1)
 
         self.pool = self.connect()
         self.logger.debug('Database pool opened')
@@ -42,13 +50,22 @@ class Database:
             try:
                 pool = ConnectionPool(
                     conninfo=self.uri,
+                    min_size=self.min_pool_size,
+                    max_size=self.max_pool_size,
+                    timeout=self.timeout,
+                    max_waiting=self.max_waiting,
+                    max_lifetime=self.max_lifetime,
+                    max_idle=self.max_idle,
+                    reconnect_timeout=self.reconnect_timeout,
                     kwargs={
                         'dbname': self.dbname,
                         'client_encoding': 'UTF8',
-                        'row_factory': namedtuple_row})
+                        'row_factory': namedtuple_row
+                    }
+                )
 
                 # Test that we are able to connect to database
-                with pool.connection(timeout=1.0):
+                with pool.connection(timeout=self.connection_test_timeout):
                     self.logger.debug('Testing database connection')
                 break
             except Exception as e:
@@ -389,8 +406,8 @@ class Database:
     # Trip
     def create_trip(self, trip):
         insert_trip = """
-            INSERT INTO trips (name, owner, private, start_time, end_time)
-            VALUES (%(name)s, %(owner)s, %(private)s,  %(start_time)s,  %(end_time)s)
+            INSERT INTO trips (name, owner, private)
+            VALUES (%(name)s, %(owner)s, %(private)s)
             RETURNING *
         """
         return self._insert(insert_trip, vars(trip))
@@ -466,6 +483,55 @@ class Database:
     def get_trip_item_lists(self, id):
         select = 'SELECT item_list_id FROM trips_item_lists_references WHERE item_list_id = %s'
         return self._fetchall(select, (id,))
+
+    # Trip Date
+    def create_trip_date(self, trip_date):
+        insert = """
+            INSERT INTO trip_dates (
+                trip_id, start_time, end_time, owner
+            )
+            VALUES (
+                %(trip_id)s, %(start_time)s,  %(end_time)s, %(owner)s
+            )
+            RETURNING *
+        """
+        return self._insert(
+            insert,
+            vars(trip_date)
+        )
+
+    def get_trip_date(self, id, deleted=None):
+        select = 'SELECT * FROM trip_dates WHERE id = %s'
+
+        if deleted is None:
+            return self._fetchone(select, (id,))
+
+        if deleted is True:
+            select += ' AND deleted = TRUE'
+        else:
+            select += ' AND deleted = FALSE'
+
+    def get_trip_dates_by_trip(self, trip_id, deleted=None):
+        select = 'SELECT * FROM trip_dates WHERE trip_id = %s'
+
+        if deleted is None:
+            return self._fetchall(select, (trip_id,))
+
+        if deleted is True:
+            select += ' AND deleted = TRUE'
+        else:
+            select += ' AND deleted = FALSE'
+
+        return self._fetchall(select, (trip_id,))
+
+    def delete_trip_date(self, trip_date_id):
+        update = """
+            UPDATE trip_dates
+                SET deleted=TRUE, delete_time=CURRENT_TIMESTAMP
+                WHERE id = %(id)s AND deleted = FALSE
+            RETURNING deleted
+        """
+        return self._updateone(update, {'id': trip_date_id}, returning=True)
 
     # Helpers
     def _insert(self, query, vars):
