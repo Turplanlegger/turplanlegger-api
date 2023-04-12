@@ -32,7 +32,7 @@ dependencies = [
     "psycopg[pool]==3.1.8",
     "PyJWT==2.6.0",
     "cryptography==40.0.1",
-    "httpx==0.23.3"
+    "httpx==0.24.0"
 ]
 [project.optional-dependencies]
 dev = [
