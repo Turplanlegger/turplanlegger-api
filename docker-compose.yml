@@ -28,12 +28,6 @@ services:
       - TP_SECRET_KEY_ID=${TP_SECRET_KEY_ID}
     hostname: turplanlegger-api
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fs http://localhost:5000/test"]
-      start_period: 20s
-      interval: 30s
-      retries: 5
-      timeout: 5s
     ports:
       - '${TP_PORT:-5000}:5000'
     depends_on:
