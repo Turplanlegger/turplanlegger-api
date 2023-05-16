@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: ./dev.Dockerfile
     environment:
-    - TP_DATABASE_URI=${TP_DATABASE_URI:-postgresql://turadm:passord@turplanlegger-dev-db/turplanlegger?connect_timeout=10&application_name=turplanlegger-api}
+    - TP_DATABASE_URI=${TP_DATABASE_URI:-postgresql://turadm:passord@turplanlegger-dev-db:5432/turplanlegger?connect_timeout=10&application_name=turplanlegger-api}
     - TP_DATABASE_NAME=${TP_DATABASE_NAME:-turplanlegger}
     - TP_DATABASE_MAX_RETRIES=${TP_DATABASE_MAX_RETRIES:-2}
     - TP_DATABASE_MIN_POOL_SIZE=${TP_DATABASE_MIN_POOL_SIZE:-2}
@@ -47,7 +47,7 @@ services:
       retries: 5
       timeout: 5s
     ports:
-      - 5432:5432
+      - ${TP_POSTGRES_PORT:-5432}:5432
     environment:
       - POSTGRES_USER=${TP_POSTGRES_USER:-turadm}
       - POSTGRES_PASSWORD=${TP_POSTGRES_PASSWORD:-passord}
