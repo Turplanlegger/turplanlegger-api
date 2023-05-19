@@ -1,11 +1,8 @@
-# This workflow will install Python dependencies, run tests and lint with a single version of Python
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
-
-name: Code standards and unittests
+name: Code standards, unittests and docker build
 
 on:
+  workflow_dispatch:
   pull_request:
-    branches: [ main, develop ]
 
 permissions:
   contents: read
@@ -26,9 +23,10 @@ jobs:
         pip install hatch
         pip install .[dev]
     - name: Lint using pre-commit
-      id: lint
       run: |
-        hatch run lint
+        echo '```bash' >> $GITHUB_STEP_SUMMARY
+        hatch run lint >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
 
   test-postgres15:
     runs-on: ubuntu-latest
@@ -66,6 +64,18 @@ jobs:
     - name: Test with pytest
       env:
         TP_DATABASE_URI: postgresql://postgres:postgres@localhost/turplanlegger?connect_timeout=10&application_name=turplanlegger
-      id: test
       run: |
-        hatch run cov
+        echo '```bash' >> $GITHUB_STEP_SUMMARY
+        hatch run cov >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build Docker image
+      run: |
+        echo '```bash' >> $GITHUB_STEP_SUMMARY
+        docker build . >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
