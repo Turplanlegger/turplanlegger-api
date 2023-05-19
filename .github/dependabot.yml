@@ -3,7 +3,8 @@ updates:
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+    target-branch: "develop"
     reviewers:
       - "sixcare"
       - "peseb"
@@ -15,6 +16,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    target-branch: "develop"
     reviewers:
       - "sixcare"
       - "peseb"
@@ -26,6 +28,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    target-branch: "develop"
     reviewers:
       - "sixcare"
       - "peseb"

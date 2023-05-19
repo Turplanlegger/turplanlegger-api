@@ -4,7 +4,6 @@ services:
   turplanlegger-dev-api:
     build:
       context: .
-      dockerfile: ./dev.Dockerfile
     environment:
     - TP_DATABASE_URI=${TP_DATABASE_URI:-postgresql://turadm:passord@turplanlegger-dev-db:5432/turplanlegger?connect_timeout=10&application_name=turplanlegger-api}
     - TP_DATABASE_NAME=${TP_DATABASE_NAME:-turplanlegger}
