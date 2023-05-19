@@ -3,7 +3,6 @@ FROM python:3.11-slim-bullseye
 # Set work directory
 WORKDIR /turplanlegger
 
-# Copy rest of the application code
 COPY . .
 
 # Install build dependencies, then run `pip install`, then remove unneeded build dependencies all in a single step.
