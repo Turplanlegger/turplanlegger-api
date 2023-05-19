@@ -79,4 +79,3 @@ jobs:
         echo '```bash' >> $GITHUB_STEP_SUMMARY
         docker build . >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
-
