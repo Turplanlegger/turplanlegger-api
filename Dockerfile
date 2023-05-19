@@ -1,5 +1,5 @@
 # Start with a smaller base image like python:slim-buster
-FROM python:slim-buster
+FROM python:3.11-slim-bullseye
 
 # Set work directory
 WORKDIR /turplanlegger
@@ -13,7 +13,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends gcc postgresql-client libpq-dev libc6-dev && \
     pip install --upgrade pip && \
     pip install --no-cache-dir .['prod'] && \
-    apt-get purge -y --auto-remove gcc postgresql-client libpq-dev libc6-dev && \
+    apt-get purge -y --auto-remove gcc libpq-dev libc6-dev && \
     rm -rf /var/lib/apt/lists/*
 
 # Default command
