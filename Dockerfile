@@ -1,4 +1,3 @@
-# Start with a smaller base image like python:slim-buster
 FROM python:3.11-slim-bullseye
 
 # Set work directory
