@@ -16,6 +16,8 @@ RUN apt-get update && \
     apt-get purge -y --auto-remove gcc libpq-dev libc6-dev && \
     rm -rf /var/lib/apt/lists/*
 
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=5 CMD [ "curl", "-fs", "http://localhost:5000/test"]
+
 # Default command
 CMD ["uwsgi", "--http", "0.0.0.0:5000", "--module", "wsgi:app", "--processes", "4", "--threads", "2"]
 
