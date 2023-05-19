@@ -8,7 +8,7 @@ COPY . .
 # Install build dependencies, then run `pip install`, then remove unneeded build dependencies all in a single step.
 # Combined RUN statements into one to reduce number of image layers.
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends gcc postgresql-client libpq-dev libc6-dev && \
+    apt-get install -y --no-install-recommends curl gcc postgresql-client libpq-dev libc6-dev && \
     pip install --upgrade pip && \
     pip install --no-cache-dir .['prod'] && \
     apt-get purge -y --auto-remove gcc libpq-dev libc6-dev && \
