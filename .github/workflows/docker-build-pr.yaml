@@ -11,4 +11,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build Docker image
-      run: docker build .
+      run: |
+        echo '```bash' >> $GITHUB_STEP_SUMMARY
+        docker build .
+        echo '```' >> $GITHUB_STEP_SUMMARY
