@@ -1,7 +1,7 @@
 version: '3.9'
 
 services:
-  turplanlegger-dev-api:
+  dev-api:
     build:
       context: .
     environment:
@@ -35,7 +35,7 @@ services:
     networks:
       - turplanlegger-dev-network
 
-  turplanlegger-dev-db:
+  dev-db:
     image: postgres:15-alpine
     hostname:  turplanlegger-dev-db
     restart: unless-stopped

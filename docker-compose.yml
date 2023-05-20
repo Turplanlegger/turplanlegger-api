@@ -1,7 +1,7 @@
 version: '3.9'
 
 services:
-  turplanlegger-api:
+  api:
     image: ghcr.io/sixcare/turplanlegger-api:main
     environment:
       - TP_DATABASE_URI=${TP_DATABASE_URI:-postgresql://turadm:passord@turplanlegger-db/turplanlegger?connect_timeout=10&application_name=turplanlegger-api}
@@ -34,7 +34,7 @@ services:
     networks:
       - turplanlegger-network
 
-  turplanlegger-db:
+  db:
     image: postgres:15-alpine
     hostname:  turplanlegger-db
     restart: unless-stopped
