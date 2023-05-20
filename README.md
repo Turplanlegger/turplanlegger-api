@@ -41,7 +41,9 @@ Add a cronjob that runs the deploy script:
 mkdir ~/turplanlegger-api
 mkdir -p ~/.config/turplanlegger
 curl -o ~/turplanlegger-api/deploy.sh https://raw.githubusercontent.com/sixcare/turplanlegger-api/main/deploy/deploy.sh
+chmod +x ~/turplanlegger-api/deploy.sh
 curl -o ~/.config/turplanlegger/env https://raw.githubusercontent.com/sixcare/turplanlegger-api/main/deploy/env
+chmod 600 ~/.config/turplanlegger/env
 crontab -l | { cat; echo "*/2 * * * * $HOME/turplanlegger-api/deploy.sh > /dev/null 2>&1"; } | crontab -
 ```
 
