@@ -42,5 +42,5 @@ https://docs.docker.com/get-docker/
 ### Start development instance
 ```bash
 docker-compose -f docker-compose.dev.yml build
-docker-compose -f docker-compose.dev.yml up --abort-on-container-exit  --exit-code-from turplanlegger-dev
+docker compose -f docker-compose.dev.yml --env-file env-dev up -d
 ```
