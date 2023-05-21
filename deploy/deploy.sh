@@ -22,17 +22,17 @@ fi
 # Compare SHAs and update the image if necessary
 if [[ "${NEW_SHA}" != "${OLD_SHA}" ]]; then
     cd "${HOME}/turplanlegger-api"
-    
+
     # Backup current docker-compose file
     cp docker-compose.yml docker-compose.yml.bak
-    
+
     # Download new docker-compose file
     if ! curl -fsLO "https://raw.githubusercontent.com/sixcare/turplanlegger-api/main/docker-compose.yml"; then
         echo "Failed to download docker-compose file, reverting to backup"
         mv docker-compose.yml.bak docker-compose.yml
         exit 1
     fi
-    
+ 
     # Pull new images
     if ! docker compose pull; then
         echo "Failed to pull new Docker images"
