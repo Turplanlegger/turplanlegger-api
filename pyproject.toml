@@ -90,6 +90,9 @@ include = [
 ]
 
 [tool.ruff]
-select = ["E", "W", "I", "F", "N", "D", "UP", "YTT", "ANN", "BLE", "FBT", "COM", "C4", "T10", "EM", "ISC", "ICN", "G", "Q", "RSE", "PTH"]
+select = ["E", "W", "I", "F", "N", "UP", "YTT", "BLE", "FBT", "C4", "T10", "ISC", "ICN", "G", "Q", "RSE", "PTH"]
 line-length = 120
 target-version = "py311"
+
+[tool.ruff.flake8-quotes]
+inline-quotes = "single"
