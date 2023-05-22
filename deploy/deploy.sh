@@ -32,7 +32,7 @@ if [[ "${NEW_SHA}" != "${OLD_SHA}" ]]; then
         mv docker-compose.yml.bak docker-compose.yml
         exit 1
     fi
- 
+
     # Pull new images
     if ! docker compose pull; then
         echo "Failed to pull new Docker images"
