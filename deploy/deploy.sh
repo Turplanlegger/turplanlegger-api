@@ -6,7 +6,7 @@ set -e
 source "${HOME}/.config/turplanlegger/env"
 
 # Get the SHA of the new image
-NEW_SHA=$(curl -sH "Authorization: Bearer ${GITHUB_ACCESS_TOKEN}" "https://api.github.com/user/packages/container/turplanlegger-api/versions" | jq -r '.[] | select(.metadata.container.tags[] | contains("main")).name')
+NEW_SHA=$(curl -sH "Authorization: Bearer ${GITHUB_ACCESS_TOKEN}" "https://api.github.com/user/packages/container/turplanlegger-api/versions" | jq -r '.[] | select(.metadata.container.tags | any(. == "main")).name')
 if [[ -z "${NEW_SHA}" ]]; then
     echo "Unable to retrieve the new image SHA"
     exit 1
