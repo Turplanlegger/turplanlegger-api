@@ -1,0 +1,24 @@
+name: Check if new API-version is deployed
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  check-api-version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Check if new API-version is deployed
+        run: |
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          ./deploy/check_version.sh >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

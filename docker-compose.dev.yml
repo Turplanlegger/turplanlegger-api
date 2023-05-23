@@ -29,9 +29,9 @@ services:
     hostname: turplanlegger-dev-api
     restart: unless-stopped
     ports:
-      - ${TP_PORT:-8080}:8080
+      - ${TP_PORT:-8080}:5000
     depends_on:
-      - turplanlegger-dev-db
+      - dev-db
     networks:
       - turplanlegger-dev-network
 
