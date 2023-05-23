@@ -12,6 +12,12 @@ if [[ -z "${NEW_SHA}" ]]; then
     exit 1
 fi
 
+IMAGE_ID=$(docker images -q ghcr.io/sixcare/turplanlegger-api:main)
+if [[ -z "${IMAGE_ID}" ]]; then
+    echo "Image 'ghcr.io/sixcare/turplanlegger-api:main' not found. Pulling it"
+    docker pull -q ghcr.io/sixcare/turplanlegger-api:main
+fi
+
 # Get the SHA of the old image
 OLD_SHA=$(docker image inspect ghcr.io/sixcare/turplanlegger-api:main --format '{{.Id}}')
 if [[ -z "${OLD_SHA}" ]]; then
