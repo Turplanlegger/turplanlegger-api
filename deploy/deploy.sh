@@ -19,7 +19,7 @@ if [[ -z "${IMAGE_ID}" ]]; then
 fi
 
 # Get the SHA of the old image
-OLD_SHA=$(docker image inspect ghcr.io/sixcare/turplanlegger-api:main --format '{{.Id}}')
+OLD_SHA=$(docker image inspect ghcr.io/sixcare/turplanlegger-api:main --format '{{range .RepoDigests}}{{.}}{{end}}' | cut -d '@' -f2)
 if [[ -z "${OLD_SHA}" ]]; then
     echo "Unable to retrieve the old image SHA"
     exit 1
