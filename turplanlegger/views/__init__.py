@@ -43,5 +43,5 @@ def test():
 
 
 @api.route('/version', methods=['GET'])
-def version():
+def get_version():
     return jsonify(version=__version__)
