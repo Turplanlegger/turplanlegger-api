@@ -1,5 +1,6 @@
 from flask import Blueprint, current_app, jsonify, request
 
+from turplanlegger.__about__ import __version__
 from turplanlegger.exceptions import ApiProblem
 from turplanlegger.utils.response import absolute_url
 
@@ -39,3 +40,8 @@ def index():
 @api.route('/test', methods=['GET'])
 def test():
     return jsonify(status='ok')
+
+
+@api.route('/version', methods=['GET'])
+def get_version():
+    return jsonify(version=__version__)
