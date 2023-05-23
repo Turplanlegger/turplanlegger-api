@@ -25,7 +25,7 @@ services:
     - TP_AZURE_AD_B2C_KEY_URL=${TP_AZURE_AD_B2C_KEY_URL:-https://turplanlegger.b2clogin.com/turplanlegger.onmicrosoft.com/discovery/v2.0/keys?p=b2c_1_signin}
     - TP_TOKEN_EXPIRE_TIME=${TP_TOKEN_EXPIRE_TIME:-86400}
     - TP_SECRET_KEY=${TP_SECRET_KEY}
-    - TP_SECRET_KEY_ID=1234
+    - TP_SECRET_KEY_ID=${TP_SECRET_KEY_ID}
     hostname: turplanlegger-dev-api
     restart: unless-stopped
     ports:
