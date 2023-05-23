@@ -3,6 +3,8 @@ from flask import Blueprint, current_app, jsonify, request
 from turplanlegger.exceptions import ApiProblem
 from turplanlegger.utils.response import absolute_url
 
+from turplanlegger.__about__ import __version__
+
 api = Blueprint('api', __name__)  # noqa isort:skip
 
 from . import item_lists, notes, routes, users, trips  # noqa isort:skip
@@ -39,3 +41,7 @@ def index():
 @api.route('/test', methods=['GET'])
 def test():
     return jsonify(status='ok')
+
+@api.route('/version', methods=['GET'])
+def version():
+    return jsonify(version=__version__)
