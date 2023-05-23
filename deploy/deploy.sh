@@ -40,7 +40,7 @@ if [[ "${NEW_SHA}" != "${OLD_SHA}" ]]; then
     fi
 
     # Restart services
-    docker compose --env-file "${HOME}/.config/turplanlegger/env" up -d
+    docker compose --env-file "${HOME}/.config/turplanlegger/env" up -d --quiet-pull --remove-orphans
 else
     echo "No new updates available"
 fi
