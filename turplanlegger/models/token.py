@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Dict
+from typing import Any
 
 import jwt
 from flask import current_app
@@ -8,7 +8,7 @@ from jwt import DecodeError, ExpiredSignatureError, InvalidAudienceError
 
 from turplanlegger.models.user import User
 
-JSON = Dict[str, Any]
+JSON = dict[str, Any]
 dt = datetime.datetime
 
 
@@ -76,7 +76,7 @@ class JWT:
             password=''
         )
 
-    def find_correct_key(token: str, unverified_header: str) -> str:
+    def find_correct_key(self, unverified_header: str) -> str:
         try:
             response = current_app.http_client.get(
                 current_app.config['AZURE_AD_B2C_KEY_URL']
