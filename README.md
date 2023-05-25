@@ -52,12 +52,13 @@ crontab -l | { cat; echo "*/2 * * * * $HOME/turplanlegger-api/deploy.sh > /dev/n
 Prerequisite: A GitHub api token with read access to code, commit statuses, and metadata permissions is required for the script to work  
 
 ```console
-git clone https://github.com/sixcare/turplanlegger-api ~/home/turplanlegger-api-dev
+git clone https://github.com/sixcare/turplanlegger-api ~/turplanlegger-api-develop
+chmod +x ~/turplanlegger-api-develop/deploy/deploy-develop.sh
 mkdir -p ~/.config/turplanlegger
 cp ~/home/turplanlegger-api-dev/deploy/env ~/.config/turplanlegger/env-develop
 chmod 600 ~/.config/turplanlegger/env-develop
 # Add Github access token, secret key and secret key id to env file
-crontab -l | { cat; echo "*/2 * * * * $HOME/turplanlegger-api-develop/deploy-develop.sh > /dev/null 2>&1"; } | crontab -
+crontab -l | { cat; echo "*/2 * * * * $HOME/turplanlegger-api-develop/deploy/deploy-develop.sh > /dev/null 2>&1"; } | crontab -
 
 ```
 
