@@ -40,7 +40,7 @@ dev = [
     "pre-commit==3.3.2",
     "pytest==7.3.1",
     "pytest-csv>=3.0.0",
-    "pytest-cov==4.0.0",
+    "pytest-cov==4.1.0",
     "wheel==0.38.4",
     "ruff==v0.0.269"
 ]
