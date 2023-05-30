@@ -40,6 +40,6 @@ if [[ "$NEW_SHA" != "$OLD_SHA" ]]; then
     git -C "$REPO_DIR" reset --quiet --hard origin/develop
 
     # Build and start Docker containers
-    docker-compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" build --quiet
-    docker-compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d --quiet-pull --remove-orphans
+    docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" build --quiet
+    docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d --quiet-pull --remove-orphans
 fi
