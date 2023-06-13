@@ -126,7 +126,7 @@ class TripDate:
 
     def select(self) -> None:
         """Select date to be current"""
-        return db.select_trip_date(self.id, self.trip_id)
+        return db.select_trip_date(self.id)
 
     @staticmethod
     def unselect_by_trip_id(trip_id: int) -> None:
