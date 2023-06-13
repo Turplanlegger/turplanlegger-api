@@ -499,13 +499,13 @@ class Database:
             insert,
             vars(trip_date)
         )
-    
+
     def select_trip_date(self, date_id, trip_id):
         insert = """
-            UPDATE trip_dates 
+            UPDATE trip_dates
                 SET selected=false
                 WHERE id != %(date_id)s AND trip_id = %(trip_id)s;
-            UPDATE trip_dates 
+            UPDATE trip_dates
                 SET selected=true
                 WHERE id = %(date_id)s AND trip_id = %(trip_id)s;
         """
@@ -514,7 +514,7 @@ class Database:
             date_id,
             trip_id
         )
-    
+
     def get_trip_date(self, id, deleted=None):
         select = 'SELECT * FROM trip_dates WHERE id = %s'
 
