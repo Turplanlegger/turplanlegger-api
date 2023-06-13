@@ -442,7 +442,6 @@ class TripsTestCase(unittest.TestCase):
         )
 
         data = json.loads(response.data.decode('utf-8'))
-        print(data)
         self.assertEqual(response.status_code, 200)
 
         response = self.client.get(
@@ -466,3 +465,43 @@ class TripsTestCase(unittest.TestCase):
         )
         self.assertEqual(data['trip']['dates'][0]['end_time'], self.trip_with_multiple_dates['dates'][1]['end_time'])
         self.assertEqual(data['trip']['owner'], self.user1.id)
+
+    def test_select_trip_date(self):
+        response = self.client.post(
+            '/trips',
+            data=json.dumps(self.trip_with_multiple_dates),
+            headers=self.headers_json
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        data = json.loads(response.data.decode('utf-8'))
+        trip_id = data['id']
+        date_id = data['dates'][0]['id']
+
+
+        self.assertIsInstance(data['id'], int)
+        self.assertEqual(data['owner'], self.user1.id)
+        self.assertEqual(data['name'], self.trip_with_multiple_dates['name'])
+
+        self.assertEqual(data['dates'][0]['owner'], data['owner'])
+        self.assertEqual(data['dates'][0]['id'], 1)
+        self.assertEqual(data['dates'][0]['trip_id'], 1)
+        self.assertEqual(data['dates'][0]['trip_id'], data['id'])
+        self.assertEqual(data['dates'][0]['start_time'], self.trip_with_multiple_dates['dates'][0]['start_time'])
+        self.assertEqual(data['dates'][0]['end_time'], self.trip_with_multiple_dates['dates'][0]['end_time'])
+
+        self.assertEqual(data['dates'][1]['owner'], data['owner'])
+        self.assertEqual(data['dates'][1]['id'], 2)
+        self.assertEqual(data['dates'][1]['trip_id'], 1)
+        self.assertEqual(data['dates'][1]['trip_id'], data['id'])
+        self.assertEqual(data['dates'][1]['start_time'], self.trip_with_multiple_dates['dates'][1]['start_time'])
+        self.assertEqual(data['dates'][1]['end_time'], self.trip_with_multiple_dates['dates'][1]['end_time'])
+
+        response = self.client.patch(
+            f'/trips/{trip_id}/dates/{date_id}/select',
+            headers=self.headers
+        )
+
+        self.assertEqual(response.status_code, 200)
+

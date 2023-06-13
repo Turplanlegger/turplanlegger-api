@@ -203,3 +203,38 @@ def remove_trip_date(trip_id, trip_date_id):
         raise ApiProblem('Failed to remove date from trip', 'Failed to delete date', 404)
 
     return jsonify(status='ok')
+
+@api.route('/trips/<trip_id>/dates/<trip_date_id>/select', methods=['patch'])
+@auth
+def select_trip_Date(trip_id, trip_date_id):
+    trip = Trip.find_trip(trip_id)
+    if not trip:
+        raise ApiProblem(
+            'Failed to select trip date',
+            'The requested trip was not found',
+            404
+        )
+
+    trip_date = None
+    for date in trip.dates:
+        if date.id == int(trip_date_id):
+            trip_date = date
+            break
+
+    if trip_date is None:
+        raise ApiProblem(
+            'Failed to select trip date',
+            'The requested date was not found in this trip',
+            404
+        )
+
+    try:
+        trip_date.select()
+    except Exception:
+        raise ApiProblem(
+            'Failed to select trip date',
+            'Failed to delete date',
+            404
+        )
+
+    return jsonify(status='ok')
