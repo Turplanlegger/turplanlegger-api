@@ -72,6 +72,7 @@ CREATE TABLE IF NOT EXISTS trip_dates (
     owner text REFERENCES users (id),
     create_time timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted boolean DEFAULT FALSE,
+    selected boolean DEFAULT FALSE,
     delete_time timestamp without time zone
 );
 

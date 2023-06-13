@@ -488,10 +488,10 @@ class Database:
     def create_trip_date(self, trip_date):
         insert = """
             INSERT INTO trip_dates (
-                trip_id, start_time, end_time, owner
+                trip_id, start_time, end_time, owner, selected
             )
             VALUES (
-                %(trip_id)s, %(start_time)s,  %(end_time)s, %(owner)s
+                %(trip_id)s, %(start_time)s,  %(end_time)s, %(owner)s, %(selected)s
             )
             RETURNING *
         """
@@ -499,7 +499,19 @@ class Database:
             insert,
             vars(trip_date)
         )
-
+    
+    def select_trip_date(self, selected, id):
+        insert = """
+            UPDATE trip_dates 
+                SET selected=%(selected)s
+                WHERE id = %(id)s
+            RETURNING *
+        """
+        return self._insert(
+            insert,
+            vars(trip_date)
+        )
+    
     def get_trip_date(self, id, deleted=None):
         select = 'SELECT * FROM trip_dates WHERE id = %s'
 
