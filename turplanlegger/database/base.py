@@ -491,7 +491,7 @@ class Database:
                 trip_id, start_time, end_time, owner, selected
             )
             VALUES (
-                %(trip_id)s, %(start_time)s,  %(end_time)s, %(owner)s, %(selected)s
+                %(trip_id)s, %(start_time)s, %(end_time)s, %(owner)s, %(selected)s
             )
             RETURNING *
         """
