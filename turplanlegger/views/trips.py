@@ -229,6 +229,15 @@ def select_trip_Date(trip_id, trip_date_id):
         )
 
     try:
+        TripDate.unselect_by_trip_id(trip.id)
+    except Exception:
+        raise ApiProblem(
+            'Failed to select trip date',
+            'Failed to unselect dates for the trip',
+            500
+        )
+
+    try:
         trip_date.select()
     except Exception:
         raise ApiProblem(

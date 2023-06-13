@@ -129,6 +129,17 @@ class TripDate:
         return db.select_trip_date(self.id, self.trip_id)
 
     @staticmethod
+    def unselect_by_trip_id(trip_id: int) -> None:
+        """Unselect all dates by trip id
+
+        Args:
+            trip_id (int): id of trip
+
+        Returns: None
+        """
+        return db.unselect_trip_dates(trip_id)
+
+    @staticmethod
     def find_by_trip_id(trip_id: int) -> ['TripDate']:
         """Looks up trip dates by trip id
 
