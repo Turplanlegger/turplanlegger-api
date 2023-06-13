@@ -486,15 +486,15 @@ class TripsTestCase(unittest.TestCase):
 
         self.assertEqual(data['dates'][0]['owner'], data['owner'])
         self.assertEqual(data['dates'][0]['id'], 1)
-        self.assertEqual(data['dates'][0]['trip_id'], 1)
         self.assertEqual(data['dates'][0]['trip_id'], data['id'])
+        self.assertEqual(data['dates'][0]['selected'], False)
         self.assertEqual(data['dates'][0]['start_time'], self.trip_with_multiple_dates['dates'][0]['start_time'])
         self.assertEqual(data['dates'][0]['end_time'], self.trip_with_multiple_dates['dates'][0]['end_time'])
 
         self.assertEqual(data['dates'][1]['owner'], data['owner'])
         self.assertEqual(data['dates'][1]['id'], 2)
-        self.assertEqual(data['dates'][1]['trip_id'], 1)
         self.assertEqual(data['dates'][1]['trip_id'], data['id'])
+        self.assertEqual(data['dates'][0]['selected'], False)
         self.assertEqual(data['dates'][1]['start_time'], self.trip_with_multiple_dates['dates'][1]['start_time'])
         self.assertEqual(data['dates'][1]['end_time'], self.trip_with_multiple_dates['dates'][1]['end_time'])
 
@@ -502,5 +502,16 @@ class TripsTestCase(unittest.TestCase):
             f'/trips/{trip_id}/dates/{date_id}/select',
             headers=self.headers
         )
-
         self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(f'/trips/{trip_id}', headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['dates'][0]['owner'], data['owner'])
+        self.assertEqual(data['dates'][0]['id'], 1)
+        self.assertEqual(data['dates'][0]['trip_id'], data['id'])
+        self.assertEqual(data['dates'][0]['selected'], True)
+        self.assertEqual(data['dates'][0]['start_time'], self.trip_with_multiple_dates['dates'][0]['start_time'])
+        self.assertEqual(data['dates'][0]['end_time'], self.trip_with_multiple_dates['dates'][0]['end_time'])
+
