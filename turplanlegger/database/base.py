@@ -420,7 +420,7 @@ class Database:
             RETURNING deleted
         """
         return self._updateone(update, {'id': trip_id}, returning=True)
-    
+
     def change_trip_owner(self, id, owner):
         update = """
             UPDATE trips
@@ -507,7 +507,7 @@ class Database:
                 WHERE id = %s
         """
         return self._updateone(insert, (date_id,))
-    
+
     def unselect_trip_dates(self, trip_id):
         insert = """
             UPDATE trip_dates

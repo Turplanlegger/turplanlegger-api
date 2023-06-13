@@ -370,15 +370,27 @@ class TripsTestCase(unittest.TestCase):
         self.assertEqual(data['dates'][0]['id'], 1)
         self.assertEqual(data['dates'][0]['trip_id'], data['id'])
         self.assertEqual(data['dates'][0]['selected'], True)
-        self.assertEqual(data['dates'][0]['start_time'], self.trip_with_multiple_dates_one_selected['dates'][0]['start_time'])
-        self.assertEqual(data['dates'][0]['end_time'], self.trip_with_multiple_dates_one_selected['dates'][0]['end_time'])
+        self.assertEqual(
+            data['dates'][0]['start_time'],
+            self.trip_with_multiple_dates_one_selected['dates'][0]['start_time']
+        )
+        self.assertEqual(
+            data['dates'][0]['end_time'],
+            self.trip_with_multiple_dates_one_selected['dates'][0]['end_time']
+        )
 
         self.assertEqual(data['dates'][1]['owner'], data['owner'])
         self.assertEqual(data['dates'][1]['id'], 2)
         self.assertEqual(data['dates'][1]['trip_id'], data['id'])
         self.assertEqual(data['dates'][1]['selected'], False)
-        self.assertEqual(data['dates'][1]['start_time'], self.trip_with_multiple_dates_one_selected['dates'][1]['start_time'])
-        self.assertEqual(data['dates'][1]['end_time'], self.trip_with_multiple_dates_one_selected['dates'][1]['end_time'])
+        self.assertEqual(
+            data['dates'][1]['start_time'],
+            self.trip_with_multiple_dates_one_selected['dates'][1]['start_time']
+        )
+        self.assertEqual(
+            data['dates'][1]['end_time'],
+            self.trip_with_multiple_dates_one_selected['dates'][1]['end_time']
+        )
 
     def test_create_trip_with_invalid_date(self):
         response = self.client.post(
@@ -503,7 +515,10 @@ class TripsTestCase(unittest.TestCase):
             data['trip']['dates'][0]['start_time'],
             self.trip_with_multiple_dates['dates'][1]['start_time']
         )
-        self.assertEqual(data['trip']['dates'][0]['end_time'], self.trip_with_multiple_dates['dates'][1]['end_time'])
+        self.assertEqual(
+            data['trip']['dates'][0]['end_time'],
+            self.trip_with_multiple_dates['dates'][1]['end_time']
+        )
         self.assertEqual(data['trip']['owner'], self.user1.id)
 
     def test_select_trip_date(self):
@@ -528,15 +543,27 @@ class TripsTestCase(unittest.TestCase):
         self.assertEqual(data['dates'][0]['id'], 1)
         self.assertEqual(data['dates'][0]['trip_id'], data['id'])
         self.assertEqual(data['dates'][0]['selected'], False)
-        self.assertEqual(data['dates'][0]['start_time'], self.trip_with_multiple_dates['dates'][0]['start_time'])
-        self.assertEqual(data['dates'][0]['end_time'], self.trip_with_multiple_dates['dates'][0]['end_time'])
+        self.assertEqual(
+            data['dates'][0]['start_time'],
+            self.trip_with_multiple_dates['dates'][0]['start_time']
+        )
+        self.assertEqual(
+            data['dates'][0]['end_time'],
+            self.trip_with_multiple_dates['dates'][0]['end_time']
+        )
 
         self.assertEqual(data['dates'][1]['owner'], data['owner'])
         self.assertEqual(data['dates'][1]['id'], 2)
         self.assertEqual(data['dates'][1]['trip_id'], data['id'])
         self.assertEqual(data['dates'][0]['selected'], False)
-        self.assertEqual(data['dates'][1]['start_time'], self.trip_with_multiple_dates['dates'][1]['start_time'])
-        self.assertEqual(data['dates'][1]['end_time'], self.trip_with_multiple_dates['dates'][1]['end_time'])
+        self.assertEqual(
+            data['dates'][1]['start_time'],
+            self.trip_with_multiple_dates['dates'][1]['start_time']
+        )
+        self.assertEqual(
+            data['dates'][1]['end_time'],
+            self.trip_with_multiple_dates['dates'][1]['end_time']
+        )
 
         response = self.client.patch(
             f'/trips/{trip_id}/dates/{date_id}/select',
@@ -550,7 +577,7 @@ class TripsTestCase(unittest.TestCase):
 
 
         for date in data['trip']['dates']:
-            if date['selected'] == True:
+            if date['selected'] is True:
                 data_date = date
                 break
 
@@ -583,15 +610,27 @@ class TripsTestCase(unittest.TestCase):
         self.assertEqual(data['dates'][0]['id'], 1)
         self.assertEqual(data['dates'][0]['trip_id'], data['id'])
         self.assertEqual(data['dates'][0]['selected'], True)
-        self.assertEqual(data['dates'][0]['start_time'], self.trip_with_multiple_dates_one_selected['dates'][0]['start_time'])
-        self.assertEqual(data['dates'][0]['end_time'], self.trip_with_multiple_dates_one_selected['dates'][0]['end_time'])
+        self.assertEqual(
+            data['dates'][0]['start_time'],
+            self.trip_with_multiple_dates_one_selected['dates'][0]['start_time']
+        )
+        self.assertEqual(
+            data['dates'][0]['end_time'],
+            self.trip_with_multiple_dates_one_selected['dates'][0]['end_time']
+        )
 
         self.assertEqual(data['dates'][1]['owner'], data['owner'])
         self.assertEqual(data['dates'][1]['id'], 2)
         self.assertEqual(data['dates'][1]['trip_id'], data['id'])
         self.assertEqual(data['dates'][1]['selected'], False)
-        self.assertEqual(data['dates'][1]['start_time'], self.trip_with_multiple_dates_one_selected['dates'][1]['start_time'])
-        self.assertEqual(data['dates'][1]['end_time'], self.trip_with_multiple_dates_one_selected['dates'][1]['end_time'])
+        self.assertEqual(
+            data['dates'][1]['start_time'],
+            self.trip_with_multiple_dates_one_selected['dates'][1]['start_time']
+        )
+        self.assertEqual(
+            data['dates'][1]['end_time'],
+            self.trip_with_multiple_dates_one_selected['dates'][1]['end_time']
+        )
 
         response = self.client.patch(
             f'/trips/{trip_id}/dates/{date_id}/select',
@@ -604,10 +643,10 @@ class TripsTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         for date in data['trip']['dates']:
-            if date['selected'] == True:
+            if date['selected'] is True:
                 selected_date = date
                 continue
-            if date['selected'] == False:
+            if date['selected'] is False:
                 unselected_date = date
                 continue
 
@@ -615,14 +654,24 @@ class TripsTestCase(unittest.TestCase):
         self.assertEqual(selected_date['id'], 2)
         self.assertEqual(selected_date['trip_id'], data['trip']['id'])
         self.assertEqual(selected_date['selected'], True)
-        self.assertEqual(selected_date['start_time'], self.trip_with_multiple_dates_one_selected['dates'][1]['start_time'])
-        self.assertEqual(selected_date['end_time'], self.trip_with_multiple_dates_one_selected['dates'][1]['end_time'])
+        self.assertEqual(
+            selected_date['start_time'],
+            self.trip_with_multiple_dates_one_selected['dates'][1]['start_time']
+        )
+        self.assertEqual(
+            selected_date['end_time'],
+            self.trip_with_multiple_dates_one_selected['dates'][1]['end_time']
+        )
 
         self.assertEqual(unselected_date['owner'], data['trip']['owner'])
         self.assertEqual(unselected_date['id'], 1)
         self.assertEqual(unselected_date['trip_id'], data['trip']['id'])
         self.assertEqual(unselected_date['selected'], False)
-        self.assertEqual(unselected_date['start_time'], self.trip_with_multiple_dates_one_selected['dates'][0]['start_time'])
-        self.assertEqual(unselected_date['end_time'], self.trip_with_multiple_dates_one_selected['dates'][0]['end_time'])
- 
-
+        self.assertEqual(
+            unselected_date['start_time'],
+            self.trip_with_multiple_dates_one_selected['dates'][0]['start_time']
+        )
+        self.assertEqual(
+            unselected_date['end_time'],
+            self.trip_with_multiple_dates_one_selected['dates'][0]['end_time']
+        )
