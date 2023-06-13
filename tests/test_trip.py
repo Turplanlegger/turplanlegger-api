@@ -508,10 +508,16 @@ class TripsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
 
-        self.assertEqual(data['dates'][0]['owner'], data['owner'])
-        self.assertEqual(data['dates'][0]['id'], 1)
-        self.assertEqual(data['dates'][0]['trip_id'], data['id'])
-        self.assertEqual(data['dates'][0]['selected'], True)
-        self.assertEqual(data['dates'][0]['start_time'], self.trip_with_multiple_dates['dates'][0]['start_time'])
-        self.assertEqual(data['dates'][0]['end_time'], self.trip_with_multiple_dates['dates'][0]['end_time'])
+
+        for date in data['trip']['dates']:
+            if date['selected'] == True:
+                data_date = date
+                break
+
+        self.assertEqual(data_date['owner'], data['trip']['owner'])
+        self.assertEqual(data_date['id'], 1)
+        self.assertEqual(data_date['trip_id'], data['trip']['id'])
+        self.assertEqual(data_date['selected'], True)
+        self.assertEqual(data_date['start_time'], self.trip_with_multiple_dates['dates'][0]['start_time'])
+        self.assertEqual(data_date['end_time'], self.trip_with_multiple_dates['dates'][0]['end_time'])
 
