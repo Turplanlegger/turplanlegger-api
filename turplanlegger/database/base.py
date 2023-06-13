@@ -420,7 +420,7 @@ class Database:
             RETURNING deleted
         """
         return self._updateone(update, {'id': trip_id}, returning=True)
-
+    
     def change_trip_owner(self, id, owner):
         update = """
             UPDATE trips
@@ -500,16 +500,21 @@ class Database:
             vars(trip_date)
         )
 
-    def select_trip_date(self, date_id, trip_id):
+    def select_trip_date(self, date_id):
+        insert = """
+            UPDATE trip_dates
+                SET selected=true
+                WHERE id = %(date_id)s
+        """
+        return self._updateone(insert, date_id)
+    
+    def unselect_trip_dates(self, trip_id):
         insert = """
             UPDATE trip_dates
                 SET selected=false
-                WHERE id != %(date_id)s AND trip_id = %(trip_id)s;
-            UPDATE trip_dates
-                SET selected=true
-                WHERE id = %(date_id)s AND trip_id = %(trip_id)s;
+                WHERE trip_id = %(trip_id)s
         """
-        return self._updateone(insert, {'date_id': date_id, 'trip_id': trip_id})
+        return self._updateone(insert, trip_id)
 
     def get_trip_date(self, id, deleted=None):
         select = 'SELECT * FROM trip_dates WHERE id = %s'
