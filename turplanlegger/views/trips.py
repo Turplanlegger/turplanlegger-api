@@ -233,8 +233,8 @@ def select_trip_Date(trip_id, trip_date_id):
     except Exception:
         raise ApiProblem(
             'Failed to select trip date',
-            'Failed to delete date',
-            404
+            'Unkown error',
+            500
         )
 
     return jsonify(status='ok')

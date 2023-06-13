@@ -124,6 +124,10 @@ class TripDate:
         Returns True if deleted"""
         return db.delete_trip_date(self.id)
 
+    def select(self) -> None:
+        """Select date to be current"""
+        return db.select_trip_date(self.id, self.trip_id)
+
     @staticmethod
     def find_by_trip_id(trip_id: int) -> ['TripDate']:
         """Looks up trip dates by trip id
