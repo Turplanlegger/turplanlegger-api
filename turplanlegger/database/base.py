@@ -509,11 +509,7 @@ class Database:
                 SET selected=true
                 WHERE id = %(date_id)s AND trip_id = %(trip_id)s;
         """
-        return self._updateone(
-            insert,
-            date_id,
-            trip_id
-        )
+        return self._updateone(insert, {'date_id': date_id, 'trip_id': trip_id})
 
     def get_trip_date(self, id, deleted=None):
         select = 'SELECT * FROM trip_dates WHERE id = %s'
