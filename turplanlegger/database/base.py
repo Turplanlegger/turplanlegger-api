@@ -509,7 +509,7 @@ class Database:
                 SET selected=true
                 WHERE id = %(date_id)s AND trip_id = %(trip_id)s;
         """
-        return self._insert(
+        return self._updateone(
             insert,
             date_id,
             trip_id
