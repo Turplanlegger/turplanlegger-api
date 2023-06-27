@@ -37,7 +37,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "hatch==1.7.0",
-    "pre-commit==3.3.2",
+    "pre-commit==3.3.3",
     "pytest==7.4.0",
     "pytest-csv>=3.0.0",
     "pytest-cov==4.1.0",
