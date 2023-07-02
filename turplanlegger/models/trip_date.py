@@ -23,6 +23,8 @@ class TripDate:
         owner (str): The UUID4 of the owner of the object
         id (int): Optional, the ID of the object
         trip_id (int): The ID of the trip (parent)
+        selected (bool): Flag if the trip_date is the selected date
+                         for the parent.
         start_time (datetime): Datetime object as start date
         end_time (datetime): Datetime object as end date
         create_time (datetime): Time of creation,
@@ -49,6 +51,7 @@ class TripDate:
         self.end_time = end_time
         self.id = kwargs.get('id', None)
         self.trip_id = kwargs.get('trip_id', None)
+        self.selected = kwargs.get('selected', False)
         self.create_time = kwargs.get('create_time', None) or datetime.now()
         self.deleted = kwargs.get('deleted', False)
         self.delete_time = kwargs.get('delete_time', None)
@@ -56,10 +59,10 @@ class TripDate:
     def __repr__(self):
         return (
             'TripDate('
-            f'id: {self.id}, trip_id: {self.trip_id}, owner: {self.owner}, '
-            f'start_time: {self.start_time}, end_time: {self.end_time}, '
-            f'deleted: {self.deleted}, delete_time: {self.delete_time}, '
-            f'create_time: {self.create_time})'
+            f'id: {self.id}, trip_id: {self.trip_id}, selected: {self.selected}',
+            f'owner: {self.owner}, start_time: {self.start_time}, '
+            f'end_time: {self.end_time}, create_time: {self.create_time}, '
+            f'deleted: {self.deleted}, delete_time: {self.delete_time})'
         )
 
     @classmethod
@@ -92,10 +95,11 @@ class TripDate:
             raise ValueError('start_time can not be before end_time')
 
         return TripDate(
-            trip_id=json.get('trip_id', None),
             owner=g.user.id,
             start_time=start_time,
-            end_time=end_time
+            end_time=end_time,
+            trip_id=json.get('trip_id', None),
+            selected=json.get('selected', False)
         )
 
     @property
@@ -103,10 +107,11 @@ class TripDate:
         """Serialize the TripDate instance and returns it as Dict(str, any)"""
         return {
             'id': self.id,
-            'trip_id': self.trip_id,
             'owner': self.owner,
             'start_time': self.start_time.isoformat(),
             'end_time': self.end_time.isoformat(),
+            'trip_id': self.trip_id,
+            'selected': self.selected,
             'create_time': self.create_time
         }
 
@@ -118,6 +123,21 @@ class TripDate:
         """Deletes the TripDate object from the database
         Returns True if deleted"""
         return db.delete_trip_date(self.id)
+
+    def select(self) -> None:
+        """Select date to be current"""
+        return db.select_trip_date(self.id)
+
+    @staticmethod
+    def unselect_by_trip_id(trip_id: int) -> None:
+        """Unselect all dates by trip id
+
+        Args:
+            trip_id (int): id of trip
+
+        Returns: None
+        """
+        return db.unselect_trip_dates(trip_id)
 
     @staticmethod
     def find_by_trip_id(trip_id: int) -> ['TripDate']:
@@ -146,10 +166,11 @@ class TripDate:
 
         return TripDate(
             id=rec.id,
-            trip_id=rec.trip_id,
             owner=rec.owner,
             start_time=rec.start_time,
             end_time=rec.end_time,
+            trip_id=rec.trip_id,
+            selected=rec.selected,
             create_time=rec.create_time,
             deleted=rec.deleted,
             delete_time=rec.delete_time

@@ -27,20 +27,20 @@ classifiers = [
 dependencies = [
     "bcrypt==4.0.1",
     "Flask==2.3.2",
-    "flask-cors==3.0.10",
+    "flask-cors==4.0.0",
     "psycopg==3.1.9",
     "psycopg[pool]==3.1.9",
     "PyJWT==2.7.0",
-    "cryptography==40.0.2",
+    "cryptography==41.0.1",
     "httpx==0.24.1"
 ]
 [project.optional-dependencies]
 dev = [
     "hatch==1.7.0",
-    "pre-commit==3.3.2",
-    "pytest==7.3.1",
+    "pre-commit==3.3.3",
+    "pytest==7.4.0",
     "pytest-csv>=3.0.0",
-    "pytest-cov==4.0.0",
+    "pytest-cov==4.1.0",
     "wheel==0.38.4",
     "ruff==v0.0.269"
 ]

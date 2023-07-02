@@ -89,6 +89,20 @@ class TripsTestCase(unittest.TestCase):
                 }
             ]
         }
+        cls.trip_with_multiple_dates_one_selected = {
+            'name': 'trippin pete',
+            'dates': [
+                {
+                    'start_time': datetime.now().isoformat(),
+                    'end_time': (datetime.now() + timedelta(minutes=10)).isoformat(),
+                    'selected': True
+                },
+                {
+                    'start_time': (datetime.now() + timedelta(days=5)).isoformat(),
+                    'end_time': (datetime.now() + timedelta(days=8)).isoformat()
+                }
+            ]
+        }
         cls.trip_with_invalid_date = {
             'name': 'no trip for u',
             'dates': [
@@ -328,17 +342,55 @@ class TripsTestCase(unittest.TestCase):
 
         self.assertEqual(data['dates'][0]['owner'], data['owner'])
         self.assertEqual(data['dates'][0]['id'], 1)
-        self.assertEqual(data['dates'][0]['trip_id'], 1)
         self.assertEqual(data['dates'][0]['trip_id'], data['id'])
         self.assertEqual(data['dates'][0]['start_time'], self.trip_with_multiple_dates['dates'][0]['start_time'])
         self.assertEqual(data['dates'][0]['end_time'], self.trip_with_multiple_dates['dates'][0]['end_time'])
 
         self.assertEqual(data['dates'][1]['owner'], data['owner'])
         self.assertEqual(data['dates'][1]['id'], 2)
-        self.assertEqual(data['dates'][1]['trip_id'], 1)
         self.assertEqual(data['dates'][1]['trip_id'], data['id'])
         self.assertEqual(data['dates'][1]['start_time'], self.trip_with_multiple_dates['dates'][1]['start_time'])
         self.assertEqual(data['dates'][1]['end_time'], self.trip_with_multiple_dates['dates'][1]['end_time'])
+
+    def test_create_trip_with_multiple_dates_one_selected(self):
+        response = self.client.post(
+            '/trips',
+            data=json.dumps(self.trip_with_multiple_dates_one_selected),
+            headers=self.headers_json
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertIsInstance(data['id'], int)
+        self.assertEqual(data['owner'], self.user1.id)
+        self.assertEqual(data['name'], self.trip_with_multiple_dates_one_selected['name'])
+
+        self.assertEqual(data['dates'][0]['owner'], data['owner'])
+        self.assertEqual(data['dates'][0]['id'], 1)
+        self.assertEqual(data['dates'][0]['trip_id'], data['id'])
+        self.assertEqual(data['dates'][0]['selected'], True)
+        self.assertEqual(
+            data['dates'][0]['start_time'],
+            self.trip_with_multiple_dates_one_selected['dates'][0]['start_time']
+        )
+        self.assertEqual(
+            data['dates'][0]['end_time'],
+            self.trip_with_multiple_dates_one_selected['dates'][0]['end_time']
+        )
+
+        self.assertEqual(data['dates'][1]['owner'], data['owner'])
+        self.assertEqual(data['dates'][1]['id'], 2)
+        self.assertEqual(data['dates'][1]['trip_id'], data['id'])
+        self.assertEqual(data['dates'][1]['selected'], False)
+        self.assertEqual(
+            data['dates'][1]['start_time'],
+            self.trip_with_multiple_dates_one_selected['dates'][1]['start_time']
+        )
+        self.assertEqual(
+            data['dates'][1]['end_time'],
+            self.trip_with_multiple_dates_one_selected['dates'][1]['end_time']
+        )
 
     def test_create_trip_with_invalid_date(self):
         response = self.client.post(
@@ -442,7 +494,6 @@ class TripsTestCase(unittest.TestCase):
         )
 
         data = json.loads(response.data.decode('utf-8'))
-        print(data)
         self.assertEqual(response.status_code, 200)
 
         response = self.client.get(
@@ -464,5 +515,163 @@ class TripsTestCase(unittest.TestCase):
             data['trip']['dates'][0]['start_time'],
             self.trip_with_multiple_dates['dates'][1]['start_time']
         )
-        self.assertEqual(data['trip']['dates'][0]['end_time'], self.trip_with_multiple_dates['dates'][1]['end_time'])
+        self.assertEqual(
+            data['trip']['dates'][0]['end_time'],
+            self.trip_with_multiple_dates['dates'][1]['end_time']
+        )
         self.assertEqual(data['trip']['owner'], self.user1.id)
+
+    def test_select_trip_date(self):
+        response = self.client.post(
+            '/trips',
+            data=json.dumps(self.trip_with_multiple_dates),
+            headers=self.headers_json
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        data = json.loads(response.data.decode('utf-8'))
+        trip_id = data['id']
+        date_id = data['dates'][0]['id']
+
+
+        self.assertIsInstance(data['id'], int)
+        self.assertEqual(data['owner'], self.user1.id)
+        self.assertEqual(data['name'], self.trip_with_multiple_dates['name'])
+
+        self.assertEqual(data['dates'][0]['owner'], data['owner'])
+        self.assertEqual(data['dates'][0]['id'], 1)
+        self.assertEqual(data['dates'][0]['trip_id'], data['id'])
+        self.assertEqual(data['dates'][0]['selected'], False)
+        self.assertEqual(
+            data['dates'][0]['start_time'],
+            self.trip_with_multiple_dates['dates'][0]['start_time']
+        )
+        self.assertEqual(
+            data['dates'][0]['end_time'],
+            self.trip_with_multiple_dates['dates'][0]['end_time']
+        )
+
+        self.assertEqual(data['dates'][1]['owner'], data['owner'])
+        self.assertEqual(data['dates'][1]['id'], 2)
+        self.assertEqual(data['dates'][1]['trip_id'], data['id'])
+        self.assertEqual(data['dates'][0]['selected'], False)
+        self.assertEqual(
+            data['dates'][1]['start_time'],
+            self.trip_with_multiple_dates['dates'][1]['start_time']
+        )
+        self.assertEqual(
+            data['dates'][1]['end_time'],
+            self.trip_with_multiple_dates['dates'][1]['end_time']
+        )
+
+        response = self.client.patch(
+            f'/trips/{trip_id}/dates/{date_id}/select',
+            headers=self.headers
+        )
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(f'/trips/{trip_id}', headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+
+        for date in data['trip']['dates']:
+            if date['selected'] is True:
+                data_date = date
+                break
+
+        self.assertEqual(data_date['owner'], data['trip']['owner'])
+        self.assertEqual(data_date['id'], 1)
+        self.assertEqual(data_date['trip_id'], data['trip']['id'])
+        self.assertEqual(data_date['selected'], True)
+        self.assertEqual(data_date['start_time'], self.trip_with_multiple_dates['dates'][0]['start_time'])
+        self.assertEqual(data_date['end_time'], self.trip_with_multiple_dates['dates'][0]['end_time'])
+
+    def test_create_with_selected_select_new_trip_date(self):
+        response = self.client.post(
+            '/trips',
+            data=json.dumps(self.trip_with_multiple_dates_one_selected),
+            headers=self.headers_json
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        data = json.loads(response.data.decode('utf-8'))
+        trip_id = data['id']
+        date_id = data['dates'][1]['id']
+
+
+        self.assertIsInstance(data['id'], int)
+        self.assertEqual(data['owner'], self.user1.id)
+        self.assertEqual(data['name'], self.trip_with_multiple_dates_one_selected['name'])
+
+        self.assertEqual(data['dates'][0]['owner'], data['owner'])
+        self.assertEqual(data['dates'][0]['id'], 1)
+        self.assertEqual(data['dates'][0]['trip_id'], data['id'])
+        self.assertEqual(data['dates'][0]['selected'], True)
+        self.assertEqual(
+            data['dates'][0]['start_time'],
+            self.trip_with_multiple_dates_one_selected['dates'][0]['start_time']
+        )
+        self.assertEqual(
+            data['dates'][0]['end_time'],
+            self.trip_with_multiple_dates_one_selected['dates'][0]['end_time']
+        )
+
+        self.assertEqual(data['dates'][1]['owner'], data['owner'])
+        self.assertEqual(data['dates'][1]['id'], 2)
+        self.assertEqual(data['dates'][1]['trip_id'], data['id'])
+        self.assertEqual(data['dates'][1]['selected'], False)
+        self.assertEqual(
+            data['dates'][1]['start_time'],
+            self.trip_with_multiple_dates_one_selected['dates'][1]['start_time']
+        )
+        self.assertEqual(
+            data['dates'][1]['end_time'],
+            self.trip_with_multiple_dates_one_selected['dates'][1]['end_time']
+        )
+
+        response = self.client.patch(
+            f'/trips/{trip_id}/dates/{date_id}/select',
+            headers=self.headers
+        )
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(f'/trips/{trip_id}', headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        for date in data['trip']['dates']:
+            if date['selected'] is True:
+                selected_date = date
+                continue
+            if date['selected'] is False:
+                unselected_date = date
+                continue
+
+        self.assertEqual(selected_date['owner'], data['trip']['owner'])
+        self.assertEqual(selected_date['id'], 2)
+        self.assertEqual(selected_date['trip_id'], data['trip']['id'])
+        self.assertEqual(selected_date['selected'], True)
+        self.assertEqual(
+            selected_date['start_time'],
+            self.trip_with_multiple_dates_one_selected['dates'][1]['start_time']
+        )
+        self.assertEqual(
+            selected_date['end_time'],
+            self.trip_with_multiple_dates_one_selected['dates'][1]['end_time']
+        )
+
+        self.assertEqual(unselected_date['owner'], data['trip']['owner'])
+        self.assertEqual(unselected_date['id'], 1)
+        self.assertEqual(unselected_date['trip_id'], data['trip']['id'])
+        self.assertEqual(unselected_date['selected'], False)
+        self.assertEqual(
+            unselected_date['start_time'],
+            self.trip_with_multiple_dates_one_selected['dates'][0]['start_time']
+        )
+        self.assertEqual(
+            unselected_date['end_time'],
+            self.trip_with_multiple_dates_one_selected['dates'][0]['end_time']
+        )
