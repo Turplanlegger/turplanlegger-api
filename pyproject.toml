@@ -28,10 +28,10 @@ dependencies = [
     "bcrypt==4.0.1",
     "Flask==2.3.2",
     "flask-cors==4.0.0",
-    "psycopg==3.1.9",
-    "psycopg[pool]==3.1.9",
-    "PyJWT==2.7.0",
-    "cryptography==41.0.1",
+    "psycopg==3.1.10",
+    "psycopg[pool]==3.1.10",
+    "PyJWT==2.8.0",
+    "cryptography==41.0.3",
     "httpx==0.24.1"
 ]
 [project.optional-dependencies]
@@ -41,12 +41,12 @@ dev = [
     "pytest==7.4.0",
     "pytest-csv>=3.0.0",
     "pytest-cov==4.1.0",
-    "wheel==0.38.4",
+    "wheel==0.41.1",
     "ruff==v0.0.269"
 ]
 prod = [
-    "uwsgi==2.0.21",
-    "psycopg[c]==3.1.9"
+    "uwsgi==2.0.22",
+    "psycopg[c]==3.1.10"
 ]
 
 [project.urls]
