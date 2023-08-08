@@ -71,6 +71,7 @@ class Database:
         with self.conn.cursor() as cur:
             for table in [
                 'trips',
+                'trip_dates',
                 'item_lists',
                 'lists_items',
                 'users',
