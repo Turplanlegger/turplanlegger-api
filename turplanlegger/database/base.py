@@ -1,8 +1,7 @@
+import psycopg
 import time
 
 from psycopg.rows import namedtuple_row
-from psycopg_pool import ConnectionPool
-
 
 class Database:
     def __init__(self, app=None):
@@ -15,22 +14,16 @@ class Database:
         self.uri = app.config.get('DATABASE_URI')
         self.dbname = app.config.get('DATABASE_NAME')
         self.max_retries = app.config.get('DATABASE_MAX_RETRIES', 5)
-        self.min_pool_size = app.config.get('DATABASE_MIN_POOL_SIZE', 2)
-        self.max_pool_size = app.config.get('DATABASE_MAX_POOL_SIZE', 10)
         self.timeout = app.config.get('DATABASE_TIMEOUT', 10)
-        self.max_waiting = app.config.get('DATABASE_MAX_WAITING', 0)
-        self.max_lifetime = app.config.get('DATABASE_MAX_LIFETIME', 1800)
-        self.max_idle = app.config.get('DATABASE_MAX_IDLE', 300)
-        self.reconnect_timeout = app.config.get('DATABASE_RECONNECT_TIMEOUT', 90)
-        self.connection_test_timeout = app.config.get('DATABASE_CONNECTION_TEST_TIMEOUT', 1)
 
-        self.pool = self.connect()
-        self.logger.debug('Database pool opened')
 
-        with app.open_resource('database/schema.sql') as f:
+        self.conn = self.connect()
+        self.logger.debug('Database conn opened')
+
+        with app.open_resource('database/schema.sql') as schema:
             try:
-                with self.pool.connection() as conn:
-                    conn.cursor().execute(f.read())
+                with self.conn.cursor() as cur:
+                    cur.execute(schema.read())
             except Exception as e:
                 self.logger.exception(e)
                 raise
@@ -48,38 +41,25 @@ class Database:
         retry = 0
         while True:
             try:
-                pool = ConnectionPool(
+                conn = psycopg.connect(
                     conninfo=self.uri,
-                    min_size=self.min_pool_size,
-                    max_size=self.max_pool_size,
-                    timeout=self.timeout,
-                    max_waiting=self.max_waiting,
-                    max_lifetime=self.max_lifetime,
-                    max_idle=self.max_idle,
-                    reconnect_timeout=self.reconnect_timeout,
-                    kwargs={
-                        'dbname': self.dbname,
-                        'client_encoding': 'UTF8',
-                        'row_factory': namedtuple_row
-                    }
+                    client_encoding='UTF8',
+                    cursor_factory=psycopg.ClientCursor,
+                    row_factory=namedtuple_row
                 )
-
-                # Test that we are able to connect to database
-                with pool.connection(timeout=self.connection_test_timeout):
-                    self.logger.debug('Testing database connection')
                 break
             except Exception as e:
                 self.logger.exception(str(e))
                 retry += 1
                 if retry > self.max_retries:
-                    pool = None
+                    conn = None
                     break
                 else:
                     backoff = 2 ** retry
                     self.logger.warning(f'Retry attempt {retry}/{self.max_retries} (wait={backoff}s)...')
                     time.sleep(backoff)
-        if pool:
-            return pool
+        if conn:
+            return conn
         else:
             raise RuntimeError('Database connect error. Failed to connect'
                                f' after {self.max_retries} retries.')
@@ -88,8 +68,7 @@ class Database:
         db.close()
 
     def destroy(self):
-        with self.pool.connection() as conn:
-            cursor = conn.cursor()
+        with self.conn.cursor() as cur:
             for table in [
                 'trips',
                 'item_lists',
@@ -101,12 +80,11 @@ class Database:
                 'trips_routes_references',
                 'trips_item_lists_references'
             ]:
-                cursor.execute(f'DROP TABLE IF EXISTS {table} CASCADE')
+                cur.execute(f'DROP TABLE IF EXISTS {table} CASCADE')
 
     def truncate_table(self, table: str):
-        with self.pool.connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute(f'TRUNCATE TABLE {table} RESTART IDENTITY CASCADE')
+        with self.conn.cursor() as cur:
+            cur.execute(f'TRUNCATE TABLE {table} RESTART IDENTITY CASCADE')
 
     # Item List
 
@@ -554,55 +532,49 @@ class Database:
         """
         Insert, with return.
         """
-        with self.pool.connection() as conn:
-            cursor = conn.cursor()
-            # self._log(cursor, '_insert', query, vars)
-            cursor.execute(query, vars)
-            return cursor.fetchone()
+        with self.conn.cursor() as cur:
+            self._log(cur, "_insert", query, vars)
+            cur.execute(query, vars)
+            return cur.fetchone()
 
     def _fetchone(self, query, vars):
         """
         Return none or one row.
         """
-        with self.pool.connection() as conn:
-            cursor = conn.cursor()
-            # self._log(cursor, '_fetchone', query, vars)
-            cursor.execute(query, vars)
+        with self.conn.cursor() as cur:
+            self._log(cur, "_fetchone", query, vars)
+            cur.execute(query, vars)
 
-            return cursor.fetchone()
+            return cur.fetchone()
 
     def _fetchall(self, query, vars):
         """
         Return none or multiple row.
         """
-        with self.pool.connection() as conn:
-            cursor = conn.cursor()
-            # self._log(cursor, '_fetchall', query, vars)
-            cursor.execute(query, vars)
-            return cursor.fetchall()
+        with self.conn.cursor() as cur:
+            self._log(cur, "_fetchall", query, vars)
+            cur.execute(query, vars)
+            return cur.fetchall()
 
     def _updateone(self, query, vars, returning=False):
         """
         Update, with optional return.
         """
-        with self.pool.connection() as conn:
-            cursor = conn.cursor()
-            # self._log(cursor, '-updateone', query, vars)
-            cursor.execute(query, vars)
-            return cursor.fetchone() if returning else None
+        with self.conn.cursor() as cur:
+            self._log(cur, "_updateone", query, vars)
+            cur.execute(query, vars)
+            return cur.fetchone() if returning else None
 
     def _deleteone(self, query, vars, returning=False):
         """
         Delete, with optional return.
         """
-        with self.pool.connection() as conn:
-            cursor = conn.cursor()
-            # self._log(cursor, '_deleteone', query, vars)
-            cursor.execute(query, vars)
+        with self.con.cursor() as cur:
+            self._log(cur, "_updateone", query, vars)
+            cur.execute(query, vars)
 
-            return cursor.fetchone() if returning else None
+            return cur.fetchone() if returning else None
 
-    def _log(self, cursor, query, vars):
-        # self.logger.debug('{stars}\n{query}\n{stars}'.format(
-        #     stars='*' * 40, query=cursor.mogrify(query, vars).decode('utf-8')))
-        return False
+    def _log(self, cursor, func_name, query, vars):
+        self.logger.debug('\n{stars} {func_name} {stars}\n{query}'.format(
+            stars='*' * 20,func_name=func_name, query=cursor.mogrify(query, vars)))
