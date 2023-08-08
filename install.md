@@ -49,4 +49,3 @@ docker compose -f docker-compose.dev.yml --env-file env-dev up -d
 docker run -e POSTGRES_USER=turadm -e POSTGRES_PASSWORD=passord -e POSTGRES_DB=turplanlegger -p 5432:5432 -d postgres:15-alpine
 ```
 Connect using string: `postgresql://turadm:passord@localhost:5432/turplanlegger?connect_timeout=10&application_name=turplanlegger-api`
-
