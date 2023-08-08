@@ -48,14 +48,6 @@ class Config:
         self.config['DATABASE_URI'] = self.conf_ent('DATABASE_URI', str)
         self.config['DATABASE_NAME'] = self.conf_ent('DATABASE_NAME', str, 'turplanlegger')
         self.config['DATABASE_MAX_RETRIES'] = self.conf_ent('DATABASE_MAX_RETRIES', int, 5)
-        self.config['DATABASE_MIN_POOL_SIZE'] = self.conf_ent('DATABASE_MIN_POOL_SIZE', int, 2)
-        self.config['DATABASE_MAX_POOL_SIZE'] = self.conf_ent('DATABASE_MAX_POOL_SIZE', int, 10)
-        self.config['DATABASE_TIMEOUT'] = self.conf_ent('DATABASE_TIMEOUT', int, 10)
-        self.config['DATABASE_MAX_WAITING'] = self.conf_ent('DATABASE_MAX_WAITING', int, 0)
-        self.config['DATABASE_MAX_LIFETIME'] = self.conf_ent('DATABASE_MAX_LIFETIME', int, 1800)
-        self.config['DATABASE_MAX_IDLE'] = self.conf_ent('DATABASE_MAX_IDLE', int, 300)
-        self.config['DATABASE_RECONNECT_TIMEOUT'] = self.conf_ent('DATABASE_RECONNECT_TIMEOUT', int, 90)
-        self.config['DATABASE_CONNECTION_TEST_TIMEOUT'] = self.conf_ent('DATABASE_CONNECTION_TEST_TIMEOUT', int, 1)
 
         # Logging
         self.config['LOG_LEVEL'] = self.conf_ent('LOG_LEVEL', str, 'INFO')
