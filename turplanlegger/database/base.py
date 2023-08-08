@@ -80,11 +80,11 @@ class Database:
                 'trips_routes_references',
                 'trips_item_lists_references'
             ]:
-                cur.execute(f'DROP TABLE IF EXISTS {table} CASCADE')
+                cur.execute(psycopg.sql.SQL('DROP TABLE IF EXISTS {} CASCADE'.format(table)))
 
     def truncate_table(self, table: str):
         with self.conn.cursor() as cur:
-            cur.execute(f'TRUNCATE TABLE {table} RESTART IDENTITY CASCADE')
+            cur.execute(psycopg.sql.SQL('TRUNCATE TABLE {} RESTART IDENTITY CASCADE'.format(table)))
 
     # Item List
 
