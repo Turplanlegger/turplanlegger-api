@@ -1,7 +1,8 @@
-import psycopg
 import time
 
+import psycopg
 from psycopg.rows import namedtuple_row
+
 
 class Database:
     def __init__(self, app=None):
@@ -59,7 +60,7 @@ class Database:
                     self.logger.warning(f'Retry attempt {retry}/{self.max_retries} (wait={backoff}s)...')
                     time.sleep(backoff)
         if conn:
-            return conn  
+            return conn
         else:
             raise RuntimeError('Database connect error. Failed to connect'
                                f' after {self.max_retries} retries.')
@@ -533,7 +534,7 @@ class Database:
         """
         Insert, with return.
         """
-        self._log("_insert", query, vars)
+        self._log('_insert', query, vars)
         with self.conn.transaction():
             self.cur.execute(query, vars)
             return self.cur.fetchone()
@@ -542,7 +543,7 @@ class Database:
         """
         Return none or one row.
         """
-        self._log("_fetchone", query, vars)
+        self._log('_fetchone', query, vars)
         with self.conn.transaction():
             self.cur.execute(query, vars)
             return self.cur.fetchone()
@@ -551,7 +552,7 @@ class Database:
         """
         Return none or multiple row.
         """
-        self._log("_fetchall", query, vars)
+        self._log('_fetchall', query, vars)
         with self.conn.transaction():
             self.cur.execute(query, vars)
             return self.cur.fetchall()
@@ -560,7 +561,7 @@ class Database:
         """
         Update, with optional return.
         """
-        self._log("_updateone", query, vars)
+        self._log('_updateone', query, vars)
         with self.conn.transaction():
             self.cur.execute(query, vars)
             return self.cur.fetchone() if returning else None
@@ -569,7 +570,7 @@ class Database:
         """
         Delete, with optional return.
         """
-        self._log("_updateone", query, vars)
+        self._log('_updateone', query, vars)
         with self.conn.transaction():
             self.cur.execute(query, vars)
             return self.cur.fetchone() if returning else None
