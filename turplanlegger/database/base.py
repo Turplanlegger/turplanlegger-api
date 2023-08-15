@@ -16,14 +16,14 @@ class Database:
         self.max_retries = app.config.get('DATABASE_MAX_RETRIES', 5)
         self.timeout = app.config.get('DATABASE_TIMEOUT', 10)
 
-
         self.conn = self.connect()
-        self.logger.debug('Database conn opened')
+        self.cur = self.conn.cursor()
+        self.logger.debug('Database connection opened')
 
         with app.open_resource('database/schema.sql') as schema:
             try:
-                with self.conn.cursor() as cur:
-                    cur.execute(schema.read())
+                with self.conn.transaction():
+                    self.cur.execute(schema.read())
             except Exception as e:
                 self.logger.exception(e)
                 raise
@@ -45,7 +45,8 @@ class Database:
                     conninfo=self.uri,
                     client_encoding='UTF8',
                     cursor_factory=psycopg.ClientCursor,
-                    row_factory=namedtuple_row
+                    row_factory=namedtuple_row,
+                    autocommit=True
                 )
                 break
             except Exception as e:
@@ -59,7 +60,7 @@ class Database:
                     self.logger.warning(f'Retry attempt {retry}/{self.max_retries} (wait={backoff}s)...')
                     time.sleep(backoff)
         if conn:
-            return conn
+            return conn  
         else:
             raise RuntimeError('Database connect error. Failed to connect'
                                f' after {self.max_retries} retries.')
