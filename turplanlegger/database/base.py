@@ -12,7 +12,6 @@ class Database:
     def init_db(self, app):
         self.logger = app.logger
         self.uri = app.config.get('DATABASE_URI')
-        self.dbname = app.config.get('DATABASE_NAME')
         self.max_retries = app.config.get('DATABASE_MAX_RETRIES', 5)
         self.timeout = app.config.get('DATABASE_TIMEOUT', 10)
 

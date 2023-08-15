@@ -46,7 +46,6 @@ class Config:
 
         # Database
         self.config['DATABASE_URI'] = self.conf_ent('DATABASE_URI', str)
-        self.config['DATABASE_NAME'] = self.conf_ent('DATABASE_NAME', str, 'turplanlegger')
         self.config['DATABASE_MAX_RETRIES'] = self.conf_ent('DATABASE_MAX_RETRIES', int, 5)
 
         # Logging
