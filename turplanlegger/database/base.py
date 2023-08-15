@@ -534,49 +534,47 @@ class Database:
         """
         Insert, with return.
         """
-        with self.conn.cursor() as cur:
-            self._log(cur, "_insert", query, vars)
-            cur.execute(query, vars)
-            return cur.fetchone()
+        self._log("_insert", query, vars)
+        with self.conn.transaction():
+            self.cur.execute(query, vars)
+            return selfcur.fetchone()
 
     def _fetchone(self, query, vars):
         """
         Return none or one row.
         """
-        with self.conn.cursor() as cur:
-            self._log(cur, "_fetchone", query, vars)
-            cur.execute(query, vars)
-
-            return cur.fetchone()
+        self._log("_fetchone", query, vars)
+        with self.conn.transaction():
+            self.cur.execute(query, vars)
+            return self.cur.fetchone()
 
     def _fetchall(self, query, vars):
         """
         Return none or multiple row.
         """
-        with self.conn.cursor() as cur:
-            self._log(cur, "_fetchall", query, vars)
-            cur.execute(query, vars)
-            return cur.fetchall()
+        self._log("_fetchall", query, vars)
+        with self.conn.transaction():
+            self.cur.execute(query, vars)
+            return self.cur.fetchall()
 
     def _updateone(self, query, vars, returning=False):
         """
         Update, with optional return.
         """
-        with self.conn.cursor() as cur:
-            self._log(cur, "_updateone", query, vars)
-            cur.execute(query, vars)
-            return cur.fetchone() if returning else None
+        self._log("_updateone", query, vars)
+        with self.conn.transaction():
+            self.cur.execute(query, vars)
+            return self.cur.fetchone() if returning else None
 
     def _deleteone(self, query, vars, returning=False):
         """
         Delete, with optional return.
         """
-        with self.con.cursor() as cur:
-            self._log(cur, "_updateone", query, vars)
-            cur.execute(query, vars)
+        self._log("_updateone", query, vars)
+        with self.conn.transaction():
+            self.cur.execute(query, vars)
+            return self.cur.fetchone() if returning else None
 
-            return cur.fetchone() if returning else None
-
-    def _log(self, cursor, func_name, query, vars):
+    def _log(self, func_name, query, vars):
         self.logger.debug('\n{stars} {func_name} {stars}\n{query}'.format(
-            stars='*' * 20,func_name=func_name, query=cursor.mogrify(query, vars)))
+            stars='*' * 20,func_name=func_name, query=self.cur.mogrify(query, vars)))
