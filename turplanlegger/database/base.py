@@ -69,7 +69,7 @@ class Database:
         db.close()
 
     def destroy(self):
-        with self.conn.cursor() as cur:
+        with self.conn.transaction():
             for table in [
                 'trips',
                 'trip_dates',
@@ -82,11 +82,11 @@ class Database:
                 'trips_routes_references',
                 'trips_item_lists_references'
             ]:
-                cur.execute(psycopg.sql.SQL('DROP TABLE IF EXISTS {} CASCADE'.format(table)))
+                self.cur.execute(psycopg.sql.SQL('DROP TABLE IF EXISTS {} CASCADE'.format(table)))
 
     def truncate_table(self, table: str):
-        with self.conn.cursor() as cur:
-            cur.execute(psycopg.sql.SQL('TRUNCATE TABLE {} RESTART IDENTITY CASCADE'.format(table)))
+        with self.conn.transaction():
+            self.cur.execute(psycopg.sql.SQL('TRUNCATE TABLE {} RESTART IDENTITY CASCADE'.format(table)))
 
     # Item List
 
