@@ -6,7 +6,6 @@ services:
       context: .
     environment:
     - TP_DATABASE_URI=${TP_DATABASE_URI:-postgresql://turadm:passord@turplanlegger-dev-db:5432/turplanlegger?connect_timeout=10&application_name=turplanlegger-api}
-    - TP_DATABASE_NAME=${TP_DATABASE_NAME:-turplanlegger}
     - TP_DATABASE_MAX_RETRIES=${TP_DATABASE_MAX_RETRIES:-2}
     - TP_LOG_LEVEL=${TP_LOG_LEVEL:-DEBUG}
     - TP_CREATE_ADMIN_USER=${TP_CREATE_ADMIN_USER:-0}
