@@ -537,7 +537,7 @@ class Database:
         self._log("_insert", query, vars)
         with self.conn.transaction():
             self.cur.execute(query, vars)
-            return selfcur.fetchone()
+            return self.cur.fetchone()
 
     def _fetchone(self, query, vars):
         """
