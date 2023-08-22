@@ -22,13 +22,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Get tags from repository
-        id: current_tag
-        #run: git tag --list | sort -V | grep -v latest | head -n 1
-        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      # - name: Get tags from repository
+      #   id: current_tag
+      #   #run: git tag --list | sort -V | grep -v latest | head -n 1
+      #   run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
       - name: Get repo version 
         id: new_tag
-        run: echo "VERSION=$(cat turplanlegger/__about__.py | cut -d'=' -f2)" >> "$GITHUB_ENV"
+        run: echo "NEW_VERSION=$(cat turplanlegger/__about__.py | cut -d'=' -f2)" >> "$GITHUB_ENV"
       - name: Check if tag exists and get sha
         id: current_sha
         run: echo "SHA_VERSION=$(git rev-parse $VERSION)" >> $GITHUB_ENV
@@ -36,9 +36,7 @@ jobs:
         id: echo_variables
         run: |
           echo $VERSION
-          echo $NEW_VERSION
           echo $SHA_VERSION
-          echo $RELEASE_VERSION
 
       # version=$(git tag --list $VERSION | grep -q $VERSION)
       # - name: Checkout repository
