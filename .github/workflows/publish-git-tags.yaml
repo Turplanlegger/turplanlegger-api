@@ -19,9 +19,11 @@ jobs:
       packages: write
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
       - name: Get tags from repository
         id: current_tag
-        uses: actions/checkout@v3
         #run: git tag --list | sort -V | grep -v latest | head -n 1
         run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
       - name: Get repo version 
