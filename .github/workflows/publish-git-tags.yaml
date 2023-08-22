@@ -55,11 +55,18 @@ jobs:
       - name: Create new tag
         id: create_tag
         run: |
+          git config --global user.email "$TURPLANLEGGER_BOT_EMAIL"
+          git config --global user.name "Turplanlegger Bot"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
           git tag -am "Release v$NEW_VERSION" $NEW_VERSION
           git push --tags
+      
       - name: Update latest tag
         id: update_latest
         run: |
+          git config --global user.email "$TURPLANLEGGER_BOT_EMAIL"
+          git config --global user.name "Turplanlegger Bot"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
           git tag -f -am "Release v$NEW_VERSION" latest
           git push --tags
 
