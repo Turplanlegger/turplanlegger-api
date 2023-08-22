@@ -27,9 +27,9 @@ jobs:
       - name: Login for bot
         id: Login
         run: |
-          git config --global user.email "$TURPLANLEGGER_BOT_EMAIL"
+          git config --global user.email "$secrets.TURPLANLEGGER_BOT_EMAIL"
           git config --global user.name "Turplanlegger Bot"
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
+          git remote set-url origin https://x-access-token:${{ secrets.DEPLOY_TOKEN }}@github.com/$GITHUB_REPOSITORY
       
       - name: Get tags
         run: git fetch --tags origin
@@ -55,18 +55,18 @@ jobs:
       - name: Create new tag
         id: create_tag
         run: |
-          git config --global user.email "$TURPLANLEGGER_BOT_EMAIL"
+          git config --global user.email "$secrets.TURPLANLEGGER_BOT_EMAIL"
           git config --global user.name "Turplanlegger Bot"
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
+          git remote set-url origin https://x-access-token:${{ secrets.DEPLOY_TOKEN }}@github.com/$GITHUB_REPOSITORY
           git tag -am "Release v$NEW_VERSION" $NEW_VERSION
           git push --tags
       
       - name: Update latest tag
         id: update_latest
         run: |
-          git config --global user.email "$TURPLANLEGGER_BOT_EMAIL"
+          git config --global user.email "$secrets.TURPLANLEGGER_BOT_EMAIL"
           git config --global user.name "Turplanlegger Bot"
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
+          git remote set-url origin https://x-access-token:${{ secrets.DEPLOY_TOKEN }}@github.com/$GITHUB_REPOSITORY
           git tag -f -am "Release v$NEW_VERSION" latest
           git push --tags
 
@@ -79,7 +79,7 @@ jobs:
       #   with:
       #     registry: ${{ env.REGISTRY }}
       #     username: ${{ github.actor }}
-      #     password: ${{ secrets.GITHUB_TOKEN }}
+      #     password: ${{ secrets.DEPLOY_TOKEN }}
 
       # - name: Extract metadata (tags, labels) for Docker
       #   id: meta
