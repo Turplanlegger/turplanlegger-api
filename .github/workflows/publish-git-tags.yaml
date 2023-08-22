@@ -33,13 +33,14 @@ jobs:
           echo "$VERSION=$NEW_VERSION" >> GITHUB_VERSION
       - name: Check if tag exists and get sha
         id: current_sha
-        run: SHA_VERSION=$(git rev-parse $VERSION) >> $GITHUB_ENV
+        run: echo "SHA_VERSION=$(git rev-parse $VERSION)" >> $GITHUB_ENV
       - name: Print variables
         id: echo_variables
         run: |
           echo $VERSION
           echo $NEW_VERSION
           echo $SHA_VERSION
+          echo $RELEASE_VERSION
 
       # version=$(git tag --list $VERSION | grep -q $VERSION)
       # - name: Checkout repository
