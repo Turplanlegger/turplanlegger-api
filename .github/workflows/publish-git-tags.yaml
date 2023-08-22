@@ -20,10 +20,11 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3.5
         with:
           fetch-depth: 0
-          fetch-tags: true
+      - name: Get tags
+        run: git fetch --tags origin
 
       - name: debug git tag --list
         run: echo "tags=$(git tag --list)"
