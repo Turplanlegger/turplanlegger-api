@@ -21,7 +21,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        
+
       - name: Get tags from repository
         id: current_tag
         #run: git tag --list | sort -V | grep -v latest | head -n 1
@@ -33,11 +33,13 @@ jobs:
           echo "$VERSION=$NEW_VERSION" >> GITHUB_VERSION
       - name: Check if tag exists and get sha
         id: current_sha
-        run: sha_version=$(git rev-parse $VERSION) >> $GITHUB_ENV
+        run: SHA_VERSION=$(git rev-parse $VERSION) >> $GITHUB_ENV
       - name: Print variables
         id: echo_variables
         run: |
-          echo  ${{ steps.current_tag.outputs.tag }}
+          echo $VERSION
+          echo $NEW_VERSION
+          echo $SHA_VERSION
 
       # version=$(git tag --list $VERSION | grep -q $VERSION)
       # - name: Checkout repository
