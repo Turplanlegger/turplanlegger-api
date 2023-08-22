@@ -1,0 +1,63 @@
+name: Create and publish a Github tag
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - ci/*
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  check-and-publish-new-tags:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Get tags from repository
+        id: current_tag
+        uses: actions/checkout@v3
+        #run: git tag --list | sort -V | grep -v latest | head -n 1
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      - name: Get repo version 
+        id: new_tag
+        run: |
+          NEW_VERSION=$(cat turplanlegger/__about__.py | cut -d'=' -f2)
+          echo "$VERSION=$NEW_VERSION" >> GITHUB_VERSION
+      - name: Check if tag exists and get sha
+        id: current_sha
+        run: sha_version=$(git rev-parse $VERSION) >> $GITHUB_ENV
+      - name: Print variables
+        id: echo_variables
+        run: |
+          echo  ${{ steps.current_tag.outputs.tag }}
+
+      # version=$(git tag --list $VERSION | grep -q $VERSION)
+      # - name: Checkout repository
+      #   uses: actions/checkout@v3
+
+      # - name: Log in to the Container registry
+      #   uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc
+      #   with:
+      #     registry: ${{ env.REGISTRY }}
+      #     username: ${{ github.actor }}
+      #     password: ${{ secrets.GITHUB_TOKEN }}
+
+      # - name: Extract metadata (tags, labels) for Docker
+      #   id: meta
+      #   uses: docker/metadata-action@818d4b7b91585d195f67373fd9cb0332e31a7175
+      #   with:
+      #     images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      # - name: Build and push Docker image
+      #   uses: docker/build-push-action@2eb1c1961a95fc15694676618e422e8ba1d63825
+      #   with:
+      #     context: .
+      #     push: true
+      #     tags: ${{ steps.meta.outputs.tags }}
+      #     labels: ${{ steps.meta.outputs.labels }}
