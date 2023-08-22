@@ -30,7 +30,7 @@ jobs:
         id: new_tag
         run: |
           NEW_VERSION=$(cat turplanlegger/__about__.py | cut -d'=' -f2)
-          echo "$VERSION=$NEW_VERSION" >> GITHUB_VERSION
+          echo "$VERSION=$NEW_VERSION" >> $GITHUB_ENV
       - name: Check if tag exists and get sha
         id: current_sha
         run: echo "SHA_VERSION=$(git rev-parse $VERSION)" >> $GITHUB_ENV
