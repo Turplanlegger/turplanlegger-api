@@ -27,7 +27,7 @@ jobs:
         run: git fetch --tags origin
 
       - name: debug git tag --list
-        run: echo "tags=$(git tag --list)"
+        run: echo "$(git tag --list)"
       - name: Get tags from repository
         id: released_tag
         # run: echo "RELEASED_VERSION=$(git tag --list | sort -V | grep -v latest | head -n 1 | xargs)" >> $GITHUB_ENV
