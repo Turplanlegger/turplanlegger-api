@@ -46,7 +46,7 @@ jobs:
           echo $NEW_SHA
       - name: Fail if tag  exists
         id: fail_if_tag_exists
-        if: ${{ NEW_SHA }}
+        if: ${{ env.NEW_SHA }}
         run: exit 1
 
       # version=$(git tag --list $VERSION | grep -q $VERSION)
