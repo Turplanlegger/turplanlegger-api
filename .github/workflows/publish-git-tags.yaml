@@ -44,9 +44,10 @@ jobs:
           echo $RELEASED_VERSION
           echo $NEW_VERSION
           echo $NEW_SHA
-      - name: Fail if tag doesn't exists
-        id: fail_if_tag_doesnt_exists
-        if: ! ${{ NEW_SHA }}
+      - name: Fail if tag  exists
+        id: fail_if_tag_exists
+        if: ${{ NEW_SHA }}
+        run: exit 1
 
       # version=$(git tag --list $VERSION | grep -q $VERSION)
       # - name: Checkout repository
