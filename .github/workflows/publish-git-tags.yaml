@@ -32,7 +32,7 @@ jobs:
         run: echo "NEW_VERSION=$(cat turplanlegger/__about__.py | cut -d'=' -f2)" >> $GITHUB_ENV
       - name: Check if tag exists and get sha
         id: NEW_SHA
-        run: echo "NEW_SHA=$(git rev-parse $NEW_VERSION)" >> $GITHUB_ENV
+        run: echo "NEW_SHA=$(git rev-parse ${NEW_VERSION})" >> $GITHUB_ENV
       - name: Print variables
         id: echo_variables
         run: |
