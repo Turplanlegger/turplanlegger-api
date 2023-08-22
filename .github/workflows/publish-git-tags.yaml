@@ -36,7 +36,7 @@ jobs:
 
       - name: Check if tag exists and and fail if it does
         id: NEW_SHA
-        run: git rev-parse -q --verify $NEW_VERSION
+        run: git rev-parse -q --verify $NEW_VERSION && exit 1 || exit 0
 
       - name: Print variables
         id: echo_variables
