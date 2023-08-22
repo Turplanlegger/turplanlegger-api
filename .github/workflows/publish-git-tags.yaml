@@ -67,28 +67,3 @@ jobs:
           git config --global user.name "Turplanlegger Bot"
           git tag -f -am "Release v$NEW_VERSION" latest
           git push -f --tags
-
-      # version=$(git tag --list $VERSION | grep -q $VERSION)
-      # - name: Checkout repository
-      #   uses: actions/checkout@v3
-
-      # - name: Log in to the Container registry
-      #   uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc
-      #   with:
-      #     registry: ${{ env.REGISTRY }}
-      #     username: ${{ github.actor }}
-      #     password: ${{ secrets.DEPLOY_TOKEN }}
-
-      # - name: Extract metadata (tags, labels) for Docker
-      #   id: meta
-      #   uses: docker/metadata-action@818d4b7b91585d195f67373fd9cb0332e31a7175
-      #   with:
-      #     images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-
-      # - name: Build and push Docker image
-      #   uses: docker/build-push-action@2eb1c1961a95fc15694676618e422e8ba1d63825
-      #   with:
-      #     context: .
-      #     push: true
-      #     tags: ${{ steps.meta.outputs.tags }}
-      #     labels: ${{ steps.meta.outputs.labels }}
