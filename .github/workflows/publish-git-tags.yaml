@@ -30,6 +30,7 @@ jobs:
         run: |
           git config --global user.email "$secrets.TURPLANLEGGER_BOT_EMAIL"
           git config --global user.name "Turplanlegger Bot"
+          gpg --list-secret-keys --keyid-format=long
 
       - name: Get tags from repository
         id: released_tag
