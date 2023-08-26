@@ -30,11 +30,14 @@ jobs:
         run: |
           git config --global user.email "$secrets.TURPLANLEGGER_BOT_EMAIL"
           git config --global user.name "Turplanlegger Bot"
-          echo "${{ secrets.TAG_SIGNING_KEY_ASC }}" > key.asc
-          echo "${{ secrets.TAG_SIGNING_KEY_PASSPHRASE }}" | gpg --batch --yes --passphrase-fd 0 --import key.asc
-          dd if=/dev/urandom of=key.asc bs=512 count=1
-          git config --global user.signingkey 46E5CFF7EF8A12AD
-          export GPG_TTY=$(tty)
+
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v5
+        with:
+          gpg_private_key: ${{ secrets.TAG_SIGNING_KEY_ASC }}
+          passphrase: ${{ secrets.TAG_SIGNING_KEY_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
 
       - name: Get tags from repository
         id: released_tag
@@ -58,8 +61,6 @@ jobs:
       - name: Create new tag
         id: create_tag
         run: |
-          export GPG_TTY=$(tty)
-          echo $GPP_TTY
           git tag -sam "Release v$NEW_VERSION" $NEW_VERSION
           git push --tags
           echo "Tag \`$NEW_VERSION\` \`$(git rev-parse -q --verify $NEW_VERSION)\` created" >> $GITHUB_STEP_SUMMARY
