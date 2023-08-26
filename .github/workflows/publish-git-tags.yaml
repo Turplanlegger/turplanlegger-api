@@ -26,7 +26,7 @@ jobs:
           token: ${{ secrets.DEPLOY_TOKEN }}
       
       - name: Login for bot
-        id: Login
+        id: login
         run: |
           git config --global user.email "$secrets.TURPLANLEGGER_BOT_EMAIL"
           git config --global user.name "Turplanlegger Bot"
@@ -40,10 +40,9 @@ jobs:
         run: echo "NEW_VERSION=$(cat turplanlegger/__about__.py | cut -d'=' -f2 | xargs)" >> $GITHUB_ENV
 
       - name: Check if tag exists and and fail if it does
-        id: NEW_SHA
+        id: new_sha
         run: |
-          if $(git rev-parse -q --verify $NEW_VERSION); then
-            git rev-parse -q --verify $NEW_VERSION
+          if git rev-parse -q --verify $NEW_VERSION; then
             echo "Tag '$NEW_VERSION' exists, will not create new" >> $GITHUB_STEP_SUMMARY;
             exit 1
           else
@@ -55,12 +54,12 @@ jobs:
         id: create_tag
         run: |
           git tag -am "Release v$NEW_VERSION" $NEW_VERSION
-          echo "Tag $NEW_VERSION ($(git rev-parse -q --verify $NEW_VERSION)) created" >> $GITHUB_STEP_SUMMARY
           git push --tags
+          echo "Tag $NEW_VERSION ($(git rev-parse -q --verify $NEW_VERSION)) created" >> $GITHUB_STEP_SUMMARY
       
       - name: Update latest tag
         id: update_latest
         run: |
           git tag -fam "Release v$NEW_VERSION" latest
-          echo "Tag latest updated to $NEW_VERSION ($(git rev-parse -q --verify $NEW_VERSION))" >> $GITHUB_STEP_SUMMARY
           git push --force --tags
+          echo "Tag latest updated to $NEW_VERSION ($(git rev-parse -q --verify $NEW_VERSION))" >> $GITHUB_STEP_SUMMARY
