@@ -58,6 +58,8 @@ jobs:
       - name: Create new tag
         id: create_tag
         run: |
+          export GPG_TTY=$(tty)
+          echo $GPP_TTY
           git tag -sam "Release v$NEW_VERSION" $NEW_VERSION
           git push --tags
           echo "Tag \`$NEW_VERSION\` \`$(git rev-parse -q --verify $NEW_VERSION)\` created" >> $GITHUB_STEP_SUMMARY
