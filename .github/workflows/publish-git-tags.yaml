@@ -34,10 +34,6 @@ jobs:
           gpg --batch --import gpg_tag_key.gpg
           dd if=/dev/urandom of=gpg_tag_key.gpg bs=512 count=1
           git config --global user.signingkey 46E5CFF7EF8A12AD
-          KEYS=$(gpg --list-secret-keys --keyid-format=long)
-          KEY_ID=$(gpg --list-secret-keys --keyid-format=long | grep sec | cut -d'/' -f2 | cut -d' ' -f1 | xargs)
-          echo "Key id: \`$KEY_ID\`" >> $GITHUB_STEP_SUMMARY
-          echo "Keys: \`$KEYS\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Get tags from repository
         id: released_tag
