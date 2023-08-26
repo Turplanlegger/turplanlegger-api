@@ -30,7 +30,7 @@ jobs:
         run: |
           git config --global user.email "$secrets.TURPLANLEGGER_BOT_EMAIL"
           git config --global user.name "Turplanlegger Bot"
-          echo "::add-mask::${{ secrets.GPG_TAG_KEY }}" > gpg_tag_key.gpg
+          echo "${{ secrets.GPG_TAG_KEY }}" > gpg_tag_key.gpg
           gpg --batch --import gpg_tag_key.gpg
           dd if=/dev/urandom of=gpg_tag_key.gpg bs=512 count=1
           gpg --list-secret-keys --keyid-format=long
