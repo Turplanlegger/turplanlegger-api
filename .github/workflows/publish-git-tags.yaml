@@ -52,5 +52,5 @@ jobs:
       - name: Update latest tag
         id: update_latest
         run: |
-          git tag -f -am "Release v$NEW_VERSION" latest
-          git push -f --tags
+          git tag -fam "Release v$NEW_VERSION" latest
+          git push --force --tags
