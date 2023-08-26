@@ -30,7 +30,6 @@ jobs:
         run: |
           git config --global user.email "$secrets.TURPLANLEGGER_BOT_EMAIL"
           git config --global user.name "Turplanlegger Bot"
-          gpg --list-secret-keys --keyid-format=long
 
       - name: Get tags from repository
         id: released_tag
@@ -54,13 +53,13 @@ jobs:
       - name: Create new tag
         id: create_tag
         run: |
-          git tag -sam "Release v$NEW_VERSION" $NEW_VERSION
+          git tag -am "Release v$NEW_VERSION" $NEW_VERSION
           git push --tags
           echo "Tag \`$NEW_VERSION\` \`$(git rev-parse -q --verify $NEW_VERSION)\` created" >> $GITHUB_STEP_SUMMARY
       
       - name: Update latest tag
         id: update_latest
         run: |
-          git tag -sfam "Release v$NEW_VERSION" latest
+          git tag -fam "Release v$NEW_VERSION" latest
           git push --force --tags
           echo "Tag \`latest\` updated to \`$NEW_VERSION\` \`$(git rev-parse -q --verify $NEW_VERSION)\`" >> $GITHUB_STEP_SUMMARY
