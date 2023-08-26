@@ -43,10 +43,10 @@ jobs:
         id: new_sha
         run: |
           if git rev-parse -q --verify $NEW_VERSION; then
-            echo "Tag '$NEW_VERSION' exists, will not create new" >> $GITHUB_STEP_SUMMARY;
+            echo "Tag `$NEW_VERSION` exists, will not create new" >> $GITHUB_STEP_SUMMARY;
             exit 1
           else
-            echo "Tag '$NEW_VERSION' does not exists, will create new tag" >> $GITHUB_STEP_SUMMARY
+            echo "Tag `$NEW_VERSION` does not exists, will create new tag" >> $GITHUB_STEP_SUMMARY
             exit 0
           fi
 
@@ -55,11 +55,11 @@ jobs:
         run: |
           git tag -am "Release v$NEW_VERSION" $NEW_VERSION
           git push --tags
-          echo "Tag $NEW_VERSION ($(git rev-parse -q --verify $NEW_VERSION)) created" >> $GITHUB_STEP_SUMMARY
+          echo "Tag `$NEW_VERSION` (`$(git rev-parse -q --verify $NEW_VERSION)`) created" >> $GITHUB_STEP_SUMMARY
       
       - name: Update latest tag
         id: update_latest
         run: |
           git tag -fam "Release v$NEW_VERSION" latest
           git push --force --tags
-          echo "Tag latest updated to $NEW_VERSION ($(git rev-parse -q --verify $NEW_VERSION))" >> $GITHUB_STEP_SUMMARY
+          echo "Tag `latest` updated to `$NEW_VERSION` (`$(git rev-parse -q --verify $NEW_VERSION)`)" >> $GITHUB_STEP_SUMMARY
