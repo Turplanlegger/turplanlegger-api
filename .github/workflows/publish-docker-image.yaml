@@ -34,7 +34,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-        tags: |
+          tags: |
             type=pep440,pattern={{raw}}
             type=sha,format=long
 
