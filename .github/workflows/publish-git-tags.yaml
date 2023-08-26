@@ -30,9 +30,9 @@ jobs:
         run: |
           git config --global user.email "$secrets.TURPLANLEGGER_BOT_EMAIL"
           git config --global user.name "Turplanlegger Bot"
-          echo "${{ secrets.GPG_TAG_KEY }}" > gpg_tag_key.gpg
-          gpg --batch --import gpg_tag_key.gpg
-          dd if=/dev/urandom of=gpg_tag_key.gpg bs=512 count=1
+          echo "${{ secrets.TAG_SIGNING_KEY_ASC }}" > key.asc
+          echo "${{ secrets.TAG_SIGNING_KEY_PASSPHRASE }}" | gpg --batch --yes --passphrase-fd 0 --import key.asc
+          dd if=/dev/urandom of=key.asc bs=512 count=1
           git config --global user.signingkey 46E5CFF7EF8A12AD
 
       - name: Get tags from repository
