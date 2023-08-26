@@ -34,6 +34,7 @@ jobs:
           echo "${{ secrets.TAG_SIGNING_KEY_PASSPHRASE }}" | gpg --batch --yes --passphrase-fd 0 --import key.asc
           dd if=/dev/urandom of=key.asc bs=512 count=1
           git config --global user.signingkey 46E5CFF7EF8A12AD
+          export GPG_TTY=$(tty)
 
       - name: Get tags from repository
         id: released_tag
