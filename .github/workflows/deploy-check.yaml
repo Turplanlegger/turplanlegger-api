@@ -2,16 +2,14 @@ name: Check if new API-version is deployed
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
+  registry_package:
+    types: [published]
 
 jobs:
   check-api-version:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
 
     steps:
       - name: Checkout repository
