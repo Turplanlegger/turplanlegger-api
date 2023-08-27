@@ -17,6 +17,7 @@ jobs:
 
       - name: Check if new API-version is deployed
         run: |
+          export API_URL=${{ secrets.PROD_API_URL }}
           echo '```bash' >> $GITHUB_STEP_SUMMARY
           ./deploy/check_version.sh >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
