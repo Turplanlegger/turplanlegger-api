@@ -19,6 +19,11 @@ else
     exit 1
 fi
 
+if [[ -z $GITHUB_ACCESS_TOKEN ]]: then
+    printf "GITHUB_ACCESS_TOKEN not defined \n"
+    exit 1
+fi
+
 # Retrieve the latest commit SHA from the GitHub API
 NEW_SHA=$(curl -sH "Authorization: Bearer ${GITHUB_ACCESS_TOKEN}" "https://api.github.com/repos/sixcare/turplanlegger-api/commits?per_page=1&sha=develop" | jq -r '.[0].sha')
 
