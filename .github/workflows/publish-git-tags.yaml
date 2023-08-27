@@ -76,6 +76,6 @@ jobs:
         id: create_release
         uses: ncipollo/release-action@v1
         with:
-          name: "Release $NEW_VERSION"
-          tag: $NEW_VERSION
+          name: "Release ${{ NEW_VERSION }}"
+          tag: ${{ NEW_VERSION }}
           token: ${{ secrets.DEPLOY_TOKEN }}
