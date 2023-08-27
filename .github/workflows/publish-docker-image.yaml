@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     tags:
-      - '\d{1,}\.\d{1,}\.\d{1,}((a|b|rc)(\d{1,}))?'
+      - '[0-9].+[0-9]+.[0-9]+.*'
 
 env:
   REGISTRY: ghcr.io
@@ -32,6 +32,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
+          context: git
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=latest
