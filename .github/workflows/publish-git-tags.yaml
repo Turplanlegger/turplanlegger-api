@@ -78,4 +78,4 @@ jobs:
         with:
           name: "Release $NEW_VERSION"
           tag: $NEW_VERSION
-          token: $secrets.DEPLOY_TOKEN
+          token: ${{ secrets.DEPLOY_TOKEN }}
