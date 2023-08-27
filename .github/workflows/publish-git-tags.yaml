@@ -1,4 +1,4 @@
-name: Create and publish a Github tag
+name: Create and publish a Github tag and release
 
 on:
   workflow_dispatch:
@@ -71,3 +71,10 @@ jobs:
           git tag -sfam "Release v$NEW_VERSION" latest
           git push --force --tags
           echo "Tag \`latest\` updated to \`$NEW_VERSION\` \`$(git rev-parse -q --verify $NEW_VERSION)\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: ncipollo/release-action@v1
+        with:
+          name: "Release $NEW_VERSION"
+          tag: $NEW_VERSION
