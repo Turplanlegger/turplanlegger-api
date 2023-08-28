@@ -23,7 +23,7 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.DEPLOY_TOKEN }}
-      
+
       - name: Login for bot
         id: login
         run: |
@@ -42,7 +42,7 @@ jobs:
         id: released_tag
         run: echo "RELEASED_VERSION=$(git tag --list | sort -V | grep -v latest | head -n 1 | xargs)" >> $GITHUB_ENV
 
-      - name: Get repo version 
+      - name: Get repo version
         id: new_tag
         run: echo "NEW_VERSION=$(cat turplanlegger/__about__.py | cut -d'=' -f2 | xargs)" >> $GITHUB_ENV
 
@@ -63,7 +63,7 @@ jobs:
           git tag -sam "Release v$NEW_VERSION" $NEW_VERSION
           git push --tags
           echo "Tag \`$NEW_VERSION\` \`$(git rev-parse -q --verify $NEW_VERSION)\` created" >> $GITHUB_STEP_SUMMARY
-      
+
       - name: Update latest tag
         id: update_latest
         run: |
