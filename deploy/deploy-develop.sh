@@ -19,7 +19,7 @@ else
     exit 1
 fi
 
-if [[ -z $GITHUB_ACCESS_TOKEN ]]: then
+if [[ -z $GITHUB_ACCESS_TOKEN ]]; then
     printf "GITHUB_ACCESS_TOKEN not defined \n"
     exit 1
 fi
