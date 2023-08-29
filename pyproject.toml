@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "Turplanlegger"
+name = "Turplanlegger-API"
 dynamic = ["version"]
 description = "Turplanlegger python API"
 readme = "README.md"
@@ -50,7 +50,7 @@ prod = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/sixcare/turplanlegger"
+Homepage = "https://github.com/Turplanlegger/turplanlegger"
 
 [tool.hatch.version]
 path = "turplanlegger/__about__.py"
