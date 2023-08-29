@@ -6,20 +6,20 @@ set -e
 source "${HOME}/.config/turplanlegger/env"
 
 # Get the SHA of the new image
-NEW_SHA=$(curl -sH "Authorization: Bearer ${GITHUB_ACCESS_TOKEN}" "https://api.github.com/user/packages/container/turplanlegger-api/versions" | jq -r '.[] | select(.metadata.container.tags | any(. == "main")).name')
+NEW_SHA=$(curl -sH "Authorization: Bearer ${GITHUB_ACCESS_TOKEN}" "https://api.github.com/orgs/turplanlegger/packages/container/turplanlegger-api/versions" | jq -r '.[] | select(.metadata.container.tags | any(. == "latest")).name')
 if [[ -z "${NEW_SHA}" ]]; then
     echo "Unable to retrieve the new image SHA"
     exit 1
 fi
 
-IMAGE_ID=$(docker images -q ghcr.io/sixcare/turplanlegger-api:main)
+IMAGE_ID=$(docker images -q ghcr.io/turplanlegger/turplanlegger-api:latest)
 if [[ -z "${IMAGE_ID}" ]]; then
-    echo "Image 'ghcr.io/sixcare/turplanlegger-api:main' not found. Pulling it"
-    docker pull -q ghcr.io/sixcare/turplanlegger-api:main
+    echo "Image 'ghcr.io/sixcare/turplanlegger-api:latest' not found. Pulling it"
+    docker pull -q ghcr.io/sixcare/turplanlegger-api:latest
 fi
 
 # Get the SHA of the old image
-OLD_SHA=$(docker image inspect ghcr.io/sixcare/turplanlegger-api:main --format '{{range .RepoDigests}}{{.}}{{end}}' | cut -d '@' -f2)
+OLD_SHA=$(docker image inspect ghcr.io/turplanlegger/turplanlegger-api:latest --format '{{range .RepoDigests}}{{.}}{{end}}' | cut -d '@' -f2)
 if [[ -z "${OLD_SHA}" ]]; then
     echo "Unable to retrieve the old image SHA"
     exit 1
@@ -33,7 +33,7 @@ if [[ "${NEW_SHA}" != "${OLD_SHA}" ]]; then
     cp docker-compose.yml docker-compose.yml.bak
 
     # Download new docker-compose file
-    if ! curl -fsLO "https://raw.githubusercontent.com/sixcare/turplanlegger-api/main/docker-compose.yml"; then
+    if ! curl -fsLO "https://raw.githubusercontent.com/turplanlegger/turplanlegger-api/latest/docker-compose.yml"; then
         echo "Failed to download docker-compose file, reverting to backup"
         mv docker-compose.yml.bak docker-compose.yml
         exit 1

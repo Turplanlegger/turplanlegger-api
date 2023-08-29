@@ -1,0 +1,80 @@
+name: Create and publish a Github tag and release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  check-and-publish-new-tags:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.DEPLOY_TOKEN }}
+
+      - name: Login for bot
+        id: login
+        run: |
+          git config --global user.email "$secrets.TURPLANLEGGER_BOT_EMAIL"
+          git config --global user.name "Turplanlegger Bot"
+
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v5
+        with:
+          gpg_private_key: ${{ secrets.TAG_SIGNING_KEY_ASC }}
+          passphrase: ${{ secrets.TAG_SIGNING_KEY_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+
+      - name: Get tags from repository
+        id: released_tag
+        run: echo "RELEASED_VERSION=$(git tag --list | sort -V | grep -v latest | head -n 1 | xargs)" >> $GITHUB_ENV
+
+      - name: Get repo version
+        id: new_tag
+        run: echo "NEW_VERSION=$(cat turplanlegger/__about__.py | cut -d'=' -f2 | xargs)" >> $GITHUB_ENV
+
+      - name: Check if tag exists and and fail if it does
+        id: new_sha
+        run: |
+          if git rev-parse -q --verify $NEW_VERSION; then
+            echo "Tag \`$NEW_VERSION\` exists, will not create new" >> $GITHUB_STEP_SUMMARY;
+            exit 1
+          else
+            echo "Tag \`$NEW_VERSION\` does not exists, will create new tag" >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+
+      - name: Create new tag
+        id: create_tag
+        run: |
+          git tag -sam "Release v$NEW_VERSION" $NEW_VERSION
+          git push --tags
+          echo "Tag \`$NEW_VERSION\` \`$(git rev-parse -q --verify $NEW_VERSION)\` created" >> $GITHUB_STEP_SUMMARY
+
+      - name: Update latest tag
+        id: update_latest
+        run: |
+          git tag -sfam "Release v$NEW_VERSION" latest
+          git push --force --tags
+          echo "Tag \`latest\` updated to \`$NEW_VERSION\` \`$(git rev-parse -q --verify $NEW_VERSION)\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: ncipollo/release-action@v1
+        with:
+          name: "Release ${{ env.NEW_VERSION }}"
+          tag: ${{ env.NEW_VERSION }}
+          token: ${{ secrets.DEPLOY_TOKEN }}
