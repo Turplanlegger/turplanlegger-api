@@ -16,6 +16,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Debug
+        run: ${{ github.event.registry_package.package_version.container_metadata.tag.name }}
+
       - name: Check if new API-version is deployed
         run: |
           export API_URL=${{ secrets.PROD_API_URL }}
