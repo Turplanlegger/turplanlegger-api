@@ -3,9 +3,7 @@ name: Create and publish a Github tag and release
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
-      - ci/*
+    branches: [main]
 
 env:
   REGISTRY: ghcr.io
