@@ -3,7 +3,7 @@ name: Check if new API-version is deployed
 on:
   workflow_dispatch:
   registry_package:
-    types: [published]
+    types: [published, updated]
 
 jobs:
   check-api-version:
