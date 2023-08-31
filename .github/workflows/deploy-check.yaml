@@ -7,6 +7,7 @@ on:
 
 jobs:
   check-api-version:
+    if: ${{ github.event.registry_package.package_version.container_metadata.tag.name == 'latest' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
