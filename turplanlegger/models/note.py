@@ -90,6 +90,6 @@ class Note:
             content=rec.content,
             create_time=rec.create_time,
             update_time=rec.update_time,
-            deleted=deleted,
-            delete_time=delete_time
+            deleted=rec.deleted,
+            delete_time=rec.delete_time
         )
