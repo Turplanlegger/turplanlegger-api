@@ -219,7 +219,7 @@ class NotesTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         response = self.client.put(
-            '/notes/1/content',
+            '/notes/1',
             data=json.dumps({
                 'name': 'newname',
                 'content': 'newcontent'
