@@ -119,9 +119,9 @@ def rename_note(note_id):
         raise ApiProblem('Failed to rename note', 'Unknown error', 500)
 
 
-@api.route('/notes/<note_id>/update', methods=['PATCH'])
+@api.route('/notes/<note_id>/content', methods=['PATCH'])
 @auth
-def update_note(note_id):
+def update_note_content(note_id):
 
     note = Note.find_note(note_id)
 
@@ -130,7 +130,7 @@ def update_note(note_id):
 
     note.content = request.json.get('content', '')
 
-    if note.update():
+    if note.update_content():
         return jsonify(status='ok')
     else:
         raise ApiProblem('Failed to update note', 'Unknown error', 500)
