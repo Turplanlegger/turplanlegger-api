@@ -65,7 +65,7 @@ def update_note(note_id):
     content = request.json.get('content', None)
 
     if name is None and content is None:
-        raise ApiProblem('Failed to update note', 'No new updates were provided, 409')
+        raise ApiProblem('Failed to update note', 'No new updates were provided', 409)
 
     if name is not None:
         note.name = name
