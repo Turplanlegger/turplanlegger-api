@@ -51,6 +51,32 @@ def add_note():
 
     return jsonify(note.serialize), 201
 
+@api.route('/notes/<note_id>', methods=['PUT'])
+@auth
+def update_note(note_id):
+
+    note = Note.find_note(note_id)
+
+    if not note:
+        raise ApiProblem('Note not found', 'The requested note was not found', 404)
+
+
+    name = request.json.get('name', None)
+    content = request.json.get('content', None)
+
+    if name is None and content is None:
+        raise ApiProblem('Failed to update note', 'No new updates were provided, 409')
+
+    if name is not None:
+        note.name = name
+    if content is not None:
+        note.content = content
+
+    if note.update():
+        return jsonify(status='ok', count=1, note=note.serialize)
+    else:
+        raise ApiProblem('Failed to update note', 'Unknown error', 500)
+
 
 @api.route('/notes/<note_id>/owner', methods=['PATCH'])
 @auth

@@ -24,6 +24,9 @@ class Note:
         self.id = kwargs.get('id', None)
         self.name = kwargs.get('name', None)
         self.create_time = kwargs.get('create_time', None)
+        self.update_time = kwargs.get('update_time', None)
+        self.deleted = kwargs.get('deleted', None)
+        self.delete = kwargs.get('delete_time', None)
 
     @classmethod
     def parse(cls, json: JSON) -> 'Note':
@@ -48,14 +51,18 @@ class Note:
         note = self.get_note(db.create_note(self))
         return note
 
+    def update(self) -> 'Note':
+        return db.update_note(self.id, self.content)
+
     def delete(self) -> bool:
         return db.delete_note(self.id)
 
     def rename(self) -> 'Note':
         return db.rename_note(self.id, self.name)
 
-    def update(self) -> 'Note':
-        return db.update_note(self.id, self.content)
+    def update_content(self) -> 'Note':
+        return db.update_note_content(self.id, self.content)
+
 
     @staticmethod
     def find_note(id: int) -> 'Note':
@@ -81,5 +88,8 @@ class Note:
             owner=rec.owner,
             name=rec.name,
             content=rec.content,
-            create_time=rec.create_time
+            create_time=rec.create_time,
+            update_time=rec.update_time,
+            deleted=deleted,
+            delete_time=delete_time
         )
