@@ -202,16 +202,37 @@ class NotesTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['status'], 'ok')
 
-    def test_update_note(self):
+    def test_update_note_content(self):
         response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
 
         response = self.client.patch(
-            '/notes/1/update', data=json.dumps({'content': 'newcontent'}), headers=self.headers_json)
+            '/notes/1/content', data=json.dumps({'content': 'newcontent'}), headers=self.headers_json)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['status'], 'ok')
+
+    def test_update_note(self):
+        response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+
+        response = self.client.put(
+            '/notes/1/content',
+            data=json.dumps({
+                'name': 'newname',
+                'content': 'newcontent'
+            }),
+            headers=self.headers_json)
+
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['status'], 'ok')
+        self.assertEqual(data['count'], 1)
+        self.assertEqual(data['note']['name'], 'newname')
+        self.assertEqual(data['note']['content'], 'newcontent')
 
     def test_get_my_note(self):
         response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
