@@ -274,6 +274,24 @@ class NotesTestCase(unittest.TestCase):
         self.assertEqual(data['title'], 'Failed to update note')
         self.assertEqual(data['detail'], 'Field content can not be empty')
 
+    def test_update_note_empty_content_update(self):
+        response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+        note_id = data['id']
+
+        response = self.client.put(
+            f'/notes/{note_id}',
+            data=json.dumps({
+                'name': self.note_full['name']
+            }),
+            headers=self.headers_json)
+
+        self.assertEqual(response.status_code, 409)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Failed to update note')
+        self.assertEqual(data['detail'], 'Field content can not be empty')
+
     def test_get_my_note(self):
         response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
