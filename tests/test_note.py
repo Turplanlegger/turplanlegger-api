@@ -217,9 +217,10 @@ class NotesTestCase(unittest.TestCase):
         response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
+        note_id = data['id']
 
         response = self.client.put(
-            '/notes/1',
+            f'/notes/{note_id}',
             data=json.dumps({
                 'name': 'newname',
                 'content': 'newcontent'
