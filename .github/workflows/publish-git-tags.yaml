@@ -3,8 +3,7 @@ name: Create and publish a Github tag and release
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
+    branches: [main]
 
 env:
   REGISTRY: ghcr.io
@@ -19,7 +18,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.DEPLOY_TOKEN }}
@@ -31,16 +30,12 @@ jobs:
           git config --global user.name "Turplanlegger Bot"
 
       - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v5
+        uses: crazy-max/ghaction-import-gpg@v6
         with:
           gpg_private_key: ${{ secrets.TAG_SIGNING_KEY_ASC }}
           passphrase: ${{ secrets.TAG_SIGNING_KEY_PASSPHRASE }}
           git_user_signingkey: true
           git_commit_gpgsign: true
-
-      - name: Get tags from repository
-        id: released_tag
-        run: echo "RELEASED_VERSION=$(git tag --list | sort -V | grep -v latest | head -n 1 | xargs)" >> $GITHUB_ENV
 
       - name: Get repo version
         id: new_tag

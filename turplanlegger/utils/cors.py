@@ -26,6 +26,7 @@ class Cors:
                 '/routes/*',
                 '/route/*',
                 '/users/*',
-                '/user/*'
+                '/user/*',
+                '/whoami'
             ]
         )

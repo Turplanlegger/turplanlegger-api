@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   api:
-    image: ghcr.io/sixcare/turplanlegger-api:main
+    image: ghcr.io/turplanlegger/turplanlegger-api:${TP_TAG:-latest}
     environment:
       - TP_DATABASE_URI=${TP_DATABASE_URI:-postgresql://turadm:passord@turplanlegger-db/turplanlegger?connect_timeout=10&application_name=turplanlegger-api}
       - TP_DATABASE_MAX_RETRIES=${TP_DATABASE_MAX_RETRIES:-2}
