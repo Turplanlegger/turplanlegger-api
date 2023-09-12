@@ -59,7 +59,6 @@ def update_note(note_id):
     if not note:
         raise ApiProblem('Note not found', 'The requested note was not found', 404)
 
-
     name = request.json.get('name', None)
     content = request.json.get('content', None)
 
