@@ -25,7 +25,7 @@ def delete_note(note_id):
 
     note = Note.find_note(note_id)
 
-    if not note:
+    if note is None:
         raise ApiProblem('Note not found', 'The requested note was not found', 404)
 
     try:

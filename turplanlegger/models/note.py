@@ -26,7 +26,7 @@ class Note:
         self.create_time = kwargs.get('create_time', None)
         self.update_time = kwargs.get('update_time', None)
         self.deleted = kwargs.get('deleted', None)
-        self.delete = kwargs.get('delete_time', None)
+        self.delete_time = kwargs.get('delete_time', None)
 
     @classmethod
     def parse(cls, json: JSON) -> 'Note':
