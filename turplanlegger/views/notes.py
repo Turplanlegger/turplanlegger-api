@@ -54,7 +54,6 @@ def add_note():
 @api.route('/notes/<note_id>', methods=['PUT'])
 @auth
 def update_note(note_id):
-
     note = Note.find_note(note_id)
 
     if not note:
@@ -64,15 +63,27 @@ def update_note(note_id):
     name = request.json.get('name', None)
     content = request.json.get('content', None)
 
-    if name is None and content is None:
+    if content is None:
+        raise ApiProblem(
+            'Failed to update note',
+            'Field can not be empty',
+            409
+        )
+
+    if name == note.name and content == note.content:
         raise ApiProblem('Failed to update note', 'No new updates were provided', 409)
 
-    if name is not None:
-        note.name = name
-    if content is not None:
-        note.content = content
+    updated_fields = []
 
-    if note.update():
+    if name != note.name:
+        updated_fields.append('name')
+    note.name = name
+
+    if content != note.content:
+        updated_fields.append('content')
+    note.content = content
+
+    if note.update(updated_fields):
         return jsonify(status='ok', count=1, note=note.serialize)
     else:
         raise ApiProblem('Failed to update note', 'Unknown error', 500)

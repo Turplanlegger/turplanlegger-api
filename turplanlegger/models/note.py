@@ -51,8 +51,8 @@ class Note:
         note = self.get_note(db.create_note(self))
         return note
 
-    def update(self) -> 'Note':
-        return db.update_note(self)
+    def update(self, updated_fields) -> 'Note':
+        return db.update_note(self, updated_fields)
 
     def delete(self) -> bool:
         return db.delete_note(self.id)
