@@ -25,7 +25,7 @@ def delete_note(note_id):
 
     note = Note.find_note(note_id)
 
-    if not note:
+    if note is None:
         raise ApiProblem('Note not found', 'The requested note was not found', 404)
 
     try:
@@ -50,6 +50,42 @@ def add_note():
         raise ApiProblem('Failed to create note', str(e), 500)
 
     return jsonify(note.serialize), 201
+
+@api.route('/notes/<note_id>', methods=['PUT'])
+@auth
+def update_note(note_id):
+    note = Note.find_note(note_id)
+
+    if not note:
+        raise ApiProblem('Note not found', 'The requested note was not found', 404)
+
+    name = request.json.get('name', None)
+    content = request.json.get('content', None)
+
+    if content is None:
+        raise ApiProblem(
+            'Failed to update note',
+            'Field content can not be empty',
+            409
+        )
+
+    if name == note.name and content == note.content:
+        raise ApiProblem('Failed to update note', 'No new updates were provided', 409)
+
+    updated_fields = []
+
+    if name != note.name:
+        updated_fields.append('name')
+    note.name = name
+
+    if content != note.content:
+        updated_fields.append('content')
+    note.content = content
+
+    if note.update(updated_fields):
+        return jsonify(status='ok', count=1, note=note.serialize)
+    else:
+        raise ApiProblem('Failed to update note', 'Unknown error', 500)
 
 
 @api.route('/notes/<note_id>/owner', methods=['PATCH'])
@@ -93,9 +129,9 @@ def rename_note(note_id):
         raise ApiProblem('Failed to rename note', 'Unknown error', 500)
 
 
-@api.route('/notes/<note_id>/update', methods=['PATCH'])
+@api.route('/notes/<note_id>/content', methods=['PATCH'])
 @auth
-def update_note(note_id):
+def update_note_content(note_id):
 
     note = Note.find_note(note_id)
 
@@ -104,7 +140,7 @@ def update_note(note_id):
 
     note.content = request.json.get('content', '')
 
-    if note.update():
+    if note.update_content():
         return jsonify(status='ok')
     else:
         raise ApiProblem('Failed to update note', 'Unknown error', 500)

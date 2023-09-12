@@ -202,16 +202,135 @@ class NotesTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['status'], 'ok')
 
-    def test_update_note(self):
+    def test_update_note_content(self):
         response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
 
         response = self.client.patch(
-            '/notes/1/update', data=json.dumps({'content': 'newcontent'}), headers=self.headers_json)
+            '/notes/1/content', data=json.dumps({'content': 'newcontent'}), headers=self.headers_json)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['status'], 'ok')
+
+    def test_update_note(self):
+        response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+        note_id = data['id']
+
+        response = self.client.put(
+            f'/notes/{note_id}',
+            data=json.dumps({
+                'name': 'newname',
+                'content': 'newcontent'
+            }),
+            headers=self.headers_json)
+
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['status'], 'ok')
+        self.assertEqual(data['count'], 1)
+        self.assertEqual(data['note']['name'], 'newname')
+        self.assertEqual(data['note']['content'], 'newcontent')
+
+    def test_update_note_fail_no_change(self):
+        response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+        note_id = data['id']
+
+        response = self.client.put(
+            f'/notes/{note_id}',
+            data=json.dumps({
+                'name': self.note_full['name'],
+                'content': self.note_full['content']
+            }),
+            headers=self.headers_json)
+
+        self.assertEqual(response.status_code, 409)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Failed to update note')
+        self.assertEqual(data['detail'], 'No new updates were provided')
+
+    def test_update_empty(self):
+        response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+        note_id = data['id']
+
+        response = self.client.put(
+            f'/notes/{note_id}',
+            data=json.dumps({
+                'name': None,
+                'content': None
+            }),
+            headers=self.headers_json
+        )
+
+        self.assertEqual(response.status_code, 409)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Failed to update note')
+        self.assertEqual(data['detail'], 'Field content can not be empty')
+
+    def test_update_content(self):
+        response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+        note_id = data['id']
+
+        response = self.client.put(
+            f'/notes/{note_id}',
+            data=json.dumps({
+                'name': 'It now has a new name',
+                'content': self.note_full['content']
+            }),
+            headers=self.headers_json
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['note']['name'], 'It now has a new name')
+        self.assertEqual(data['note']['content'], self.note_full['content'])
+
+    def test_update_note_empty_content_update(self):
+        response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+        note_id = data['id']
+
+        response = self.client.put(
+            f'/notes/{note_id}',
+            data=json.dumps({
+                'name': self.note_full['name']
+            }),
+            headers=self.headers_json)
+
+        self.assertEqual(response.status_code, 409)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Failed to update note')
+        self.assertEqual(data['detail'], 'Field content can not be empty')
+
+    def test_update_name(self):
+        response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+        note_id = data['id']
+
+        response = self.client.put(
+            f'/notes/{note_id}',
+            data=json.dumps({
+                'name': self.note_full['name'],
+                'content': 'It now has new content'
+            }),
+            headers=self.headers_json
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['note']['name'], self.note_full['name'])
+        self.assertEqual(data['note']['content'], 'It now has new content')
 
     def test_get_my_note(self):
         response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
