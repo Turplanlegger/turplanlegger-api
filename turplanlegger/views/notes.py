@@ -65,7 +65,7 @@ def update_note(note_id):
     if content is None:
         raise ApiProblem(
             'Failed to update note',
-            'Field can not be empty',
+            'Field content can not be empty',
             409
         )
 
