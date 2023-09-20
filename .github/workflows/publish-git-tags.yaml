@@ -39,8 +39,8 @@ jobs:
 
       - name: Create new tag
         run: |
-          git tag -sam "Release v$NEW_VERSION" $NEW_VERSION
-          git push --tags
+          git tag -sam "Release v$NEW_VERSION" "$NEW_VERSION"
+          git push origin "$NEW_VERSION"
           echo "Tag \`$NEW_VERSION\` \`$(git rev-parse -q --verify $NEW_VERSION)\` created" >> $GITHUB_STEP_SUMMARY
 
       - name: Update latest tag
