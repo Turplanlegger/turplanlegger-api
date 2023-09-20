@@ -8,7 +8,7 @@ on:
       - turplanlegger/__about__.py
 
 jobs:
-  check-and-publish-new-tags:
+  publish-new-tag:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -34,18 +34,8 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
 
-      - name: Get repo version
-        run: echo "NEW_VERSION=$(cat turplanlegger/__about__.py | cut -d'=' -f2 | xargs)" >> $GITHUB_ENV
-
-      - name: Check if tag exists and and fail if it does
-        run: |
-          if git rev-parse -q --verify $NEW_VERSION; then
-            echo "Tag \`$NEW_VERSION\` exists, will not create new" >> $GITHUB_STEP_SUMMARY;
-            exit 1
-          else
-            echo "Tag \`$NEW_VERSION\` does not exists, will create new tag" >> $GITHUB_STEP_SUMMARY
-            exit 0
-          fi
+      - name: Get version
+        run: echo "NEW_VERSION=$(cat turplanlegger/__about__.py | cut -d'=' -f2 | xargs)" >> "$GITHUB_ENV"
 
       - name: Create new tag
         run: |
