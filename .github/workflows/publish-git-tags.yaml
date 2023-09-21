@@ -16,8 +16,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Generate a token
         id: generate_token
@@ -35,6 +33,7 @@ jobs:
         env:
           NEW_VERSION: v1.0.0test
         run: |
+          git checkout use-github-app-for-signing-new-tags
           git commit --allow-empty -sm "Test"
           git push
 #
