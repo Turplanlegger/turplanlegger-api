@@ -36,7 +36,7 @@ jobs:
           NEW_VERSION: v1.0.0test
         run: |
           git checkout -b testing-siging-bot
-          git commit --allow-empty -S -sm "Test"
+          git commit --allow-empty -sm "Test"
           git push -f testing-siging-bot
 #
 #      - name: Update latest tag
