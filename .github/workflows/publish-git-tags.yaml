@@ -28,8 +28,8 @@ jobs:
 
       - name: Login for bot
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "${{ secrets.TURPLANLEGGER_SIGNING_BOT_APP_ID }}+github-actions[bot]@users.noreply.github.com"
+          git config user.name "turplanlegger-signing-bot[bot]"
+          git config user.email "${{ secrets.TURPLANLEGGER_SIGNING_BOT_APP_ID }}+turplanlegger-signing-bot[bot]@users.noreply.github.com"
 
       - name: Create new tag
         env:
