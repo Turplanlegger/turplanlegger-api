@@ -35,9 +35,9 @@ jobs:
         env:
           NEW_VERSION: v1.0.0test
         run: |
-          git checkout -b testing-siging-bot
+          git checkout testing-siging-bot
           git commit --allow-empty -sm "Test"
-          git push -f testing-siging-bot
+          git push -f
 #
 #      - name: Update latest tag
 #        run: |
