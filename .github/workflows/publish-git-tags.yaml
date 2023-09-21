@@ -35,9 +35,9 @@ jobs:
         env:
           NEW_VERSION: v1.0.0test
         run: |
-          git checkout use-github-app-for-signing-new-tags
+          git checkout -b testing-siging-bot
           git commit --allow-empty -sm "Test"
-          git push
+          git push -u origin testing-siging-bot
 #
 #      - name: Update latest tag
 #        run: |
