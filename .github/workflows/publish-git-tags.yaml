@@ -17,49 +17,61 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.DEPLOY_TOKEN }}
 
-      - name: Login for bot
-        run: |
-          git config --global user.email "$secrets.TURPLANLEGGER_BOT_EMAIL"
-          git config --global user.name "Turplanlegger Bot"
-
-      - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v6
+      - name: Generate a token
+        id: generate_token
+        uses: actions/create-github-app-token@v1
         with:
-          gpg_private_key: ${{ secrets.TAG_SIGNING_KEY_ASC }}
-          passphrase: ${{ secrets.TAG_SIGNING_KEY_PASSPHRASE }}
-          git_user_signingkey: true
-          git_commit_gpgsign: true
+          app_id: ${{ secrets.TURPLANLEGGER_SIGNING_BOT_APP_ID }}
+          private_key: ${{ secrets.TURPLANLEGGER_SIGNING_BOT_APP_PRIVATE_KEY }}
 
-      - name: Get repo version
-        run: echo "NEW_VERSION=$(cat turplanlegger/__about__.py | cut -d'=' -f2 | xargs)" >> $GITHUB_ENV
-
-      - name: Check if tag exists and and fail if it does
+      - name: Use the token
+        env:
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
         run: |
-          if git rev-parse -q --verify $NEW_VERSION; then
-            echo "Tag \`$NEW_VERSION\` exists, will not create new" >> $GITHUB_STEP_SUMMARY;
-            exit 1
-          else
-            echo "Tag \`$NEW_VERSION\` does not exists, will create new tag" >> $GITHUB_STEP_SUMMARY
-            exit 0
-          fi
+          gh api octocat
 
-      - name: Create new tag
-        run: |
-          git tag -sam "Release v$NEW_VERSION" $NEW_VERSION
-          git push --tags
-          echo "Tag \`$NEW_VERSION\` \`$(git rev-parse -q --verify $NEW_VERSION)\` created" >> $GITHUB_STEP_SUMMARY
-
-      - name: Update latest tag
-        run: |
-          git tag -sfam "Release v$NEW_VERSION" latest
-          git push --force --tags
-          echo "Tag \`latest\` updated to \`$NEW_VERSION\` \`$(git rev-parse -q --verify $NEW_VERSION)\`" >> $GITHUB_STEP_SUMMARY
-
-      - name: Create GitHub Release
-        uses: ncipollo/release-action@v1
-        with:
-          name: "Release ${{ env.NEW_VERSION }}"
-          tag: ${{ env.NEW_VERSION }}
-          token: ${{ secrets.DEPLOY_TOKEN }}
+#      - name: Login for bot
+#        run: |
+#          git config --global user.email "$secrets.TURPLANLEGGER_BOT_EMAIL"
+#          git config --global user.name "Turplanlegger Bot"
+#
+#      - name: Import GPG key
+#        uses: crazy-max/ghaction-import-gpg@v6
+#        with:
+#          gpg_private_key: ${{ secrets.TAG_SIGNING_KEY_ASC }}
+#          passphrase: ${{ secrets.TAG_SIGNING_KEY_PASSPHRASE }}
+#          git_user_signingkey: true
+#          git_commit_gpgsign: true
+#
+#      - name: Get repo version
+#        run: echo "NEW_VERSION=$(cat turplanlegger/__about__.py | cut -d'=' -f2 | xargs)" >> $GITHUB_ENV
+#
+#      - name: Check if tag exists and and fail if it does
+#        run: |
+#          if git rev-parse -q --verify $NEW_VERSION; then
+#            echo "Tag \`$NEW_VERSION\` exists, will not create new" >> $GITHUB_STEP_SUMMARY;
+#            exit 1
+#          else
+#            echo "Tag \`$NEW_VERSION\` does not exists, will create new tag" >> $GITHUB_STEP_SUMMARY
+#            exit 0
+#          fi
+#
+#      - name: Create new tag
+#        run: |
+#          git tag -sam "Release v$NEW_VERSION" $NEW_VERSION
+#          git push --tags
+#          echo "Tag \`$NEW_VERSION\` \`$(git rev-parse -q --verify $NEW_VERSION)\` created" >> $GITHUB_STEP_SUMMARY
+#
+#      - name: Update latest tag
+#        run: |
+#          git tag -sfam "Release v$NEW_VERSION" latest
+#          git push --force --tags
+#          echo "Tag \`latest\` updated to \`$NEW_VERSION\` \`$(git rev-parse -q --verify $NEW_VERSION)\`" >> $GITHUB_STEP_SUMMARY
+#
+#      - name: Create GitHub Release
+#        uses: ncipollo/release-action@v1
+#        with:
+#          name: "Release ${{ env.NEW_VERSION }}"
+#          tag: ${{ env.NEW_VERSION }}
+#          token: ${{ secrets.DEPLOY_TOKEN }}
