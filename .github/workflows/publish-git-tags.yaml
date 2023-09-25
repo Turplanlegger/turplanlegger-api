@@ -35,7 +35,7 @@ jobs:
           git_commit_gpgsign: true
 
       - name: Get version
-        run: echo "NEW_VERSION=$(cat turplanlegger/__about__.py | cut -d'=' -f2 | xargs)" >> "$GITHUB_ENV"
+        run: echo "NEW_VERSION=$(grep -v '^#' turplanlegger/__about__.py | cut -d'=' -f2 | xargs)" >> "$GITHUB_ENV"
 
       - name: Create new tag
         run: |
