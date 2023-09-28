@@ -30,6 +30,9 @@ pytest tests/test_*.py --csv tests/test_result.csv --csv-columns utc_timestamp,i
 git commit tests/test_result.csv -m "Unitetest result"
 ```
 
+## Building and publishing.
+Editing the [__about__.py](turplanlegger/__about__.py) file will trigger a GitHub Action that creates a new version tag.  
+After a new version tag is avaiable on GitHub, the new version will be built by GitHub Actions and a new release is published.
 
 ## Docker
 
