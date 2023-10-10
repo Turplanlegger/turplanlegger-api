@@ -1,6 +1,7 @@
 import json
 import unittest
 from uuid import uuid4
+from datetime import datetime
 
 from turplanlegger.app import create_app, db
 from turplanlegger.auth.utils import hash_password
@@ -455,7 +456,7 @@ class UsersTestCase(unittest.TestCase):
         response = self.client.get(f'/users/{self.user10["id"]}', headers={'Authorization': f'Bearer {data["token"]}'})
         self.assertEqual(response.status_code, 200)
 
-    def test_date_whoami(self):
+    def test_date_format(self):
         response = self.client.post('/users', data=json.dumps(self.user1), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
@@ -467,4 +468,6 @@ class UsersTestCase(unittest.TestCase):
         response = self.client.get(f'/users/{data["id"]}', headers=self.headers)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['user']['create_time'])
+        print(data['user']['create_time'])
+        print(datetime.strptime(data['user']['create_time'], "%Y-%m-%dT%H:%M:%S.%f"))
+        self.assertIsInstance(datetime.strptime(data['user']['create_time'], "%Y-%m-%dT%H:%M:%S.%f"), data['user']['create_time'])

@@ -133,7 +133,7 @@ class User:
             'private': self.private,
             'create_time': self.create_time.isoformat(),
             'deleted': self.deleted,
-            'delete_time': self.delete_time.isoformat()
+            'delete_time': self.delete_time
         }
 
     def create(self) -> 'User':
