@@ -454,3 +454,17 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         response = self.client.get(f'/users/{self.user10["id"]}', headers={'Authorization': f'Bearer {data["token"]}'})
         self.assertEqual(response.status_code, 200)
+
+    def test_date_whoami(self):
+        response = self.client.post('/users', data=json.dumps(self.user1), headers=self.headers_json)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+
+        response = self.client.get(f'/whoami', headers=self.headers)
+
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(f'/users/{data["id"]}', headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['user']['create_time'])
