@@ -44,7 +44,7 @@ class Note:
             'owner': self.owner,
             'name': self.name,
             'content': self.content,
-            'create_time': self.create_time
+            'create_time': self.create_time.isoformat()
         }
 
     def create(self) -> 'Note':

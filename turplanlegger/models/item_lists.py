@@ -109,7 +109,7 @@ class ItemList:
             'private': self.private,
             'items': [item.serialize for item in self.items],
             'items_checked': [item.serialize for item in self.items_checked],
-            'create_time': self.create_time
+            'create_time': self.create_time.isoformat()
         }
 
     def create(self) -> 'ItemList':

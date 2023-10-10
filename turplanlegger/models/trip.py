@@ -104,7 +104,7 @@ class Trip:
             'notes': self.notes,
             'routes': self.routes,
             'item_lists': self.item_lists,
-            'create_time': self.create_time
+            'create_time': self.create_time.isoformat()
         }
 
     def create(self) -> 'Trip':

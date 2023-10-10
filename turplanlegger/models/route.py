@@ -71,7 +71,7 @@ class Route:
             'owner': self.owner,
             'route': self.route,
             'route_history': self.route_history,
-            'create_time': self.create_time,
+            'create_time': self.create_time.isoformat(),
             'name': self.name,
             'comment': self.comment
         }

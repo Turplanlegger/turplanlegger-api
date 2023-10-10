@@ -112,7 +112,7 @@ class TripDate:
             'end_time': self.end_time.isoformat(),
             'trip_id': self.trip_id,
             'selected': self.selected,
-            'create_time': self.create_time
+            'create_time': self.create_time.isoformat()
         }
 
     def create(self) -> 'TripDate':

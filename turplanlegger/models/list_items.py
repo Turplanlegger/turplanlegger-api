@@ -105,7 +105,7 @@ class ListItem:
             'owner': self.owner,
             'item_list': self.item_list,
             'content': self.content,
-            'create_time': self.create_time
+            'create_time': self.create_time.isoformat()
         }
 
     @property
