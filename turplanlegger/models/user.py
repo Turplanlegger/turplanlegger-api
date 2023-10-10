@@ -131,9 +131,9 @@ class User:
             'email': self.email,
             'auth_method': self.auth_method,
             'private': self.private,
-            'create_time': self.create_time,
+            'create_time': self.create_time.isoformat(),
             'deleted': self.deleted,
-            'delete_time': self.delete_time
+            'delete_time': self.delete_time.isoformat()
         }
 
     def create(self) -> 'User':
