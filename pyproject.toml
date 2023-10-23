@@ -42,7 +42,7 @@ dev = [
     "pytest-csv>=3.0.0",
     "pytest-cov==4.1.0",
     "wheel==0.41.2",
-    "ruff==v0.0.269"
+    "ruff==v0.1.1"
 ]
 prod = [
     "uwsgi==2.0.22",
