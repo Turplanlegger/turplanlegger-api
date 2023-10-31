@@ -12,6 +12,7 @@ requires-python = ">=3.10"
 authors = [
     { name = "Are Schjetne", email = "are.schjetne@gmail.com" },
     { name = "Petter Bjørkås", email = "peseb@icloud.com" },
+    { name = "Martin Høgli", email = "martin.lindelien@gmail.com" },
 ]
 keywords = [
     "planning",
