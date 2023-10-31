@@ -63,12 +63,6 @@ lint = "pre-commit run -a --show-diff-on-failure"
 branch = true
 parallel = true
 
-[tool.coverage.report]
-exclude_lines = [
-  "no cov"
-]
-
-
 [tool.hatch.build.targets.sdist]
 include = [
     "/turplanlegger",
