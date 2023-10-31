@@ -31,7 +31,7 @@ dependencies = [
     "psycopg==3.1.12",
     "psycopg[pool]==3.1.12",
     "PyJWT==2.8.0",
-    "cryptography==41.0.4",
+    "cryptography==41.0.5",
     "httpx==0.25.0"
 ]
 [project.optional-dependencies]
@@ -42,7 +42,7 @@ dev = [
     "pytest-csv>=3.0.0",
     "pytest-cov==4.1.0",
     "wheel==0.41.2",
-    "ruff==v0.0.269"
+    "ruff==v0.1.3"
 ]
 prod = [
     "uwsgi==2.0.22",
