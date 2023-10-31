@@ -39,7 +39,6 @@ dev = [
     "hatch==1.7.0",
     "pre-commit==3.5.0",
     "pytest==7.4.3",
-    "pytest-csv>=3.0.0",
     "pytest-cov==4.1.0",
     "wheel==0.41.2",
     "ruff==v0.1.3"
@@ -55,32 +54,18 @@ Homepage = "https://github.com/Turplanlegger/turplanlegger"
 [tool.hatch.version]
 path = "turplanlegger/__about__.py"
 
-[tool.hatch.envs.default]
-dependencies = [
-  "pytest",
-  "pytest-cov",
-  "pytest-csv>=3.0.0",
-]
 [tool.hatch.envs.default.scripts]
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=turplanlegger --cov=tests {args}"
 no-cov = "cov --no-cov {args}"
 lint = "pre-commit run -a --show-diff-on-failure"
 
-[[tool.hatch.envs.test.matrix]]
-python = ["310", "311", "312"]
-
 [tool.coverage.run]
 branch = true
 parallel = true
-omit = [
-  "turpanlegger/__about__.py",
-]
 
 [tool.coverage.report]
 exclude_lines = [
-  "no cov",
-  "if __name__ == .__main__.:",
-  "if TYPE_CHECKING:",
+  "no cov"
 ]
 
 
@@ -93,6 +78,3 @@ include = [
 select = ["E", "W", "Q", "I", "F", "YTT", "C4", "T10", "ISC", "ICN", "RSE"]
 line-length = 120
 target-version = "py312"
-
-[tool.ruff.flake8-quotes]
-inline-quotes = "single"
