@@ -11,13 +11,13 @@ class Note:
 
     def __init__(self, owner: str, content: str, **kwargs) -> None:
         if not owner:
-            raise ValueError('Missing mandatory field \'owner\'')
+            raise ValueError("Missing mandatory field 'owner'")
         if not isinstance(owner, str):
-            raise TypeError('\'owner\' must be str')
+            raise TypeError("'owner' must be str")
         if not content:
-            raise ValueError('Missing mandatory field \'content\'')
+            raise ValueError("Missing mandatory field 'content'")
         if not isinstance(content, str):
-            raise TypeError('\'content\' must be string')
+            raise TypeError("'content' must be string")
 
         self.owner = owner
         self.content = content

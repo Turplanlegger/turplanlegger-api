@@ -88,7 +88,7 @@ class RoutesTestCase(unittest.TestCase):
 
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['title'], 'Failed to parse route')
-        self.assertEqual(data['detail'], 'Missing mandatory field \'route\'')
+        self.assertEqual(data['detail'], "Missing mandatory field 'route'")
         self.assertEqual(data['type'], 'about:blank')
         self.assertEqual(data['instance'], 'http://localhost/routes')
 

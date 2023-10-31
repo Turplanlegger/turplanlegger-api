@@ -72,7 +72,7 @@ class UsersTestCase(unittest.TestCase):
             'last_name': 'Smart',
             'email': 'petter@smart.com',
             'auth_method': 'basic',
-            'password': 'GbYRCzE}q:~e6Qo?\':fg^*:d6;{*NV&b=Q2GUAqYv#792C<{?,8@JoYX>qV)3H^q',
+            'password': "GbYRCzE}q:~e6Qo?':fg^*:d6;{*NV&b=Q2GUAqYv#792C<{?,8@JoYX>qV)3H^q",
             'private': False
         }
         cls.user7 = {
@@ -81,7 +81,7 @@ class UsersTestCase(unittest.TestCase):
             'last_name': 'Smart',
             'email': 'petter@smart.com',
             'auth_method': 'basic',
-            'password': 'm9uMSpb&q.Ft,[5,%oWj7yk-$YFBvKd}J<fNrToR2x~&+d_9J}K:gcGmUq#qkL\'#',
+            'password': "m9uMSpb&q.Ft,[5,%oWj7yk-$YFBvKd}J<fNrToR2x~&+d_9J}K:gcGmUq#qkL'#",
             'private': False
         }
         cls.user8 = {
@@ -238,7 +238,7 @@ class UsersTestCase(unittest.TestCase):
 
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['title'], 'Failed to parse user')
-        self.assertEqual(data['detail'], 'Missing mandatory field \'last_name\'')
+        self.assertEqual(data['detail'], "Missing mandatory field 'last_name'")
         self.assertEqual(data['type'], 'about:blank')
         self.assertEqual(data['instance'], 'http://localhost/users')
 
