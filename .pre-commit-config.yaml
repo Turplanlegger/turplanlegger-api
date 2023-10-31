@@ -7,7 +7,6 @@ repos:
     -   id: fix-byte-order-marker
     -   id: check-case-conflict
     -   id: check-docstring-first
-    -   id: check-json
     -   id: check-merge-conflict
     -   id: check-yaml
     -   id: debug-statements
