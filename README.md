@@ -23,6 +23,9 @@ pip install pytest
 pytest tests/test_*.py`
 ```
 
+## Building and publishing.
+Editing the [\_\_about__.py](turplanlegger/__about__.py) file will trigger a GitHub Action that creates a new version tag.  
+After a new version tag is avaiable on GitHub, the new version will be built by GitHub Actions and a new release is published.
 
 ## Docker
 
