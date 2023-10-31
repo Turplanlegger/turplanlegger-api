@@ -30,11 +30,11 @@ class Route:
 
     def __init__(self, owner: str, route: JSON, **kwargs) -> None:
         if not owner:
-            raise ValueError('Missing mandatory field \'owner\'')
+            raise ValueError("Missing mandatory field 'owner'")
         if not isinstance(owner, str):
-            raise TypeError('\'owner\' must be string')
+            raise TypeError("'owner' must be string")
         if not route:
-            raise ValueError('Missing mandatory field \'route\'')
+            raise ValueError("Missing mandatory field 'route'")
 
         self.owner = owner
         self.route = route

@@ -39,13 +39,13 @@ class Trip:
 
     def __init__(self, owner: str, name: str, **kwargs) -> None:
         if not owner:
-            raise ValueError('Missing mandatory field \'owner\'')
+            raise ValueError("Missing mandatory field 'owner'")
         if not isinstance(owner, str):
-            raise TypeError('\'owner\' must be string')
+            raise TypeError("'owner' must be string")
         if not name:
-            raise ValueError('Missing mandatory field \'name\'')
+            raise ValueError("Missing mandatory field 'name'")
         if not isinstance(name, str):
-            raise TypeError('\'name\' must be string')
+            raise TypeError("'name' must be string")
 
         if name is not None and len(name) > 512:
             raise ValueError("'name' is too long")

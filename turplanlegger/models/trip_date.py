@@ -38,13 +38,13 @@ class TripDate:
 
     def __init__(self, owner: str, start_time: datetime, end_time: datetime, **kwargs) -> None:
         if not owner:
-            raise ValueError('Missing mandatory field \'owner\'')
+            raise ValueError("Missing mandatory field 'owner'")
         if not isinstance(owner, str):
-            raise TypeError('\'owner\' must be string')
+            raise TypeError("'owner' must be string")
         if not isinstance(start_time, datetime):
-            raise TypeError('\'start_time\' must be an datetime instance')
+            raise TypeError("'start_time' must be an datetime instance")
         if not isinstance(end_time, datetime):
-            raise TypeError('\'end_time\' must be an datetime instance')
+            raise TypeError("'end_time' must be an datetime instance")
 
         self.owner = owner
         self.start_time = start_time
@@ -77,19 +77,19 @@ class TripDate:
         """
         start_time = json.get('start_time', None)
         if start_time is None:
-            raise ValueError('Missing mandatory field \'start_time\'')
+            raise ValueError("Missing mandatory field 'start_time'")
         try:
             start_time = datetime.fromisoformat(start_time)
         except ValueError:
-            raise ValueError('Field \'end_time\' must be ISO 8601 date as tring')
+            raise ValueError("Field 'end_time' must be ISO 8601 date as tring")
 
         end_time = json.get('end_time', None)
         if end_time is None:
-            raise ValueError('Missing mandatory field \'end_time\'')
+            raise ValueError("Missing mandatory field 'end_time'")
         try:
             end_time = datetime.fromisoformat(end_time)
         except ValueError:
-            raise ValueError('Field \'end_time\' must be ISO 8601 date as string')
+            raise ValueError("Field 'end_time' must be ISO 8601 date as string")
 
         if start_time > end_time:
             raise ValueError('start_time can not be before end_time')

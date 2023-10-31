@@ -13,6 +13,6 @@ def before_request():
             and not request.is_json):
         raise ApiProblem(
             'Request has wrong Content-Type',
-            'PATCH, POST and PUT requests must set \'Content-type\' to \'application/json\'',
+            "PATCH, POST and PUT requests must set 'Content-type' to 'application/json'",
             415
         )

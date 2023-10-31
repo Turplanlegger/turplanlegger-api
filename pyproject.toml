@@ -45,7 +45,7 @@ dev = [
     "ruff==v0.1.3"
 ]
 prod = [
-    "uwsgi==2.0.22",
+    "gunicorn[gthread]==21.2.0",
     "psycopg[c]==3.1.12"
 ]
 
@@ -67,7 +67,7 @@ no-cov = "cov --no-cov {args}"
 lint = "pre-commit run -a --show-diff-on-failure"
 
 [[tool.hatch.envs.test.matrix]]
-python = ["310", "311"]
+python = ["310", "311", "312"]
 
 [tool.coverage.run]
 branch = true
@@ -90,9 +90,9 @@ include = [
 ]
 
 [tool.ruff]
-select = ["E", "W", "I", "F", "YTT", "C4", "T10", "ISC", "ICN", "RSE"]
+select = ["E", "W", "Q", "I", "F", "YTT", "C4", "T10", "ISC", "ICN", "RSE"]
 line-length = 120
-target-version = "py311"
+target-version = "py312"
 
 [tool.ruff.flake8-quotes]
 inline-quotes = "single"

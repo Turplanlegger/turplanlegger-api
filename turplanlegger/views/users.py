@@ -27,7 +27,7 @@ def lookup_user():
         raise ApiProblem('Failed to get user', str(e), 400)
 
     if not email:
-        raise ApiProblem('Failed to get user', 'Provide \'email\' in JSON body', 400)
+        raise ApiProblem('Failed to get user', "Provide 'email' in JSON body", 400)
 
     try:
         user = User.find_by_email(email)
