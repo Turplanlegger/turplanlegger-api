@@ -10,7 +10,6 @@ repos:
     -   id: check-merge-conflict
     -   id: check-yaml
     -   id: debug-statements
-    -   id: double-quote-string-fixer
     -   id: fix-encoding-pragma
         args: ['--remove']
     -   id: name-tests-test
