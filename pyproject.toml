@@ -12,6 +12,7 @@ requires-python = ">=3.10"
 authors = [
     { name = "Are Schjetne", email = "are.schjetne@gmail.com" },
     { name = "Petter Bjørkås", email = "peseb@icloud.com" },
+    { name = "Martin Høgli", email = "martin.lindelien@gmail.com" },
 ]
 keywords = [
     "planning",
@@ -26,27 +27,26 @@ classifiers = [
 ]
 dependencies = [
     "bcrypt==4.0.1",
-    "Flask==2.3.3",
+    "Flask==3.0.0",
     "flask-cors==4.0.0",
-    "psycopg==3.1.10",
-    "psycopg[pool]==3.1.10",
+    "psycopg==3.1.12",
+    "psycopg[pool]==3.1.12",
     "PyJWT==2.8.0",
-    "cryptography==41.0.4",
+    "cryptography==41.0.5",
     "httpx==0.25.0"
 ]
 [project.optional-dependencies]
 dev = [
     "hatch==1.7.0",
-    "pre-commit==3.4.0",
-    "pytest==7.4.2",
-    "pytest-csv>=3.0.0",
+    "pre-commit==3.5.0",
+    "pytest==7.4.3",
     "pytest-cov==4.1.0",
     "wheel==0.41.2",
-    "ruff==v0.0.269"
+    "ruff==v0.1.3"
 ]
 prod = [
-    "uwsgi==2.0.22",
-    "psycopg[c]==3.1.10"
+    "gunicorn[gthread]==21.2.0",
+    "psycopg[c]==3.1.12"
 ]
 
 [project.urls]
@@ -55,34 +55,14 @@ Homepage = "https://github.com/Turplanlegger/turplanlegger"
 [tool.hatch.version]
 path = "turplanlegger/__about__.py"
 
-[tool.hatch.envs.default]
-dependencies = [
-  "pytest",
-  "pytest-cov",
-  "pytest-csv>=3.0.0",
-]
 [tool.hatch.envs.default.scripts]
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=turplanlegger --cov=tests {args}"
 no-cov = "cov --no-cov {args}"
 lint = "pre-commit run -a --show-diff-on-failure"
 
-[[tool.hatch.envs.test.matrix]]
-python = ["310", "311"]
-
 [tool.coverage.run]
 branch = true
 parallel = true
-omit = [
-  "turpanlegger/__about__.py",
-]
-
-[tool.coverage.report]
-exclude_lines = [
-  "no cov",
-  "if __name__ == .__main__.:",
-  "if TYPE_CHECKING:",
-]
-
 
 [tool.hatch.build.targets.sdist]
 include = [
@@ -90,9 +70,9 @@ include = [
 ]
 
 [tool.ruff]
-select = ["E", "W", "I", "F", "YTT", "C4", "T10", "ISC", "ICN", "RSE"]
+select = ["E", "W", "Q", "I", "F", "YTT", "C4", "T10", "ISC", "ICN", "RSE"]
 line-length = 120
-target-version = "py311"
+target-version = "py312"
 
 [tool.ruff.flake8-quotes]
 inline-quotes = "single"

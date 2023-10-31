@@ -38,25 +38,25 @@ class User:
                  password: str, private: bool = False, **kwargs) -> None:
 
         if not isinstance(private, bool):
-            raise TypeError('\'private\' must be boolean')
+            raise TypeError("'private' must be boolean")
 
         if not name:
-            raise ValueError('Missing mandatory field \'name\'')
+            raise ValueError("Missing mandatory field 'name'")
         if not isinstance(name, str):
-            raise TypeError('\'name\' must be string')
+            raise TypeError("'name' must be string")
 
         if not last_name:
-            raise ValueError('Missing mandatory field \'last_name\'')
+            raise ValueError("Missing mandatory field 'last_name'")
         if not isinstance(last_name, str):
-            raise TypeError('\'last_name\' must be string')
+            raise TypeError("'last_name' must be string")
 
         if not email:
-            raise ValueError('Missing mandatory field \'email\'')
+            raise ValueError("Missing mandatory field 'email'")
         if not isinstance(email, str):
-            raise TypeError('\'email\' must be string')
+            raise TypeError("'email' must be string")
 
         if not auth_method:
-            raise ValueError('Missing mandatory field \'auth_method\'')
+            raise ValueError("Missing mandatory field 'auth_method'")
 
         self.id = kwargs.get('id') or str(uuid4())
         self.name = name
