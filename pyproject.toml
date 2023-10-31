@@ -72,3 +72,6 @@ include = [
 select = ["E", "W", "Q", "I", "F", "YTT", "C4", "T10", "ISC", "ICN", "RSE"]
 line-length = 120
 target-version = "py312"
+
+[tool.ruff.flake8-quotes]
+inline-quotes = "single"
