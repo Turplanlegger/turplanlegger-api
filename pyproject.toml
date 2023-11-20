@@ -42,7 +42,7 @@ dev = [
     "pytest==7.4.3",
     "pytest-cov==4.1.0",
     "wheel==0.41.3",
-    "ruff==v0.1.4"
+    "ruff==v0.1.6"
 ]
 prod = [
     "gunicorn[gthread]==21.2.0",
