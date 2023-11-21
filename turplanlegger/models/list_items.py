@@ -116,7 +116,8 @@ class ListItem:
         """
         return {
             'id': self.id,
-            'content': self.content
+            'content': self.content,
+            'checked': self.checked
         }
 
     def create(self) -> 'ListItem':
