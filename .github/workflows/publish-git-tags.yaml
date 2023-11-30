@@ -1,53 +1,31 @@
-name: Create and publish a Github tag and release
+name: Create Release
 
 on:
-  workflow_dispatch:
   push:
     branches: [main]
-  pull_request:
+    paths:
+      - turplanlegger/__about__.py
 
 jobs:
-  check-and-publish-new-tags:
+  create-release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      packages: write
-
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Generate a token
-        id: generate_token
-        uses: actions/create-github-app-token@v1
-        with:
-          app_id: ${{ secrets.TURPLANLEGGER_SIGNING_BOT_APP_ID }}
-          private_key: ${{ secrets.TURPLANLEGGER_SIGNING_BOT_APP_PRIVATE_KEY }}
+      - name: Get version
+        id: get-version
+        run: echo "NEW_VERSION=$(grep -v '^#' turplanlegger/__about__.py | cut -d'=' -f2 | xargs)" >> "$GITHUB_OUTPUT"
 
-      - name: Login for bot
-        run: |
-          git config user.name "turplanlegger-signing-bot[bot]"
-          git config user.email "393644+turplanlegger-signing-bot[bot]@users.noreply.github.com"
-
-      - name: Create new tag
+      - name: Create new tag and release
         env:
-          NEW_VERSION: v1.0.0test
+          GH_TOKEN: ${{ github.token }}
+          NEW_VERSION: ${{ steps.get-version.outputs.NEW_VERSION }}
         run: |
-          git checkout testing-siging-bot
-          git commit --allow-empty -sm "Test"
-          git push -f
-#
-#      - name: Update latest tag
-#        run: |
-#          git tag -sfam "Release v$NEW_VERSION" latest
-#          git push --force --tags
-#          echo "Tag \`latest\` updated to \`$NEW_VERSION\` \`$(git rev-parse -q --verify $NEW_VERSION)\`" >> $GITHUB_STEP_SUMMARY
-#
-#      - name: Create GitHub Release
-#        uses: ncipollo/release-action@v1
-#        with:
-#          name: "Release ${{ env.NEW_VERSION }}"
-#          tag: ${{ env.NEW_VERSION }}
-#          token: ${{ secrets.DEPLOY_TOKEN }}
+          gh release create "$NEW_VERSION" \
+            --target "main" \
+            --latest \
+            --title "$NEW_VERSION" \
+            --generate-notes
