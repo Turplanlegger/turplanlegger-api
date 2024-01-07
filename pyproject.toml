@@ -29,8 +29,8 @@ dependencies = [
     "bcrypt==4.1.2",
     "Flask==3.0.0",
     "flask-cors==4.0.0",
-    "psycopg==3.1.13",
-    "psycopg[pool]==3.1.13",
+    "psycopg==3.1.17",
+    "psycopg[pool]==3.1.17",
     "PyJWT==2.8.0",
     "cryptography==41.0.7",
     "httpx==0.25.2"
@@ -46,7 +46,7 @@ dev = [
 ]
 prod = [
     "gunicorn[gthread]==21.2.0",
-    "psycopg[c]==3.1.13"
+    "psycopg[c]==3.1.17"
 ]
 
 [project.urls]
