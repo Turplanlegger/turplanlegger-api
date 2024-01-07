@@ -1,4 +1,4 @@
-FROM python:3.11-slim-bullseye
+FROM python:3.12-slim-bullseye
 
 # Set work directory
 WORKDIR /turplanlegger
@@ -17,7 +17,7 @@ RUN apt-get update && \
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=5 CMD [ "curl", "-fs", "http://localhost:5000/test"]
 
 # Default command
-CMD ["uwsgi", "--http", "0.0.0.0:5000", "--module", "wsgi:app", "--processes", "4", "--threads", "2"]
+CMD ["gunicorn", "--bind=0.0.0.0:5000", "--workers=2", "--threads=4", "--worker-class=gthread", "--log-file=-", "wsgi:app"]
 
 # Expose port
 EXPOSE 5000

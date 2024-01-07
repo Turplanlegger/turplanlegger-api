@@ -23,13 +23,9 @@ pip install pytest
 pytest tests/test_*.py`
 ```
 
-Run test and save result:
-```
-pip install pytest pytest-csv
-pytest tests/test_*.py --csv tests/test_result.csv --csv-columns utc_timestamp,id,module,name,file,status,message,duration
-git commit tests/test_result.csv -m "Unitetest result"
-```
-
+## Building and publishing.
+Editing the [\_\_about__.py](turplanlegger/__about__.py) file will trigger a GitHub Action that creates a new version tag.  
+After a new version tag is avaiable on GitHub, the new version will be built by GitHub Actions and a new release is published.
 
 ## Docker
 
