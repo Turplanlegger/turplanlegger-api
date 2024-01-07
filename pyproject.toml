@@ -68,6 +68,10 @@ parallel = true
 include = [
     "/turplanlegger",
 ]
+[tool.hatch.build.targets.wheel]
+include = [
+    "/turplanlegger",
+]
 
 [tool.ruff]
 select = ["E", "W", "Q", "I", "F", "YTT", "C4", "T10", "ISC", "ICN", "RSE"]
