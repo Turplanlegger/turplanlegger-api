@@ -105,6 +105,7 @@ class ListItem:
             'owner': self.owner,
             'item_list': self.item_list,
             'content': self.content,
+            'checked': self.checked,
             'create_time': self.create_time
         }
 
@@ -115,7 +116,8 @@ class ListItem:
         """
         return {
             'id': self.id,
-            'content': self.content
+            'content': self.content,
+            'checked': self.checked
         }
 
     def create(self) -> 'ListItem':
