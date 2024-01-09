@@ -20,12 +20,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Get App Token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.TURPLANLEGGER_BOT_APP_ID }}
+          private-key: ${{ secrets.TURPLANLEGGER_BOT_PRIVATE_KEY }}
+
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
-          username: turplanlegger-bot
-          password: ${{ secrets.DEPLOY_TOKEN }}
+          username: ${{ vars.TURPLANLEGGER_BOT_APP_ID }}
+          password: ${{ steps.app-token.outputs.token }}
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
