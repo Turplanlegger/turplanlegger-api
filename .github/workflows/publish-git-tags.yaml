@@ -13,13 +13,20 @@ jobs:
     permissions:
       contents: read
       packages: write
-
     steps:
+
+      - name: Get App Token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.TURPLANLEGGER_BOT_APP_ID }}
+          private-key: ${{ secrets.TURPLANLEGGER_BOT_PRIVATE_KEY }}
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.DEPLOY_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Login for bot
         run: |
@@ -50,8 +57,9 @@ jobs:
           echo "Tag \`latest\` updated to \`$NEW_VERSION\` \`$(git rev-parse -q --verify $NEW_VERSION)\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Create GitHub Release
-        uses: ncipollo/release-action@v1
-        with:
-          name: "Release ${{ env.NEW_VERSION }}"
-          tag: ${{ env.NEW_VERSION }}
-          token: ${{ secrets.DEPLOY_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          gh release create "${{ env.NEW_VERSION }}" \
+            --title "Release ${{ env.NEW_VERSION }}" \
+            --latest
