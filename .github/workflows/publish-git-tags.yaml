@@ -50,12 +50,6 @@ jobs:
           git push origin "$NEW_VERSION"
           echo "Tag \`$NEW_VERSION\` \`$(git rev-parse -q --verify $NEW_VERSION)\` created" >> $GITHUB_STEP_SUMMARY
 
-      - name: Update latest tag
-        run: |
-          git tag -sfam "Release v$NEW_VERSION" latest
-          git push --force --tags
-          echo "Tag \`latest\` updated to \`$NEW_VERSION\` \`$(git rev-parse -q --verify $NEW_VERSION)\`" >> $GITHUB_STEP_SUMMARY
-
       - name: Create GitHub Release
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
