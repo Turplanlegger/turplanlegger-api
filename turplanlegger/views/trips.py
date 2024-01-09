@@ -36,6 +36,32 @@ def add_trip():
 
     return jsonify(trip.serialize), 201
 
+@api.route('/trips/<trip_id>', methods=['PUT'])
+@auth
+def update_trip(trip_id):
+    trip = Trip.find_trip(trip_id)
+
+    if not trip:
+        raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
+    
+    name = request.json.get('name', None)
+    dates = request.json.get('dates', None)
+    dates_parsed = []
+            
+    # 1. Check if any existing dates has been removed
+    # 2. Check if any existing date has been changed
+    # 3. Check for new date and parse
+    # 4. Create new dates
+    # 5. Delete removed dates
+    # 6. Update changed dates
+
+    try:
+        trip = trip.create()
+    except Exception as e:
+        raise ApiProblem('Failed to create trip', str(e), 500)
+
+    return jsonify(trip.serialize), 201
+
 
 @api.route('/trips/notes', methods=['PATCH'])
 @auth
