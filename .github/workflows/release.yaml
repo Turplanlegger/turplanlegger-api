@@ -43,6 +43,8 @@ jobs:
           echo "Tag \`$NEW_VERSION\` \`$(git rev-parse -q --verify $NEW_VERSION)\` created" >> $GITHUB_STEP_SUMMARY
 
       - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create "${{ env.NEW_VERSION }}" \
             --title "Release ${{ env.NEW_VERSION }}" \
