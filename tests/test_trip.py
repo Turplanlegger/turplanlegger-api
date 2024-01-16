@@ -688,12 +688,11 @@ class TripsTestCase(unittest.TestCase):
 
         trip = json.loads(response.data.decode('utf-8'))
 
-        updated_trip = self.trip_with_multiple_dates_one_selected
-        updated_trip['name'] = 'New tripin pete'
+        trip['name'] = 'New tripin pete'
 
         response = self.client.put(
             f'/trips/{trip["id"]}',
-            data=json.dumps(self.updated_trip),
+            data=json.dumps(trip),
             headers=self.headers_json
         )
 
@@ -702,7 +701,9 @@ class TripsTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['id'], trip['id'])
         self.assertEqual(data['owner'], trip['owner'])
-        self.assertEqual(data['name'], updated_trip['name'])
+        self.assertEqual(data['name'], trip['name'])
+
+        self.assertCountEqual(data['dates'], trip['dates'])
 
         self.assertEqual(data['dates'][0]['owner'], data['owner'])
         self.assertEqual(data['dates'][0]['id'], 1)
@@ -730,8 +731,7 @@ class TripsTestCase(unittest.TestCase):
 
         trip = json.loads(response.data.decode('utf-8'))
 
-        updated_trip = self.trip_with_multiple_dates_one_selected
-        updated_trip['dates'].push(
+        trip['dates'].push(
             {
                 'start_time': (datetime.now() + timedelta(days=7)).isoformat(),
                 'end_time': (datetime.now() + timedelta(days=8)).isoformat()
@@ -740,17 +740,19 @@ class TripsTestCase(unittest.TestCase):
 
         response = self.client.put(
             f'/trips/{trip["id"]}',
-            data=json.dumps(self.updated_trip),
+            data=json.dumps(trip),
             headers=self.headers_json
         )
 
         self.assertEqual(response.status_code, 200)
 
         data = json.loads(response.data.decode('utf-8'))
-        
+
         self.assertEqual(data['id'], trip['id'])
         self.assertEqual(data['owner'], trip['owner'])
-        self.assertEqual(data['name'], updated_trip['name'])
+        self.assertEqual(data['name'], trip['name'])
+        
+        self.assertCountEqual(data['dates'], trip['dates'])
 
         self.assertEqual(data['dates'][0]['owner'], data['owner'])
         self.assertEqual(data['dates'][0]['id'], 1)
@@ -770,10 +772,102 @@ class TripsTestCase(unittest.TestCase):
         self.assertEqual(data['dates'][2]['id'], 3)
         self.assertEqual(data['dates'][2]['trip_id'], data['id'])
         self.assertEqual(data['dates'][2]['selected'], False)
-        self.assertEqual(data['dates'][2]['start_time'], updated_trip['dates'][2]['start_time'])
-        self.assertEqual(data['dates'][2]['end_time'], updated_trip['dates'][2]['end_time'])
+        self.assertEqual(data['dates'][2]['start_time'], trip['dates'][2]['start_time'])
+        self.assertEqual(data['dates'][2]['end_time'], trip['dates'][2]['end_time'])
 
     def test_update_trip_remove_date(self):
+        response = self.client.post(
+            '/trips',
+            data=json.dumps(self.trip_with_multiple_dates),
+            headers=self.headers_json
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        trip = json.loads(response.data.decode('utf-8'))
+
+        trip['dates'].pop(1)
+
+        response = self.client.put(
+            f'/trips/{trip["id"]}',
+            data=json.dumps(trip),
+            headers=self.headers_json
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['id'], trip['id'])
+        self.assertEqual(data['owner'], trip['owner'])
+        self.assertEqual(data['name'], trip['name'])
+        
+        self.assertCountEqual(data['dates'], trip['dates'])
+
+        self.assertEqual(data['dates'][0]['owner'], data['owner'])
+        self.assertEqual(data['dates'][0]['id'], 1)
+        self.assertEqual(data['dates'][0]['trip_id'], data['id'])
+        self.assertEqual(data['dates'][0]['selected'], True)
+        self.assertEqual(data['dates'][0]['start_time'], trip['dates'][0]['start_time'])
+        self.assertEqual(data['dates'][0]['end_time'], trip['dates'][0]['end_time'])
+    
     def test_update_trip_change_date(self):
+        response = self.client.post(
+            '/trips',
+            data=json.dumps(self.trip_with_multiple_dates),
+            headers=self.headers_json
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        trip = json.loads(response.data.decode('utf-8'))
+
+        trip['dates'][0]['end_time'] = (datetime.now() + timedelta(days=8)).isoformat()
+
+        response = self.client.put(
+            f'/trips/{trip["id"]}',
+            data=json.dumps(trip),
+            headers=self.headers_json
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['id'], trip['id'])
+        self.assertEqual(data['owner'], trip['owner'])
+        self.assertEqual(data['name'], trip['name'])
+
+        self.assertCountEqual(data['dates'], trip['dates'])
+
+        self.assertEqual(data['dates'][0]['owner'], data['owner'])
+        self.assertEqual(data['dates'][0]['id'], 1)
+        self.assertEqual(data['dates'][0]['trip_id'], data['id'])
+        self.assertEqual(data['dates'][0]['selected'], True)
+        self.assertEqual(data['dates'][0]['start_time'], trip['dates'][0]['start_time'])
+        self.assertEqual(data['dates'][0]['end_time'], trip['dates'][0]['end_time'])
+
+        self.assertEqual(data['dates'][1]['owner'], data['owner'])
+        self.assertEqual(data['dates'][1]['id'], 2)
+        self.assertEqual(data['dates'][1]['trip_id'], data['id'])
+        self.assertEqual(data['dates'][1]['selected'], False)
+        self.assertEqual(data['dates'][1]['start_time'], trip['dates'][1]['start_time'])
+        self.assertEqual(data['dates'][1]['end_time'], trip['dates'][1]['end_time'])
+
     def test_update_trip_no_change(self):
-    def test_update_trip(self):
+        response = self.client.post(
+            '/trips',
+            data=json.dumps(self.trip_with_multiple_dates),
+            headers=self.headers_json
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        trip = json.loads(response.data.decode('utf-8'))
+
+        response = self.client.put(
+            f'/trips/{trip["id"]}',
+            data=json.dumps(trip),
+            headers=self.headers_json
+        )
+
+        self.assertEqual(response.status_code, 400)
