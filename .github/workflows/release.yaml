@@ -76,7 +76,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           context: git
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ github.repository }}
           tags: |
             type=raw,value=latest
             type=pep440,pattern={{version}}
