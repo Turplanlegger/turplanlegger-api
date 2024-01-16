@@ -45,9 +45,63 @@ def update_trip(trip_id):
         raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
     
     name = request.json.get('name', None)
+
+    trip_changed = False
+
+    if name != trip.name:
+        trip_changed = True
+
     dates = request.json.get('dates', None)
-    dates_parsed = []
-            
+    dates_new = []
+    dates_existing = []
+    date_ids_existing = []
+    dates_removed = []
+
+    for date in dates:
+        if date.get('id', None) is None:
+            trip_changed = True
+            dates_new.push(date)
+            continue
+
+        dates_existing.push(date)
+        date_ids_existing.push(date.id)
+
+    for date in trip.dates:
+        if date.id not in date_ids_existing:
+            trip_changed = True
+            dates_removed.push(date)
+
+    for date in dates_new:
+        try:
+            TripDate.parse(date).create()
+        except (ValueError, KeyError):
+            # Do something about this
+            pass
+
+    for date in dates_removed:
+        date.delete()
+
+    for date in dates_existing:
+        needle = None
+        for date_in_db in trip.dates:
+            if date_in_db.id == date.id:
+                needle = date_in_db
+                break
+
+        date_changed = False
+        for attribute, value in vars(needle).items():
+            if date[attribute] != needle[attribute]:
+                trip_changed = True
+                date_changed = True
+                needle[attribute] = date[attribute]
+
+        if needle is not None and date_changed is True:
+            needle.update()
+
+    # trip.update is the next step
+    # We also need to move all this logic somewhere else
+
+
     # 1. Check if any existing dates has been removed
     # 2. Check if any existing date has been changed
     # 3. Check for new date and parse
@@ -60,7 +114,7 @@ def update_trip(trip_id):
     except Exception as e:
         raise ApiProblem('Failed to create trip', str(e), 500)
 
-    return jsonify(trip.serialize), 201
+    return jsonify(trip.serialize), 200
 
 
 @api.route('/trips/notes', methods=['PATCH'])
