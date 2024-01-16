@@ -49,6 +49,7 @@ jobs:
         run: |
           gh release create "${{ env.NEW_VERSION }}" \
             --title "Release ${{ env.NEW_VERSION }}" \
+            --generate-notes \
             --latest
 
   build-and-push-docker-image:
