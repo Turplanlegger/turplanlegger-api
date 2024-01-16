@@ -96,6 +96,9 @@ jobs:
     needs: build-and-push-docker-image
     steps:
 
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Check if new API-version is deployed
         env:
           API_URL: ${{ secrets.PROD_API_URL }}
