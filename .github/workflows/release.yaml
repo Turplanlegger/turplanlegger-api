@@ -103,8 +103,6 @@ jobs:
         env:
           API_URL: ${{ secrets.PROD_API_URL }}
         run: |
-          {
-            echo '```bash'
-            ./deploy/check_version.sh
-            echo '```'
-          } | tee -a $GITHUB_STEP_SUMMARY
+          echo '```bash' | tee -a $GITHUB_STEP_SUMMARY
+          ./deploy/check_version.sh | tee -a $GITHUB_STEP_SUMMARY
+          echo '```' | tee -a $GITHUB_STEP_SUMMARY
