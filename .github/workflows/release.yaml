@@ -50,7 +50,9 @@ jobs:
           gh release create "${{ env.NEW_VERSION }}" \
             --title "Release ${{ env.NEW_VERSION }}" \
             --generate-notes \
-            --latest
+            --latest \
+            docker-compose.yml \
+            docker-compose.dev.yml
 
   build-and-push-docker-image:
     name: Build and publish Docker image to GitHub Packages
