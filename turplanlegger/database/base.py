@@ -494,6 +494,16 @@ class Database:
             vars(trip_date)
         )
 
+    def update_trip_date(self, trip_date):
+        update = """
+            UPDATE trip_dates
+                SET start_time=%(start_time)s, end_time=%(end_time)s,
+                    selected=%(selected)s
+                WHERE id = %(id)s
+            RETURNING *
+        """
+        return self._updateone(update, vars(trip_dates))
+
     def select_trip_date(self, date_id):
         insert = """
             UPDATE trip_dates
