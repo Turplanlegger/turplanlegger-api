@@ -28,6 +28,14 @@ class Note:
         self.deleted = kwargs.get('deleted', None)
         self.delete_time = kwargs.get('delete_time', None)
 
+    def __repr__(self):
+        return (
+            f"Note(id='{self.id}', owner='{self.owner}', "
+            f"name='{self.name}', content='{self.content}', "
+            f"create_time={self.create_time}, update_time={self.update_time}, "
+            f"deleted={self.deleted}, delete_time={self.delete_time})"
+        )
+
     @classmethod
     def parse(cls, json: JSON) -> 'Note':
         return Note(

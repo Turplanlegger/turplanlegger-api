@@ -50,10 +50,9 @@ class ListItem:
 
     def __repr__(self):
         return (
-            'ListItem('
-            f'id: {self.id}, owner: {self.owner}, '
-            f'item_list: {self.item_list}, checked: {self.checked}, '
-            f'content: {self.content}, create_time: {self.create_time})'
+            f"ListItem(id='{self.id}', owner='{self.owner}', "
+            f"item_list='{self.item_list}', checked={self.checked}, "
+            f"content='{self.content}', create_time={self.create_time})"
         )
 
     @classmethod

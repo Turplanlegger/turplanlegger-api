@@ -62,12 +62,10 @@ class ItemList:
 
     def __repr__(self):
         return (
-            'ItemList('
-            f'id: {self.id}, owner: {self.owner}, '
-            f'name: {self.name}, '
-            f'items_count: {len(self.items)}, items: {self.items}, '
-            f'items_checked_count: {len(self.items_checked)}, items_checked: {self.items_checked}, '
-            f'create_time: {self.create_time})'
+            f"ItemList(id='{self.id}', owner='{self.owner}', "
+            f"name='{self.name}', private={self.private}, "
+            f"items={self.items}, items_checked={self.items_checked}, "
+            f"create_time={self.create_time})"
         )
 
     @classmethod

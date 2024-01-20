@@ -69,6 +69,14 @@ class User:
         self.delete_time = kwargs.get('delete_time', None)
         self.create_time = kwargs.get('create_time', None)
 
+    def __repr__(self):
+        return (
+            f"User(id={self.id}, name='{self.name}', last_name='{self.last_name}', "
+            f"email='{self.email}', auth_method={self.auth_method}, "
+            f"private={self.private}, deleted={self.deleted}, "
+            f"delete_time={self.delete_time}, create_time={self.create_time})"
+        )
+
     @classmethod
     def parse(cls, json: JSON) -> 'User':
         """Parse input JSON and return an User instance.
