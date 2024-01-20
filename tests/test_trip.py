@@ -731,7 +731,7 @@ class TripsTestCase(unittest.TestCase):
 
         trip = json.loads(response.data.decode('utf-8'))
 
-        trip['dates'].push(
+        trip['dates'].append(
             {
                 'start_time': (datetime.now() + timedelta(days=7)).isoformat(),
                 'end_time': (datetime.now() + timedelta(days=8)).isoformat()

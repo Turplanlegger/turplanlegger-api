@@ -60,16 +60,17 @@ def update_trip(trip_id):
     for date in dates:
         if date.get('id', None) is None:
             trip_changed = True
-            dates_new.push(date)
+            date['trip_id'] = trip.id
+            dates_new.append(date)
             continue
 
-        dates_existing.push(date)
-        date_ids_existing.push(date.id)
+        dates_existing.append(date)
+        date_ids_existing.append(date.get('id', None))
 
     for date in trip.dates:
         if date.id not in date_ids_existing:
             trip_changed = True
-            dates_removed.push(date)
+            dates_removed.append(date)
 
     for date in dates_new:
         try:
