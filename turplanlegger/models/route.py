@@ -47,7 +47,7 @@ class Route:
     def __repr__(self):
         return (
             f"Route(id='{self.id}', owner='{self.owner}', "
-            f"name='{self.name}, comment='{self.comment}"
+            f"name='{self.name}, comment='{self.comment}, "
             f"route={self.route}, route_history={self.route_history}, "
             f"create_time={self.create_time})"
         )

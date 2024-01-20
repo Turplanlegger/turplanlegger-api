@@ -58,11 +58,11 @@ class TripDate:
 
     def __repr__(self):
         return (
-            f"TripDate(id: '{self.id}', trip_id: '{self.trip_id}', "
-            f"selected: {self.selected}, owner: '{self.owner}', "
-            f"start_time: {self.start_time}, end_time: {self.end_time}, "
-            f"create_time: {self.create_time}, deleted: {self.deleted}, "
-            f"delete_time: {self.delete_time})"
+            f"TripDate(id='{self.id}', trip_id='{self.trip_id}', "
+            f"selected={self.selected}, owner='{self.owner}', "
+            f"start_time={self.start_time}, end_time={self.end_time}, "
+            f"create_time={self.create_time}, deleted={self.deleted}, "
+            f"delete_time={self.delete_time})"
         )
 
     @classmethod

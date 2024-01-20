@@ -62,11 +62,11 @@ class Trip:
 
     def __repr__(self):
         return (
-            f"Trip(id: '{self.id}', owner: '{self.owner}', "
-            f"private: {self.private}, dates: {self.dates}, "
-            f"notes: {self.notes}, routes: {self.routes}, "
-            f"item_lists: {self.item_lists}, "
-            f"create_time: {self.create_time})"
+            f"Trip(id='{self.id}', owner='{self.owner}', "
+            f"private={self.private}, dates={self.dates}, "
+            f"notes={self.notes}, routes={self.routes}, "
+            f"item_lists={self.item_lists}, "
+            f"create_time={self.create_time})"
         )
 
     @classmethod
