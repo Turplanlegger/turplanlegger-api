@@ -98,6 +98,7 @@ class TripDate:
             owner=g.user.id,
             start_time=start_time,
             end_time=end_time,
+            id=json.get('id', None),
             trip_id=json.get('trip_id', None),
             selected=json.get('selected', False)
         )
