@@ -92,10 +92,10 @@ def update_trip(trip_id):
         date_changed = False
         if date_to_update is not None:
             for attribute, value in vars(date_to_update).items():
-                if getattr(date_to_update, attribute, None) != getattr(date_in_db, attribute, None):
+                if getattr(date_to_update, attribute, None) != date_from_input.get(attribute, None):
                     trip_changed = True
                     date_changed = True
-                    break
+                    setattr(date_to_update, attribute, date_from_input.get(attribute, None))
 
         if date_changed is True:
             date_to_update.update()

@@ -502,7 +502,7 @@ class Database:
                 WHERE id = %(id)s
             RETURNING *
         """
-        return self._updateone(update, vars(trip_dates))
+        return self._updateone(update, vars(trip_date))
 
     def select_trip_date(self, date_id):
         insert = """
