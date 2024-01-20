@@ -43,7 +43,7 @@ def update_trip(trip_id):
 
     if not trip:
         raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
-    
+
     name = request.json.get('name', None)
 
     trip_changed = False
@@ -85,18 +85,19 @@ def update_trip(trip_id):
     for date_from_input in dates_existing:
         date_to_update = None
         for date_in_db in trip.dates:
-            if date_in_db.id == date_from_input.id:
+            if date_in_db.id == date_from_input.get('id', None):
                 date_to_update = date_in_db
                 break
 
         date_changed = False
-        for attribute, value in vars(date_to_update).items():
-            if date_in_db[attribute] != date_to_update[attribute]:
-                trip_changed = True
-                date_changed = True
-                date_to_update[attribute] = date_to_update[attribute]
+        if date_to_update is not None:
+            for attribute, value in vars(date_to_update).items():
+                if getattr(date_to_update, attribute, None) != getattr(date_in_db, attribute, None):
+                    trip_changed = True
+                    date_changed = True
+                    break
 
-        if date_to_update is not None and date_changed is True:
+        if date_changed is True:
             date_to_update.update()
 
     # trip.update is the next step
@@ -110,10 +111,7 @@ def update_trip(trip_id):
     # 5. Delete removed dates
     # 6. Update changed dates
 
-    try:
-        trip = trip.create()
-    except Exception as e:
-        raise ApiProblem('Failed to create trip', str(e), 500)
+    trip = Trip.find_trip(trip.id)
 
     return jsonify(trip.serialize), 200
 

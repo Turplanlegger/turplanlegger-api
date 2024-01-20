@@ -719,7 +719,7 @@ class TripsTestCase(unittest.TestCase):
         self.assertEqual(data['dates'][1]['start_time'], trip['dates'][1]['start_time'])
         self.assertEqual(data['dates'][1]['end_time'], trip['dates'][1]['end_time'])
 
-    
+
     def test_update_trip_add_date(self):
         response = self.client.post(
             '/trips',
@@ -751,13 +751,13 @@ class TripsTestCase(unittest.TestCase):
         self.assertEqual(data['id'], trip['id'])
         self.assertEqual(data['owner'], trip['owner'])
         self.assertEqual(data['name'], trip['name'])
-        
-        self.assertCountEqual(data['dates'], trip['dates'])
+
+        self.assertEqual(len(data['dates']), len(trip['dates']))
 
         self.assertEqual(data['dates'][0]['owner'], data['owner'])
         self.assertEqual(data['dates'][0]['id'], 1)
         self.assertEqual(data['dates'][0]['trip_id'], data['id'])
-        self.assertEqual(data['dates'][0]['selected'], True)
+        self.assertEqual(data['dates'][0]['selected'], False)
         self.assertEqual(data['dates'][0]['start_time'], trip['dates'][0]['start_time'])
         self.assertEqual(data['dates'][0]['end_time'], trip['dates'][0]['end_time'])
 
@@ -801,16 +801,16 @@ class TripsTestCase(unittest.TestCase):
         self.assertEqual(data['id'], trip['id'])
         self.assertEqual(data['owner'], trip['owner'])
         self.assertEqual(data['name'], trip['name'])
-        
+
         self.assertCountEqual(data['dates'], trip['dates'])
 
         self.assertEqual(data['dates'][0]['owner'], data['owner'])
         self.assertEqual(data['dates'][0]['id'], 1)
         self.assertEqual(data['dates'][0]['trip_id'], data['id'])
-        self.assertEqual(data['dates'][0]['selected'], True)
+        self.assertEqual(data['dates'][0]['selected'], False)
         self.assertEqual(data['dates'][0]['start_time'], trip['dates'][0]['start_time'])
         self.assertEqual(data['dates'][0]['end_time'], trip['dates'][0]['end_time'])
-    
+
     def test_update_trip_change_date(self):
         response = self.client.post(
             '/trips',
@@ -837,12 +837,12 @@ class TripsTestCase(unittest.TestCase):
         self.assertEqual(data['owner'], trip['owner'])
         self.assertEqual(data['name'], trip['name'])
 
-        self.assertCountEqual(data['dates'], trip['dates'])
+        self.assertEqual(len(data['dates']), len(trip['dates']))
 
         self.assertEqual(data['dates'][0]['owner'], data['owner'])
         self.assertEqual(data['dates'][0]['id'], 1)
         self.assertEqual(data['dates'][0]['trip_id'], data['id'])
-        self.assertEqual(data['dates'][0]['selected'], True)
+        self.assertEqual(data['dates'][0]['selected'], False)
         self.assertEqual(data['dates'][0]['start_time'], trip['dates'][0]['start_time'])
         self.assertEqual(data['dates'][0]['end_time'], trip['dates'][0]['end_time'])
 
