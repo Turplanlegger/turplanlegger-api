@@ -81,22 +81,22 @@ def update_trip(trip_id):
     for date in dates_removed:
         date.delete()
 
-    for date in dates_existing:
-        needle = None
+    for date_from_input in dates_existing:
+        date_to_update = None
         for date_in_db in trip.dates:
-            if date_in_db.id == date.id:
-                needle = date_in_db
+            if date_in_db.id == date_from_input.id:
+                date_to_update = date_in_db
                 break
 
         date_changed = False
-        for attribute, value in vars(needle).items():
-            if date[attribute] != needle[attribute]:
+        for attribute, value in vars(date_to_update).items():
+            if date_in_db[attribute] != date_to_update[attribute]:
                 trip_changed = True
                 date_changed = True
-                needle[attribute] = date[attribute]
+                date_to_update[attribute] = date_to_update[attribute]
 
-        if needle is not None and date_changed is True:
-            needle.update()
+        if date_to_update is not None and date_changed is True:
+            date_to_update.update()
 
     # trip.update is the next step
     # We also need to move all this logic somewhere else
