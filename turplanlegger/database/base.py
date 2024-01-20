@@ -542,6 +542,8 @@ class Database:
         else:
             select += ' AND deleted = FALSE'
 
+        select += ' ORDER BY start_time ASC'
+
         return self._fetchall(select, (trip_id,))
 
     def delete_trip_date(self, trip_date_id):
