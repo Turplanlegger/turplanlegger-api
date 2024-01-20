@@ -105,22 +105,14 @@ def update_trip(trip_id):
 
     updated_fields = []
     if name != trip.name:
+        trip_changed = True
         updated_fields.append('name')
     trip.name = name
 
     trip.update(updated_fields)
 
-
-    # trip.update is the next step
-    # We also need to move all this logic somewhere else
-
-
-    # 1. Check if any existing dates has been removed
-    # 2. Check if any existing date has been changed
-    # 3. Check for new date and parse
-    # 4. Create new dates
-    # 5. Delete removed dates
-    # 6. Update changed dates
+    if trip_changed is False:
+        raise ApiProblem('Failed to update note', 'No new updates were provided', 409)
 
     trip = Trip.find_trip(trip.id)
 
