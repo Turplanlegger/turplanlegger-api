@@ -64,7 +64,11 @@ def update_trip(trip_id):
             dates_new.append(date)
             continue
 
-        dates_existing.append(date)
+        try:
+            dates_existing.append(TripDate.parse(date))
+        except (ValueError, KeyError):
+            # Do something about this
+            pass
         date_ids_existing.append(date.get('id', None))
 
     for date in trip.dates:
@@ -85,17 +89,17 @@ def update_trip(trip_id):
     for date_from_input in dates_existing:
         date_to_update = None
         for date_in_db in trip.dates:
-            if date_in_db.id == date_from_input.get('id', None):
+            if date_in_db.id == date_from_input.id:
                 date_to_update = date_in_db
                 break
 
         date_changed = False
         if date_to_update is not None:
             for attribute, value in vars(date_to_update).items():
-                if getattr(date_to_update, attribute, None) != date_from_input.get(attribute, None):
+                if getattr(date_to_update, attribute, None) != getattr(date_from_input, attribute, None):
                     trip_changed = True
                     date_changed = True
-                    setattr(date_to_update, attribute, date_from_input.get(attribute, None))
+                    setattr(date_to_update, attribute, getattr(date_from_input, attribute, None))
 
         if date_changed is True:
             date_to_update.update()
