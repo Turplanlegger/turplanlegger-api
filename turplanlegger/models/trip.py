@@ -34,6 +34,7 @@ class Trip:
                           the trip
         create_time (datetime): Time of creation,
                                 Default: datetime.now()
+        create_time (datetime): Time of update,
 
     """
 
@@ -59,6 +60,7 @@ class Trip:
         self.routes = kwargs.get('routes', [])
         self.item_lists = kwargs.get('item_lists', [])
         self.create_time = kwargs.get('create_time', None) or datetime.now()
+        self.update_time = kwargs.get('update_time', None)
 
     def __repr__(self):
         return (
@@ -67,7 +69,8 @@ class Trip:
             f'private: {self.private}, dates: {self.dates}, '
             f'notes: {self.notes}, routes: {self.routes}, '
             f'item_lists: {self.item_lists}, '
-            f'create_time: {self.create_time})'
+            f'create_time: {self.create_time}, '
+            f'update_time: {self.update_time})'
         )
 
     @classmethod
