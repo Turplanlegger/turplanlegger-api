@@ -52,8 +52,8 @@ class Config:
         self.config['LOG_LEVEL'] = self.conf_ent('LOG_LEVEL', str, 'INFO')
         self.config['LOG_TO_FILE'] = self.conf_ent('LOG_TO_FILE', bool, False)
         if self.config['LOG_TO_FILE']:
-            self.config['LOG_PATH'] = self.conf_ent(
-                'LOG_PATH',
+            self.config['LOG_FILE_PATH'] = self.conf_ent(
+                'LOG_FILE_PATH',
                 str,
                 '/var/log/turplanlegger.log'
             )
