@@ -126,6 +126,9 @@ class Trip:
         Returns True if deleted"""
         return db.delete_trip(self.id)
 
+    def update(self, updated_fields) -> None:
+        return db.update_trip(self, updated_fields)
+
     def add_note_reference(self, note_id: int) -> 'Trip':
         """Adds a note to the trip instance
 

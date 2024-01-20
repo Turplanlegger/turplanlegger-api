@@ -44,12 +44,7 @@ def update_trip(trip_id):
     if not trip:
         raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
 
-    name = request.json.get('name', None)
-
     trip_changed = False
-
-    if name != trip.name:
-        trip_changed = True
 
     dates = request.json.get('dates', None)
     dates_new = []
@@ -103,6 +98,16 @@ def update_trip(trip_id):
 
         if date_changed is True:
             date_to_update.update()
+
+    name = request.json.get('name', None)
+
+    updated_fields = []
+    if name != trip.name:
+        updated_fields.append('name')
+    trip.name = name
+
+    trip.update(updated_fields)
+
 
     # trip.update is the next step
     # We also need to move all this logic somewhere else

@@ -415,6 +415,19 @@ class Database:
         """
         return self._updateone(update, {'id': trip_id}, returning=True)
 
+    def update_trip(self, trip, updated_fields=None):
+        update = 'UPDATE trips SET update_time=CURRENT_TIMESTAMP'
+        vars = { 'id': trip.id }
+        if 'name' in updated_fields:
+            if trip.name is None:
+                update += ', name=NULL'
+            else:
+                update += ', name=%(name)s'
+                vars['name'] = trip.name
+
+        update += ' WHERE id=%(id)s'
+        return self._updateone(update, vars, returning=False)
+
     def change_trip_owner(self, id, owner):
         update = """
             UPDATE trips
