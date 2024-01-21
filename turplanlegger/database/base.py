@@ -415,6 +415,19 @@ class Database:
         """
         return self._updateone(update, {'id': trip_id}, returning=True)
 
+    def update_trip(self, trip, updated_fields=None):
+        update = 'UPDATE trips SET update_time=CURRENT_TIMESTAMP'
+        vars = { 'id': trip.id }
+        if 'name' in updated_fields:
+            if trip.name is None:
+                update += ', name=NULL'
+            else:
+                update += ', name=%(name)s'
+                vars['name'] = trip.name
+
+        update += ' WHERE id=%(id)s'
+        return self._updateone(update, vars, returning=False)
+
     def change_trip_owner(self, id, owner):
         update = """
             UPDATE trips
@@ -494,6 +507,16 @@ class Database:
             vars(trip_date)
         )
 
+    def update_trip_date(self, trip_date):
+        update = """
+            UPDATE trip_dates
+                SET start_time=%(start_time)s, end_time=%(end_time)s,
+                    selected=%(selected)s
+                WHERE id = %(id)s
+            RETURNING *
+        """
+        return self._updateone(update, vars(trip_date))
+
     def select_trip_date(self, date_id):
         insert = """
             UPDATE trip_dates
@@ -531,6 +554,8 @@ class Database:
             select += ' AND deleted = TRUE'
         else:
             select += ' AND deleted = FALSE'
+
+        select += ' ORDER BY start_time ASC'
 
         return self._fetchall(select, (trip_id,))
 
