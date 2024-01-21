@@ -699,6 +699,8 @@ class TripsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         data = json.loads(response.data.decode('utf-8'))
+        data = data.get('trip', {})
+
         self.assertEqual(data['id'], trip['id'])
         self.assertEqual(data['owner'], trip['owner'])
         self.assertEqual(data['name'], trip['name'])
@@ -747,6 +749,7 @@ class TripsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         data = json.loads(response.data.decode('utf-8'))
+        data = data.get('trip', {})
 
         self.assertEqual(data['id'], trip['id'])
         self.assertEqual(data['owner'], trip['owner'])
@@ -797,6 +800,7 @@ class TripsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         data = json.loads(response.data.decode('utf-8'))
+        data = data.get('trip', {})
 
         self.assertEqual(data['id'], trip['id'])
         self.assertEqual(data['owner'], trip['owner'])
@@ -833,6 +837,7 @@ class TripsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         data = json.loads(response.data.decode('utf-8'))
+        data = data.get('trip', {})
         self.assertEqual(data['id'], trip['id'])
         self.assertEqual(data['owner'], trip['owner'])
         self.assertEqual(data['name'], trip['name'])
