@@ -48,88 +48,13 @@ def update_trip(trip_id):
     trip_changed = False
 
     dates = request.json.get('dates', None)
-    dates_new = []
-    dates_existing = []
-    date_ids_existing = []
-    dates_removed = []
 
-    for date in dates:
-        if date.get('id', None) is None:
-            date['trip_id'] = trip.id
-            dates_new.append(date)
-            continue
-
-        try:
-            dates_existing.append(TripDate.parse(date))
-        except (ValueError, KeyError) as e:
-            errors.append({
-                'error': 'Failed to parse existing date',
-                'object': date,
-                'details': e
-            })
-        else:
-            date_ids_existing.append(date.get('id', None))
-
-    for date in trip.dates:
-        if date.id not in date_ids_existing:
-            trip_changed = True
-            dates_removed.append(date)
-
-    for date in dates_new:
-        try:
-            TripDate.parse(date).create()
-        except (ValueError, KeyError) as e:
-            errors.append({
-                'error': 'Failed to parse new date',
-                'object': date,
-                'details': e
-            })
-        else:
-            trip_changed = True
-
-    for date in dates_removed:
-        try:
-            date.delete()
-        except Exception as e:
-            errors.append({
-                'error': 'Failed to delete existing date',
-                'object': date,
-                'details': e
-            })
-        else:
-            trip_changed = True
-
-    for date_from_input in dates_existing:
-        date_to_update = None
-        for date_in_db in trip.dates:
-            if date_in_db.id == date_from_input.id:
-                date_to_update = date_in_db
-                break
-
-        date_changed = False
-        if date_to_update is not None:
-            for attribute, value in vars(date_to_update).items():
-                if attribute in ['id', 'trip_id', 'create_time']:
-                    continue
-                if getattr(date_to_update, attribute, None) != getattr(date_from_input, attribute, None):
-                    trip_changed = True
-                    date_changed = True
-                    setattr(date_to_update, attribute, getattr(date_from_input, attribute, None))
-
-        if date_changed is True:
-            try:
-                date_to_update.update()
-            except Exception as e:
-                errors.append({
-                    'error': 'Failed to update existing date',
-                    'object': date,
-                    'details': e
-                })
-            else:
-                trip_changed = True
+    date_status = Trip.update_trip_dates(dates, trip)
+    if date_status.changed is True:
+        trip_changed = True
+    errors.extend(date_status.errors)
 
     name = request.json.get('name', None)
-
     updated_fields = []
     if name != trip.name:
         updated_fields.append('name')
