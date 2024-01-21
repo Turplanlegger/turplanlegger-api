@@ -174,16 +174,24 @@ class Trip:
         Returns: TRIP_DATE_UPDATE_STATUS
         """
         errors = []
-        dates_new = []
         dates_existing = []
         date_ids_existing = []
-        dates_removed = []
         trip_changed = False
 
         for date in dates:
             if date.get('id', None) is None:
                 date['trip_id'] = trip.id
-                dates_new.append(date)
+                try:
+                    TripDate.parse(date).create()
+                except (ValueError, KeyError) as e:
+                    errors.append({
+                        'error': 'Failed to parse new date',
+                        'object': date,
+                        'details': e
+                    })
+                else:
+                    trip_changed = True
+
                 continue
 
             try:
@@ -199,32 +207,16 @@ class Trip:
 
         for date in trip.dates:
             if date.id not in date_ids_existing:
-                trip_changed = True
-                dates_removed.append(date)
-
-        for date in dates_new:
-            try:
-                TripDate.parse(date).create()
-            except (ValueError, KeyError) as e:
-                errors.append({
-                    'error': 'Failed to parse new date',
-                    'object': date,
-                    'details': e
-                })
-            else:
-                trip_changed = True
-
-        for date in dates_removed:
-            try:
-                date.delete()
-            except Exception as e:
-                errors.append({
-                    'error': 'Failed to delete existing date',
-                    'object': date,
-                    'details': e
-                })
-            else:
-                trip_changed = True
+                try:
+                    date.delete()
+                except Exception as e:
+                    errors.append({
+                        'error': 'Failed to delete existing date',
+                        'object': date,
+                        'details': e
+                    })
+                else:
+                    trip_changed = True
 
         for date_from_input in dates_existing:
             date_to_update = None
