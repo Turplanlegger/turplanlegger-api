@@ -4,34 +4,31 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    target-branch: "develop"
-    reviewers:
-      - "sixcare"
-      - "peseb"
+    target-branch: "main"
     labels:
       - "pip dependencies"
       - "dependencies"
+    commit-message:
+      prefix: "⬆️ Dependency"
 
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
       interval: "weekly"
-    target-branch: "develop"
-    reviewers:
-      - "sixcare"
-      - "peseb"
+    target-branch: "main"
     labels:
       - "Docker dependencies"
       - "dependencies"
+    commit-message:
+      prefix: "🐋 Docker"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
-    target-branch: "develop"
-    reviewers:
-      - "sixcare"
-      - "peseb"
+    target-branch: "main"
     labels:
       - "GitHub-actions dependencies"
       - "dependencies"
+    commit-message:
+      prefix: "👷 CI"
