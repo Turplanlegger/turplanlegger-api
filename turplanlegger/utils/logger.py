@@ -24,7 +24,7 @@ class Logger:
         ]
 
         if app.config.get('LOG_TO_FILE'):
-            handlers.append(logging.FileHandler(app.config.get('LOG_FILE')))
+            handlers.append(logging.FileHandler(app.config.get('LOG_FILE_PATH')))
 
         logging.basicConfig(
             level=log_level,
