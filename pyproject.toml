@@ -56,7 +56,8 @@ path = "turplanlegger/__about__.py"
 [tool.hatch.envs.default.scripts]
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=turplanlegger --cov=tests {args}"
 no-cov = "cov --no-cov {args}"
-lint = "pre-commit run -a --show-diff-on-failure"
+lint = "ruff check"
+format = "ruff format --diff --no-cache"
 
 [tool.coverage.run]
 branch = true
