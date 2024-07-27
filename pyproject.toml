@@ -78,7 +78,7 @@ line-length = 120
 target-version = "py312"
 
 [tool.ruff.lint]
-select = ["E", "W", "Q", "I", "F", "YTT", "C4", "T10", "ISC", "ICN", "RSE"]
+select = ["E", "W", "Q", "I", "F", "YTT", "C4", "T10", "ICN", "RSE"]
 
 [tool.ruff.lint.flake8-quotes]
 inline-quotes = "single"
