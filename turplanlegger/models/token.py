@@ -13,10 +13,7 @@ dt = datetime.datetime
 
 
 class JWT:
-
-    def __init__(self, iss: int, sub: str, aud: str, exp: dt, nbf: dt,
-                 iat: dt, jti: str, typ: str, **kwargss) -> None:
-
+    def __init__(self, iss: int, sub: str, aud: str, exp: dt, nbf: dt, iat: dt, jti: str, typ: str, **kwargss) -> None:
         self.issuer = iss
         self.subject = sub
         self.audience = aud
@@ -33,10 +30,7 @@ class JWT:
 
         try:
             jsonRes = jwt.decode(
-                token,
-                key,
-                algorithms=[unverified_header['alg']],
-                audience=current_app.config['AUDIENCE']
+                token, key, algorithms=[unverified_header['alg']], audience=current_app.config['AUDIENCE']
             )
         except (DecodeError, ExpiredSignatureError, InvalidAudienceError):
             raise
@@ -49,7 +43,7 @@ class JWT:
             nbf=jsonRes.get('nbf', None),
             iat=jsonRes.get('iat', None),
             jti=jsonRes.get('jti', None),
-            typ=jsonRes.get('typ', None)
+            typ=jsonRes.get('typ', None),
         )
 
     @classmethod
@@ -59,10 +53,7 @@ class JWT:
 
         try:
             jsonRes = jwt.decode(
-                token,
-                key,
-                algorithms=[unverified_header['alg']],
-                audience=current_app.config['AUDIENCE']
+                token, key, algorithms=[unverified_header['alg']], audience=current_app.config['AUDIENCE']
             )
         except (DecodeError, ExpiredSignatureError, InvalidAudienceError):
             raise
@@ -73,14 +64,12 @@ class JWT:
             last_name=jsonRes.get('family_name', None),
             email=jsonRes.get('emails', None)[0],
             auth_method='b2c',
-            password=''
+            password='',
         )
 
     def find_correct_key(self, unverified_header: str) -> str:
         try:
-            response = current_app.http_client.get(
-                current_app.config['AZURE_AD_B2C_KEY_URL']
-            )
+            response = current_app.http_client.get(current_app.config['AZURE_AD_B2C_KEY_URL'])
             response.raise_for_status()
         except HTTPError:
             raise
@@ -90,18 +79,14 @@ class JWT:
 
         for key in jwks['keys']:
             if key['kid'] == unverified_header['kid']:
-                rsa_key = jwt.algorithms.RSAAlgorithm.from_jwk({
-                    'kty': key['kty'],
-                    'kid': key['kid'],
-                    'use': key['use'],
-                    'n': key['n'],
-                    'e': key['e']
-                })
+                rsa_key = jwt.algorithms.RSAAlgorithm.from_jwk(
+                    {'kty': key['kty'], 'kid': key['kid'], 'use': key['use'], 'n': key['n'], 'e': key['e']}
+                )
                 break
 
-        if (rsa_key):
+        if rsa_key:
             key = rsa_key
-        elif (unverified_header['kid'] == current_app.config['SECRET_KEY_ID']):
+        elif unverified_header['kid'] == current_app.config['SECRET_KEY_ID']:
             key = current_app.config['SECRET_KEY']
         else:
             key = ''
@@ -118,7 +103,7 @@ class JWT:
             'nbf': self.not_before,
             'iat': self.issued_at,
             'jti': self.jwt_id,
-            'typ': self.type
+            'typ': self.type,
         }
 
     def tokenize(self, algorithm: str = 'HS256') -> str:
@@ -126,10 +111,13 @@ class JWT:
             self.serialize,
             key=current_app.config['SECRET_KEY'],
             algorithm=algorithm,
-            headers={'kid': current_app.config['SECRET_KEY_ID']})
+            headers={'kid': current_app.config['SECRET_KEY_ID']},
+        )
 
     def __repr__(self) -> str:
-        return (f'Jwt(iss={self.issuer}, sub={self.subject}, '
-                f'aud={self.audience}, exp={self.expiration}, '
-                f'nbf={self.not_before}, iat={self.issued_at} '
-                f'jti={self.jwt_id}, typ={self.type})')
+        return (
+            f'Jwt(iss={self.issuer}, sub={self.subject}, '
+            f'aud={self.audience}, exp={self.expiration}, '
+            f'nbf={self.not_before}, iat={self.issued_at} '
+            f'jti={self.jwt_id}, typ={self.type})'
+        )

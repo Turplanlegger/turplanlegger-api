@@ -3,7 +3,6 @@ from flask_cors import CORS
 
 
 class Cors:
-
     def __init__(self, app: Flask = None) -> None:
         self.app = None
         if app:
@@ -27,6 +26,6 @@ class Cors:
                 '/route/*',
                 '/users/*',
                 '/user/*',
-                '/whoami'
-            ]
+                '/whoami',
+            ],
         )

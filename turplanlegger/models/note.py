@@ -8,7 +8,6 @@ JSON = Dict[str, any]
 
 
 class Note:
-
     def __init__(self, owner: str, content: str, **kwargs) -> None:
         if not owner:
             raise ValueError("Missing mandatory field 'owner'")
@@ -32,8 +31,8 @@ class Note:
         return (
             f"Note(id='{self.id}', owner='{self.owner}', "
             f"name='{self.name}', content='{self.content}', "
-            f"create_time={self.create_time}, update_time={self.update_time}, "
-            f"deleted={self.deleted}, delete_time={self.delete_time})"
+            f'create_time={self.create_time}, update_time={self.update_time}, '
+            f'deleted={self.deleted}, delete_time={self.delete_time})'
         )
 
     @classmethod
@@ -52,7 +51,7 @@ class Note:
             'owner': self.owner,
             'name': self.name,
             'content': self.content,
-            'create_time': self.create_time
+            'create_time': self.create_time,
         }
 
     def create(self) -> 'Note':
@@ -70,7 +69,6 @@ class Note:
 
     def update_content(self) -> 'Note':
         return db.update_note_content(self.id, self.content)
-
 
     @staticmethod
     def find_note(id: int) -> 'Note':
@@ -99,5 +97,5 @@ class Note:
             create_time=rec.create_time,
             update_time=rec.update_time,
             deleted=rec.deleted,
-            delete_time=rec.delete_time
+            delete_time=rec.delete_time,
         )

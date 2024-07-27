@@ -3,7 +3,6 @@ from flask import Flask
 
 
 class HttpClient:
-
     def __init__(self, app: Flask = None) -> None:
         self.app = None
         if app:

@@ -10,7 +10,6 @@ from . import api
 @api.route('/notes/<note_id>', methods=['GET'])
 @auth
 def get_note(note_id):
-
     note = Note.find_note(note_id)
 
     if note:
@@ -22,7 +21,6 @@ def get_note(note_id):
 @api.route('/notes/<note_id>', methods=['DELETE'])
 @auth
 def delete_note(note_id):
-
     note = Note.find_note(note_id)
 
     if note is None:
@@ -51,6 +49,7 @@ def add_note():
 
     return jsonify(note.serialize), 201
 
+
 @api.route('/notes/<note_id>', methods=['PUT'])
 @auth
 def update_note(note_id):
@@ -63,11 +62,7 @@ def update_note(note_id):
     content = request.json.get('content', None)
 
     if content is None:
-        raise ApiProblem(
-            'Failed to update note',
-            'Field content can not be empty',
-            409
-        )
+        raise ApiProblem('Failed to update note', 'Field content can not be empty', 409)
 
     if name == note.name and content == note.content:
         raise ApiProblem('Failed to update note', 'No new updates were provided', 409)
@@ -91,7 +86,6 @@ def update_note(note_id):
 @api.route('/notes/<note_id>/owner', methods=['PATCH'])
 @auth
 def change_note_owner(note_id):
-
     note = Note.find_note(note_id)
 
     if not note:
@@ -115,7 +109,6 @@ def change_note_owner(note_id):
 @api.route('/notes/<note_id>/rename', methods=['PATCH'])
 @auth
 def rename_note(note_id):
-
     note = Note.find_note(note_id)
 
     if not note:
@@ -132,7 +125,6 @@ def rename_note(note_id):
 @api.route('/notes/<note_id>/content', methods=['PATCH'])
 @auth
 def update_note_content(note_id):
-
     note = Note.find_note(note_id)
 
     if not note:
@@ -149,18 +141,9 @@ def update_note_content(note_id):
 @api.route('/notes/mine', methods=['GET'])
 @auth
 def get_my_notes():
-
     notes = Note.find_note_by_owner(g.user.id)
 
     if notes:
-        return jsonify(
-            status='ok',
-            count=len(notes),
-            note=[note.serialize for note in notes]
-        )
+        return jsonify(status='ok', count=len(notes), note=[note.serialize for note in notes])
     else:
-        raise ApiProblem(
-            'Note not found',
-            'No notes were found for the requested user',
-            404
-        )
+        raise ApiProblem('Note not found', 'No notes were found for the requested user', 404)
