@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   api:
     image: ghcr.io/turplanlegger/turplanlegger-api:${TP_TAG:-latest}
