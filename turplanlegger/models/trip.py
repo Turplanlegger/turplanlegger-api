@@ -8,10 +8,7 @@ from turplanlegger.app import db
 from turplanlegger.models.trip_date import TripDate
 
 JSON = Dict[str, any]
-TRIP_DATE_UPDATE_STATUS = namedtuple(
-    'TRIP_DATE_UPDATE_STATUS',
-    ['changed', 'errors']
-)
+TRIP_DATE_UPDATE_STATUS = namedtuple('TRIP_DATE_UPDATE_STATUS', ['changed', 'errors'])
 
 
 class Trip:
@@ -182,11 +179,7 @@ class Trip:
                 try:
                     TripDate.parse(date).create()
                 except (ValueError, KeyError) as e:
-                    errors.append({
-                        'error': 'Failed to parse new date',
-                        'object': date,
-                        'details': e
-                    })
+                    errors.append({'error': 'Failed to parse new date', 'object': date, 'details': e})
                 else:
                     trip_changed = True
 
@@ -195,11 +188,7 @@ class Trip:
             try:
                 dates_existing.append(TripDate.parse(date))
             except (ValueError, KeyError) as e:
-                errors.append({
-                    'error': 'Failed to parse existing date',
-                    'object': date,
-                    'details': e
-                })
+                errors.append({'error': 'Failed to parse existing date', 'object': date, 'details': e})
             else:
                 date_ids_existing.append(date.get('id', None))
 
@@ -208,11 +197,7 @@ class Trip:
                 try:
                     date.delete()
                 except Exception as e:
-                    errors.append({
-                        'error': 'Failed to delete existing date',
-                        'object': date,
-                        'details': e
-                    })
+                    errors.append({'error': 'Failed to delete existing date', 'object': date, 'details': e})
                 else:
                     trip_changed = True
 
@@ -237,11 +222,7 @@ class Trip:
                 try:
                     date_to_update.update()
                 except Exception as e:
-                    errors.append({
-                        'error': 'Failed to update existing date',
-                        'object': date,
-                        'details': e
-                    })
+                    errors.append({'error': 'Failed to update existing date', 'object': date, 'details': e})
                 else:
                     trip_changed = True
 

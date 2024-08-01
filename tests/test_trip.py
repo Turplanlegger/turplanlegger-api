@@ -578,12 +578,9 @@ class TripsTestCase(unittest.TestCase):
             unselected_date['end_time'], self.trip_with_multiple_dates_one_selected['dates'][0]['end_time']
         )
 
-
     def test_update_trip_name(self):
         response = self.client.post(
-            '/trips',
-            data=json.dumps(self.trip_with_multiple_dates_one_selected),
-            headers=self.headers_json
+            '/trips', data=json.dumps(self.trip_with_multiple_dates_one_selected), headers=self.headers_json
         )
 
         self.assertEqual(response.status_code, 201)
@@ -592,11 +589,7 @@ class TripsTestCase(unittest.TestCase):
 
         trip['name'] = 'New tripin pete'
 
-        response = self.client.put(
-            f'/trips/{trip["id"]}',
-            data=json.dumps(trip),
-            headers=self.headers_json
-        )
+        response = self.client.put(f'/trips/{trip["id"]}', data=json.dumps(trip), headers=self.headers_json)
 
         self.assertEqual(response.status_code, 200)
 
@@ -623,13 +616,8 @@ class TripsTestCase(unittest.TestCase):
         self.assertEqual(data['dates'][1]['start_time'], trip['dates'][1]['start_time'])
         self.assertEqual(data['dates'][1]['end_time'], trip['dates'][1]['end_time'])
 
-
     def test_update_trip_add_date(self):
-        response = self.client.post(
-            '/trips',
-            data=json.dumps(self.trip_with_multiple_dates),
-            headers=self.headers_json
-        )
+        response = self.client.post('/trips', data=json.dumps(self.trip_with_multiple_dates), headers=self.headers_json)
 
         self.assertEqual(response.status_code, 201)
 
@@ -638,15 +626,11 @@ class TripsTestCase(unittest.TestCase):
         trip['dates'].append(
             {
                 'start_time': (datetime.now() + timedelta(days=7)).isoformat(),
-                'end_time': (datetime.now() + timedelta(days=8)).isoformat()
+                'end_time': (datetime.now() + timedelta(days=8)).isoformat(),
             }
         )
 
-        response = self.client.put(
-            f'/trips/{trip["id"]}',
-            data=json.dumps(trip),
-            headers=self.headers_json
-        )
+        response = self.client.put(f'/trips/{trip["id"]}', data=json.dumps(trip), headers=self.headers_json)
 
         self.assertEqual(response.status_code, 200)
 
@@ -681,11 +665,7 @@ class TripsTestCase(unittest.TestCase):
         self.assertEqual(data['dates'][2]['end_time'], trip['dates'][2]['end_time'])
 
     def test_update_trip_remove_date(self):
-        response = self.client.post(
-            '/trips',
-            data=json.dumps(self.trip_with_multiple_dates),
-            headers=self.headers_json
-        )
+        response = self.client.post('/trips', data=json.dumps(self.trip_with_multiple_dates), headers=self.headers_json)
 
         self.assertEqual(response.status_code, 201)
 
@@ -693,11 +673,7 @@ class TripsTestCase(unittest.TestCase):
 
         trip['dates'].pop(1)
 
-        response = self.client.put(
-            f'/trips/{trip["id"]}',
-            data=json.dumps(trip),
-            headers=self.headers_json
-        )
+        response = self.client.put(f'/trips/{trip["id"]}', data=json.dumps(trip), headers=self.headers_json)
 
         self.assertEqual(response.status_code, 200)
 
@@ -718,11 +694,7 @@ class TripsTestCase(unittest.TestCase):
         self.assertEqual(data['dates'][0]['end_time'], trip['dates'][0]['end_time'])
 
     def test_update_trip_change_date(self):
-        response = self.client.post(
-            '/trips',
-            data=json.dumps(self.trip_with_multiple_dates),
-            headers=self.headers_json
-        )
+        response = self.client.post('/trips', data=json.dumps(self.trip_with_multiple_dates), headers=self.headers_json)
 
         self.assertEqual(response.status_code, 201)
 
@@ -730,11 +702,7 @@ class TripsTestCase(unittest.TestCase):
 
         trip['dates'][0]['end_time'] = (datetime.now() + timedelta(days=8)).isoformat()
 
-        response = self.client.put(
-            f'/trips/{trip["id"]}',
-            data=json.dumps(trip),
-            headers=self.headers_json
-        )
+        response = self.client.put(f'/trips/{trip["id"]}', data=json.dumps(trip), headers=self.headers_json)
 
         self.assertEqual(response.status_code, 200)
 
@@ -761,21 +729,12 @@ class TripsTestCase(unittest.TestCase):
         self.assertEqual(data['dates'][1]['end_time'], trip['dates'][1]['end_time'])
 
     def test_update_trip_no_change(self):
-        response = self.client.post(
-            '/trips',
-            data=json.dumps(self.trip_with_multiple_dates),
-            headers=self.headers_json
-        )
+        response = self.client.post('/trips', data=json.dumps(self.trip_with_multiple_dates), headers=self.headers_json)
 
         self.assertEqual(response.status_code, 201)
 
         trip = json.loads(response.data.decode('utf-8'))
 
-        response = self.client.put(
-            f'/trips/{trip["id"]}',
-            data=json.dumps(trip),
-            headers=self.headers_json
-        )
+        response = self.client.put(f'/trips/{trip["id"]}', data=json.dumps(trip), headers=self.headers_json)
 
         self.assertEqual(response.status_code, 409)
-

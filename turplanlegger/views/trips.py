@@ -35,6 +35,7 @@ def add_trip():
 
     return jsonify(trip.serialize), 201
 
+
 @api.route('/trips/<trip_id>', methods=['PUT'])
 @auth
 def update_trip(trip_id):
@@ -63,11 +64,7 @@ def update_trip(trip_id):
         try:
             trip.update(updated_fields)
         except Exception as e:
-            errors.append({
-                'error': 'Failed to update trip',
-                'object': trip,
-                'details': e
-            })
+            errors.append({'error': 'Failed to update trip', 'object': trip, 'details': e})
         else:
             trip_changed = True
 
@@ -76,12 +73,7 @@ def update_trip(trip_id):
 
     trip = Trip.find_trip(trip.id)
 
-    return jsonify(
-        status='ok',
-        count=1,
-        trip=trip.serialize,
-        errors=errors
-    )
+    return jsonify(status='ok', count=1, trip=trip.serialize, errors=errors)
 
 
 @api.route('/trips/notes', methods=['PATCH'])

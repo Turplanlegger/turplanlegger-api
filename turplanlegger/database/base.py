@@ -413,7 +413,7 @@ class Database:
 
     def update_trip(self, trip, updated_fields=None):
         update = 'UPDATE trips SET update_time=CURRENT_TIMESTAMP'
-        vars = { 'id': trip.id }
+        vars = {'id': trip.id}
         if 'name' in updated_fields:
             if trip.name is None:
                 update += ', name=NULL'
