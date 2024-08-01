@@ -48,8 +48,8 @@ class Route:
         return (
             f"Route(id='{self.id}', owner='{self.owner}', "
             f"name='{self.name}, comment='{self.comment}, "
-            f"route={self.route}, route_history={self.route_history}, "
-            f"create_time={self.create_time})"
+            f'route={self.route}, route_history={self.route_history}, '
+            f'create_time={self.create_time})'
         )
 
     @classmethod
@@ -81,7 +81,7 @@ class Route:
             'route_history': self.route_history,
             'create_time': self.create_time,
             'name': self.name,
-            'comment': self.comment
+            'comment': self.comment,
         }
 
     def create(self) -> 'Route':
@@ -154,5 +154,5 @@ class Route:
             route_history=rec.route_history,
             name=rec.name,
             comment=rec.comment,
-            create_time=rec.create_time
+            create_time=rec.create_time,
         )

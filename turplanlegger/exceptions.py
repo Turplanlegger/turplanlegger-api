@@ -7,9 +7,15 @@ from werkzeug.routing import RoutingException
 
 
 class ApiProblem(Exception):
-    def __init__(self, title: Optional[str] = None, detail: Optional[str] = None, status: Optional[int] = None,
-                 type: Optional[str] = None, instance: Optional[str] = None, **kwargs) -> None:
-
+    def __init__(
+        self,
+        title: Optional[str] = None,
+        detail: Optional[str] = None,
+        status: Optional[int] = None,
+        type: Optional[str] = None,
+        instance: Optional[str] = None,
+        **kwargs,
+    ) -> None:
         self.title: str = title
         self.detail: Optional[str] = detail
         self.status: int = status or 500
@@ -39,9 +45,9 @@ class ApiError(BaseError):
 
 
 class ExceptionHandlers:
-
     def register(self, app):
         from werkzeug.exceptions import default_exceptions
+
         for code in default_exceptions.keys():
             app.register_error_handler(code, handle_http_error)
         app.register_error_handler(AuthError, handle_auth_error)
@@ -54,62 +60,50 @@ def handle_http_error(error: HTTPException) -> Tuple[Response, int]:
     error.code = error.code or 500
     if error.code >= 500:
         current_app.logger.exception(error)
-    return jsonify({
-        'status': 'error',
-        'message': str(error),
-        'code': error.code,
-        'errors': [
-            error.description
-        ]
-    }), error.code
+    return jsonify(
+        {'status': 'error', 'message': str(error), 'code': error.code, 'errors': [error.description]}
+    ), error.code
 
 
-def handle_auth_error(error: AuthError) -> Tuple[Response, int,
-                                                 Dict[str, Any]]:
-    return jsonify({
-        'status': 'error',
-        'message': error.message,
-        'code': error.code,
-        'errors': error.errors
-    }), error.code, {'WWW-Authenticate': 'Bearer realm=Turplanlegger'}
+def handle_auth_error(error: AuthError) -> Tuple[Response, int, Dict[str, Any]]:
+    return (
+        jsonify({'status': 'error', 'message': error.message, 'code': error.code, 'errors': error.errors}),
+        error.code,
+        {'WWW-Authenticate': 'Bearer realm=Turplanlegger'},
+    )
 
 
 def handle_api_problem(problem: ApiProblem) -> Tuple[Response, int, Dict[str, Any]]:
     if problem.status >= 500:
         current_app.logger.exception(problem)
-    return jsonify({
-        'type': problem.type,
-        'status': problem.status,
-        'title': problem.title,
-        'detail': problem.detail,
-        'instance': problem.instance
-    }), problem.status, {'Content-Type': 'application/problem+json'}
+    return (
+        jsonify(
+            {
+                'type': problem.type,
+                'status': problem.status,
+                'title': problem.title,
+                'detail': problem.detail,
+                'instance': problem.instance,
+            }
+        ),
+        problem.status,
+        {'Content-Type': 'application/problem+json'},
+    )
 
 
 def handle_api_error(error: ApiError) -> Tuple[Response, int]:
     if error.code >= 500:
         current_app.logger.exception(error)
-    return jsonify({
-        'status': 'error',
-        'message': error.message,
-        'code': error.code,
-        'errors': error.errors
-    }), error.code
+    return jsonify(
+        {'status': 'error', 'message': error.message, 'code': error.code, 'errors': error.errors}
+    ), error.code
 
 
-def handle_exception(error: Exception) -> Union[Tuple[Response, int],
-                                                Exception]:
+def handle_exception(error: Exception) -> Union[Tuple[Response, int], Exception]:
     # RoutingExceptions are used internally to trigger routing
     # actions, such as slash redirects raising RequestRedirect.
     if isinstance(error, RoutingException):
         return error
 
     current_app.logger.exception(error)
-    return jsonify({
-        'status': 'error',
-        'message': str(error),
-        'code': 500,
-        'errors': [
-            traceback.format_exc()
-        ]
-    }), 500
+    return jsonify({'status': 'error', 'message': str(error), 'code': 500, 'errors': [traceback.format_exc()]}), 500

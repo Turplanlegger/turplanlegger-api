@@ -7,7 +7,6 @@ from turplanlegger.auth.utils import hash_password
 
 
 class UsersTestCase(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         config = {
@@ -15,7 +14,7 @@ class UsersTestCase(unittest.TestCase):
             'SECRET_KEY': 'test',
             'SECRET_KEY_ID': 'test',
             'LOG_LEVEL': 'INFO',
-            'CREATE_ADMIN_USER': False
+            'CREATE_ADMIN_USER': False,
         }
 
         cls.app = create_app(config)
@@ -46,7 +45,7 @@ class UsersTestCase(unittest.TestCase):
             'auth_method': 'a',
             'password': 'adsadsa',
             'private': 'NEI',
-            'create_time': now
+            'create_time': now,
         }
 
         with self.assertRaises(Exception) as cm:
@@ -61,11 +60,24 @@ class UsersTestCase(unittest.TestCase):
             'auth_method': 'a',
             'password': 'adsadsa',
             'private': False,
-            'create_time': now
+            'create_time': now,
         }
 
-        Row = namedtuple('Row', ['id', 'name', 'last_name', 'email', 'auth_method',
-                         'password', 'private', 'create_time', 'deleted', 'delete_time'])
+        Row = namedtuple(
+            'Row',
+            [
+                'id',
+                'name',
+                'last_name',
+                'email',
+                'auth_method',
+                'password',
+                'private',
+                'create_time',
+                'deleted',
+                'delete_time',
+            ],
+        )
         correct = Row('1', 'n', 'l', 'e', 'a', 'adsadsa', False, now, False, None)
 
         res = db._insert(insert, correct_vars)

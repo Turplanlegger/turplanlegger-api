@@ -8,7 +8,6 @@ from turplanlegger.models.user import User
 
 
 class UsersTestCase(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         config = {
@@ -16,7 +15,7 @@ class UsersTestCase(unittest.TestCase):
             'SECRET_KEY': 'test',
             'SECRET_KEY_ID': 'test',
             'LOG_LEVEL': 'INFO',
-            'CREATE_ADMIN_USER': False
+            'CREATE_ADMIN_USER': False,
         }
 
         cls.app = create_app(config)
@@ -29,7 +28,7 @@ class UsersTestCase(unittest.TestCase):
             'email': 'ola.nordmann@norge.no',
             'auth_method': 'basic',
             'password': 'test123',
-            'private': False
+            'private': False,
         }
         cls.user2 = {
             'id': str(uuid4()),
@@ -37,7 +36,7 @@ class UsersTestCase(unittest.TestCase):
             'email': 'kari.nordmann@norge.no',
             'auth_method': 'basic',
             'password': 'test123',
-            'private': False
+            'private': False,
         }
         cls.user3 = {
             'id': str(uuid4()),
@@ -46,7 +45,7 @@ class UsersTestCase(unittest.TestCase):
             'email': 'invalid.com',
             'auth_method': 'basic',
             'password': 'test123',
-            'private': False
+            'private': False,
         }
         cls.user4 = {
             'id': str(uuid4()),
@@ -55,7 +54,7 @@ class UsersTestCase(unittest.TestCase):
             'email': 'petter@smart.com',
             'auth_method': 'basic',
             'password': 'te',
-            'private': True
+            'private': True,
         }
         cls.user5 = {
             'id': str(uuid4()),
@@ -64,7 +63,7 @@ class UsersTestCase(unittest.TestCase):
             'email': 'oernulf.aasenaes@norge.no',
             'auth_method': 'basic',
             'password': 'test123',
-            'private': True
+            'private': True,
         }
         cls.user6 = {
             'id': str(uuid4()),
@@ -73,7 +72,7 @@ class UsersTestCase(unittest.TestCase):
             'email': 'petter@smart.com',
             'auth_method': 'basic',
             'password': "GbYRCzE}q:~e6Qo?':fg^*:d6;{*NV&b=Q2GUAqYv#792C<{?,8@JoYX>qV)3H^q",
-            'private': False
+            'private': False,
         }
         cls.user7 = {
             'id': str(uuid4()),
@@ -82,7 +81,7 @@ class UsersTestCase(unittest.TestCase):
             'email': 'petter@smart.com',
             'auth_method': 'basic',
             'password': "m9uMSpb&q.Ft,[5,%oWj7yk-$YFBvKd}J<fNrToR2x~&+d_9J}K:gcGmUq#qkL'#",
-            'private': False
+            'private': False,
         }
         cls.user8 = {
             'id': str(uuid4()),
@@ -90,10 +89,12 @@ class UsersTestCase(unittest.TestCase):
             'last_name': 'Smart',
             'email': 'petter@smart.com',
             'auth_method': 'basic',
-            'password': ('TZULjwxS3K5MPZv8P4qz3KfsEnxjCsZgd7HNWFXkhcutEDMxzcU5HyEv2'
-                         'VVm9okEaF5tjDfpoqyZrYwVfbQicrvNQrpjqxYexihKVUvJxN23LJxAvf'
-                         'vbbAsU2mbUw67b'),
-            'private': False
+            'password': (
+                'TZULjwxS3K5MPZv8P4qz3KfsEnxjCsZgd7HNWFXkhcutEDMxzcU5HyEv2'
+                'VVm9okEaF5tjDfpoqyZrYwVfbQicrvNQrpjqxYexihKVUvJxN23LJxAvf'
+                'vbbAsU2mbUw67b'
+            ),
+            'private': False,
         }
         cls.user9 = {
             'id': str(uuid4()),
@@ -101,10 +102,12 @@ class UsersTestCase(unittest.TestCase):
             'last_name': 'Smart',
             'email': 'peter@smart.com',
             'auth_method': 'basic',
-            'password': ('>Q`CV"%3c9naU3(fj@eX~N,7+Qx~_t[+Nt9R4~7m(YRK/r)n!T;onA,^G7F'
-                         '+7]<uqy#xGmWkoaN4.JhxK!}u-S4#y^aC"dfBThL^w\'Y2M(qPyr(prX[Vc'
-                         'r_P~:v]Vbc;'),
-            'private': False
+            'password': (
+                '>Q`CV"%3c9naU3(fj@eX~N,7+Qx~_t[+Nt9R4~7m(YRK/r)n!T;onA,^G7F'
+                '+7]<uqy#xGmWkoaN4.JhxK!}u-S4#y^aC"dfBThL^w\'Y2M(qPyr(prX[Vc'
+                'r_P~:v]Vbc;'
+            ),
+            'private': False,
         }
         cls.user10 = {
             'id': str(uuid4()),
@@ -113,7 +116,7 @@ class UsersTestCase(unittest.TestCase):
             'email': 'petter@smart.com',
             'auth_method': 'basic',
             'password': 'JegErEtPassordeSomBurdeFunkeDaVelÅsåæSø',
-            'private': False
+            'private': False,
         }
         cls.user11 = {
             'id': str(uuid4()),
@@ -122,7 +125,7 @@ class UsersTestCase(unittest.TestCase):
             'email': 'petter@smart.com',
             'auth_method': 'basic',
             'password': 'JegErEtPassordeSomBurdeFunkeDaVelÅsåæSø',
-            'private': True
+            'private': True,
         }
 
         cls.hashed_password = hash_password('test')
@@ -134,25 +137,20 @@ class UsersTestCase(unittest.TestCase):
                 last_name='Nordamnn',
                 email='old.nordmann@norge.no',
                 auth_method='basic',
-                password=self.hashed_password
+                password=self.hashed_password,
             )
         )
 
         response = self.client.post(
             '/login',
             data=json.dumps({'email': self.test_user.email, 'password': 'test'}),
-            headers={'Content-type': 'application/json'}
+            headers={'Content-type': 'application/json'},
         )
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
 
-        self.headers_json = {
-            'Content-type': 'application/json',
-            'Authorization': f'Bearer {data["token"]}'
-        }
-        self.headers = {
-            'Authorization': f'Bearer {data["token"]}'
-        }
+        self.headers_json = {'Content-type': 'application/json', 'Authorization': f'Bearer {data["token"]}'}
+        self.headers = {'Authorization': f'Bearer {data["token"]}'}
 
     def tearDown(self):
         db.truncate_table('users')
@@ -198,7 +196,7 @@ class UsersTestCase(unittest.TestCase):
         response = self.client.post(
             '/login',
             data=json.dumps({'email': self.user11['email'], 'password': self.user11['password']}),
-            headers={'Content-type': 'application/json'}
+            headers={'Content-type': 'application/json'},
         )
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
@@ -228,7 +226,7 @@ class UsersTestCase(unittest.TestCase):
         response = self.client.post(
             '/login',
             data=json.dumps({'email': self.user1['email'], 'password': self.user1['password']}),
-            headers={'Content-type': 'application/json'}
+            headers={'Content-type': 'application/json'},
         )
         self.assertEqual(response.status_code, 401)
 
@@ -260,7 +258,7 @@ class UsersTestCase(unittest.TestCase):
         response = self.client.patch(
             f'/users/{self.user1["id"]}/rename',
             data=json.dumps({'name': 'Petter', 'last_name': 'Smart'}),
-            headers=self.headers_json
+            headers=self.headers_json,
         )
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(response.status_code, 200)
@@ -314,7 +312,7 @@ class UsersTestCase(unittest.TestCase):
         response = self.client.post(
             '/login',
             data=json.dumps({'email': self.user5['email'], 'password': self.user5['password']}),
-            headers={'Content-type': 'application/json'}
+            headers={'Content-type': 'application/json'},
         )
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
@@ -350,7 +348,7 @@ class UsersTestCase(unittest.TestCase):
         response = self.client.post(
             '/login',
             data=json.dumps({'email': self.user6['email'], 'password': self.user6['password']}),
-            headers={'Content-type': 'application/json'}
+            headers={'Content-type': 'application/json'},
         )
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
@@ -374,7 +372,7 @@ class UsersTestCase(unittest.TestCase):
         response = self.client.post(
             '/login',
             data=json.dumps({'email': self.user7['email'], 'password': self.user7['password']}),
-            headers={'Content-type': 'application/json'}
+            headers={'Content-type': 'application/json'},
         )
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
@@ -398,7 +396,7 @@ class UsersTestCase(unittest.TestCase):
         response = self.client.post(
             '/login',
             data=json.dumps({'email': self.user8['email'], 'password': self.user8['password']}),
-            headers={'Content-type': 'application/json'}
+            headers={'Content-type': 'application/json'},
         )
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
@@ -422,7 +420,7 @@ class UsersTestCase(unittest.TestCase):
         response = self.client.post(
             '/login',
             data=json.dumps({'email': self.user9['email'], 'password': self.user9['password']}),
-            headers={'Content-type': 'application/json'}
+            headers={'Content-type': 'application/json'},
         )
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
@@ -446,7 +444,7 @@ class UsersTestCase(unittest.TestCase):
         response = self.client.post(
             '/login',
             data=json.dumps({'email': self.user10['email'], 'password': self.user10['password']}),
-            headers={'Content-type': 'application/json'}
+            headers={'Content-type': 'application/json'},
         )
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))

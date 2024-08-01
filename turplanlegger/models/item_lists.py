@@ -35,12 +35,7 @@ class ItemList:
                                 Default: datetime.now()
     """
 
-    def __init__(
-        self,
-        owner: str,
-        private: bool = True,
-        **kwargs
-    ) -> None:
+    def __init__(self, owner: str, private: bool = True, **kwargs) -> None:
         if not owner:
             raise ValueError("missing mandatory field 'owner'")
         if not isinstance(owner, str):
@@ -64,8 +59,8 @@ class ItemList:
         return (
             f"ItemList(id='{self.id}', owner='{self.owner}', "
             f"name='{self.name}', private={self.private}, "
-            f"items={self.items}, items_checked={self.items_checked}, "
-            f"create_time={self.create_time})"
+            f'items={self.items}, items_checked={self.items_checked}, '
+            f'create_time={self.create_time})'
         )
 
     @classmethod
@@ -94,7 +89,7 @@ class ItemList:
             name=json.get('name', None),
             private=json.get('private', True),
             items=items,
-            items_checked=items_checked
+            items_checked=items_checked,
         )
 
     @property
@@ -107,7 +102,7 @@ class ItemList:
             'private': self.private,
             'items': [item.serialize for item in self.items],
             'items_checked': [item.serialize for item in self.items_checked],
-            'create_time': self.create_time
+            'create_time': self.create_time,
         }
 
     def create(self) -> 'ItemList':
@@ -205,5 +200,5 @@ class ItemList:
             private=rec.private,
             items=ListItem.find_list_items(rec.id, checked=False),
             items_checked=ListItem.find_list_items(rec.id, checked=True),
-            create_time=rec.create_time
+            create_time=rec.create_time,
         )
