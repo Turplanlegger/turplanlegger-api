@@ -69,13 +69,11 @@ class Trip:
 
     def __repr__(self):
         return (
-            'Trip('
-            f'id: {self.id}, owner: {self.owner}, '
-            f'private: {self.private}, dates: {self.dates}, '
-            f'notes: {self.notes}, routes: {self.routes}, '
-            f'item_lists: {self.item_lists}, '
-            f'create_time: {self.create_time}, '
-            f'update_time: {self.update_time})'
+            f"Trip(id='{self.id}', owner='{self.owner}', "
+            f'private={self.private}, dates={self.dates}, '
+            f'notes={self.notes}, routes={self.routes}, '
+            f'item_lists={self.item_lists}, '
+            f'create_time={self.create_time})'
         )
 
     @classmethod
@@ -112,7 +110,7 @@ class Trip:
             'notes': self.notes,
             'routes': self.routes,
             'item_lists': self.item_lists,
-            'create_time': self.create_time
+            'create_time': self.create_time,
         }
 
     def create(self) -> 'Trip':
@@ -300,13 +298,7 @@ class Trip:
         if rec is None:
             return None
 
-        trip = Trip(
-            id=rec.id,
-            owner=rec.owner,
-            name=rec.name,
-            private=rec.private,
-            create_time=rec.create_time
-        )
+        trip = Trip(id=rec.id, owner=rec.owner, name=rec.name, private=rec.private, create_time=rec.create_time)
         trip.dates = TripDate.find_by_trip_id(trip.id)
         trip.notes = [item.note_id for item in db.get_trip_notes(trip.id)]
         trip.routes = [item.route_id for item in db.get_trip_routes(trip.id)]

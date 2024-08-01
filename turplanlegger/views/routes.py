@@ -10,7 +10,6 @@ from . import api
 @api.route('/routes/<route_id>', methods=['GET'])
 @auth
 def get_route(route_id):
-
     route = Route.find_route(route_id)
 
     if route:
@@ -22,7 +21,6 @@ def get_route(route_id):
 @api.route('/routes/<route_id>', methods=['DELETE'])
 @auth
 def delete_route(route_id):
-
     route = Route.find_route(route_id)
 
     if not route:
@@ -55,7 +53,6 @@ def add_route():
 @api.route('/routes/<route_id>/owner', methods=['PATCH'])
 @auth
 def change_route_owner(route_id):
-
     route = Route.find_route(route_id)
 
     if not route:
@@ -79,18 +76,9 @@ def change_route_owner(route_id):
 @api.route('/routes/mine', methods=['GET'])
 @auth
 def get_my_routes():
-
     routes = Route.find_routes_by_owner(g.user.id)
 
     if routes:
-        return jsonify(
-            status='ok',
-            count=len(routes),
-            route=[route.serialize for route in routes]
-        )
+        return jsonify(status='ok', count=len(routes), route=[route.serialize for route in routes])
     else:
-        raise ApiProblem(
-            'route not found',
-            'No routes were found for the requested user',
-            404
-        )
+        raise ApiProblem('route not found', 'No routes were found for the requested user', 404)

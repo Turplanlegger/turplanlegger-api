@@ -44,6 +44,14 @@ class Route:
         self.route_history = kwargs.get('route_history', [])
         self.create_time = kwargs.get('create_time', None) or datetime.now()
 
+    def __repr__(self):
+        return (
+            f"Route(id='{self.id}', owner='{self.owner}', "
+            f"name='{self.name}, comment='{self.comment}, "
+            f'route={self.route}, route_history={self.route_history}, '
+            f'create_time={self.create_time})'
+        )
+
     @classmethod
     def parse(cls, json: JSON) -> 'Route':
         """Parse input JSON and return an Route object.
@@ -73,7 +81,7 @@ class Route:
             'route_history': self.route_history,
             'create_time': self.create_time,
             'name': self.name,
-            'comment': self.comment
+            'comment': self.comment,
         }
 
     def create(self) -> 'Route':
@@ -146,5 +154,5 @@ class Route:
             route_history=rec.route_history,
             name=rec.name,
             comment=rec.comment,
-            create_time=rec.create_time
+            create_time=rec.create_time,
         )

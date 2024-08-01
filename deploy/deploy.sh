@@ -33,7 +33,7 @@ if [[ "${NEW_SHA}" != "${OLD_SHA}" ]]; then
     cp docker-compose.yml docker-compose.yml.bak
 
     # Download new docker-compose file
-    if ! curl -fsLO "https://raw.githubusercontent.com/turplanlegger/turplanlegger-api/latest/docker-compose.yml"; then
+    if ! curl -fsLO "https://raw.githubusercontent.com/turplanlegger/turplanlegger-api/main/docker-compose.yml"; then
         echo "Failed to download docker-compose file, reverting to backup"
         mv docker-compose.yml.bak docker-compose.yml
         exit 1

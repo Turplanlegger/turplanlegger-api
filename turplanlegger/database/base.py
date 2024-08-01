@@ -28,14 +28,11 @@ class Database:
                 self.logger.exception(e)
                 raise
 
-        if (app.config.get('CREATE_ADMIN_USER', False)
-                and not self.check_admin_user(app.config.get('ADMIN_EMAIL'))):
+        if app.config.get('CREATE_ADMIN_USER', False) and not self.check_admin_user(app.config.get('ADMIN_EMAIL')):
             self.logger.debug('Did not find admin user, creating one')
             from turplanlegger.utils.admin_user import create_admin_user
-            create_admin_user(
-                email=app.config.get('ADMIN_EMAIL'),
-                password=app.config.get('ADMIN_PASSWORD')
-            )
+
+            create_admin_user(email=app.config.get('ADMIN_EMAIL'), password=app.config.get('ADMIN_PASSWORD'))
 
     def connect(self):
         retry = 0
@@ -46,7 +43,7 @@ class Database:
                     client_encoding='UTF8',
                     cursor_factory=psycopg.ClientCursor,
                     row_factory=namedtuple_row,
-                    autocommit=True
+                    autocommit=True,
                 )
                 break
             except Exception as e:
@@ -56,14 +53,13 @@ class Database:
                     conn = None
                     break
                 else:
-                    backoff = 2 ** retry
+                    backoff = 2**retry
                     self.logger.warning(f'Retry attempt {retry}/{self.max_retries} (wait={backoff}s)...')
                     time.sleep(backoff)
         if conn:
             return conn
         else:
-            raise RuntimeError('Database connect error. Failed to connect'
-                               f' after {self.max_retries} retries.')
+            raise RuntimeError(f'Database connect error. Failed to connect after {self.max_retries} retries.')
 
     def close(self, db):
         db.close()
@@ -80,7 +76,7 @@ class Database:
                 'notes',
                 'trips_notes_references',
                 'trips_routes_references',
-                'trips_item_lists_references'
+                'trips_item_lists_references',
             ]:
                 self.cur.execute(psycopg.sql.SQL('DROP TABLE IF EXISTS {} CASCADE'.format(table)))
 
@@ -451,7 +447,7 @@ class Database:
             VALUES (%(trip_id)s, %(item_list_id)s)
             RETURNING *
         """
-        return self._insert(insert_ref,  {'trip_id': trip_id, 'item_list_id': item_list_id})
+        return self._insert(insert_ref, {'trip_id': trip_id, 'item_list_id': item_list_id})
 
     def add_trip_route_reference(self, trip_id, route_id):
         insert_ref = """
@@ -459,7 +455,7 @@ class Database:
             VALUES (%(trip_id)s, %(route_id)s)
             RETURNING *
         """
-        return self._insert(insert_ref,  {'trip_id': trip_id, 'route_id': route_id})
+        return self._insert(insert_ref, {'trip_id': trip_id, 'route_id': route_id})
 
     def get_trip(self, id, deleted=False):
         select = 'SELECT * FROM trips WHERE id = %s'
@@ -502,10 +498,7 @@ class Database:
             )
             RETURNING *
         """
-        return self._insert(
-            insert,
-            vars(trip_date)
-        )
+        return self._insert(insert, vars(trip_date))
 
     def update_trip_date(self, trip_date):
         update = """
@@ -615,5 +608,8 @@ class Database:
             return self.cur.fetchone() if returning else None
 
     def _log(self, func_name, query, vars):
-        self.logger.debug('\n{stars} {func_name} {stars}\n{query}'.format(
-            stars='*' * 20,func_name=func_name, query=self.cur.mogrify(query, vars)))
+        self.logger.debug(
+            '\n{stars} {func_name} {stars}\n{query}'.format(
+                stars='*' * 20, func_name=func_name, query=self.cur.mogrify(query, vars)
+            )
+        )

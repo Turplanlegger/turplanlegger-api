@@ -34,9 +34,9 @@ class User:
                                 Default: datetime.now()
     """
 
-    def __init__(self, name: str, last_name: str, email: str, auth_method: str,
-                 password: str, private: bool = False, **kwargs) -> None:
-
+    def __init__(
+        self, name: str, last_name: str, email: str, auth_method: str, password: str, private: bool = False, **kwargs
+    ) -> None:
         if not isinstance(private, bool):
             raise TypeError("'private' must be boolean")
 
@@ -68,6 +68,14 @@ class User:
         self.deleted = kwargs.get('deleted', False)
         self.delete_time = kwargs.get('delete_time', None)
         self.create_time = kwargs.get('create_time', None)
+
+    def __repr__(self):
+        return (
+            f"User(id={self.id}, name='{self.name}', last_name='{self.last_name}', "
+            f"email='{self.email}', auth_method={self.auth_method}, "
+            f'private={self.private}, deleted={self.deleted}, '
+            f'delete_time={self.delete_time}, create_time={self.create_time})'
+        )
 
     @classmethod
     def parse(cls, json: JSON) -> 'User':
@@ -118,7 +126,7 @@ class User:
             email=email,
             auth_method=auth_method,
             password=password,
-            private=json.get('private', False)
+            private=json.get('private', False),
         )
 
     @property
@@ -133,7 +141,7 @@ class User:
             'private': self.private,
             'create_time': self.create_time,
             'deleted': self.deleted,
-            'delete_time': self.delete_time
+            'delete_time': self.delete_time,
         }
 
     def create(self) -> 'User':
@@ -231,5 +239,5 @@ class User:
             private=rec.private,
             create_time=rec.create_time,
             deleted=rec.deleted,
-            delete_time=rec.delete_time
+            delete_time=rec.delete_time,
         )

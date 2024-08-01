@@ -111,7 +111,6 @@ def toggle_private_user(user_id: str):
 @api.route('/whoami', methods=['GET'])
 @auth
 def lookup_self():
-
     user = User.find_user(g.user.id)
 
     if user:

@@ -14,7 +14,6 @@ from . import api
 @api.route('/trips/<trip_id>', methods=['GET'])
 @auth
 def get_trip(trip_id):
-
     trip = Trip.find_trip(trip_id)
     if trip:
         return jsonify(status='ok', count=1, trip=trip.serialize)
@@ -88,7 +87,6 @@ def update_trip(trip_id):
 @api.route('/trips/notes', methods=['PATCH'])
 @auth
 def add_note_to_trip():
-
     trip = Trip.find_trip(request.json.get('trip_id', None))
     if not trip:
         raise ApiProblem('Failed to add note to trip', 'Trip was not found', 404)
@@ -108,7 +106,6 @@ def add_note_to_trip():
 @api.route('/trips/routes', methods=['PATCH'])
 @auth
 def add_route_to_trip():
-
     trip = Trip.find_trip(request.json.get('trip_id', None))
     if not trip:
         raise ApiProblem('Failed to add route to trip', 'Trip was not found', 404)
@@ -128,7 +125,6 @@ def add_route_to_trip():
 @api.route('/trips/item_lists', methods=['PATCH'])
 @auth
 def add_item_list_to_trip():
-
     trip = Trip.find_trip(request.json.get('trip_id', None))
     if not trip:
         raise ApiProblem('Failed to add item list to trip', 'Trip was not found', 404)
@@ -148,7 +144,6 @@ def add_item_list_to_trip():
 @api.route('/trips/<trip_id>/owner', methods=['PATCH'])
 @auth
 def change_trip_owner(trip_id):
-
     trip = Trip.find_trip(trip_id)
     if not trip:
         raise ApiProblem('Failed to change owner of trip', 'The requested trip was not found', 404)
@@ -170,27 +165,17 @@ def change_trip_owner(trip_id):
 @api.route('/trips/mine', methods=['GET'])
 @auth
 def get_my_trips():
-
     trips = Trip.find_trips_by_owner(g.user.id)
 
     if trips:
-        return jsonify(
-            status='ok',
-            count=len(trips),
-            trip=[trip.serialize for trip in trips]
-        )
+        return jsonify(status='ok', count=len(trips), trip=[trip.serialize for trip in trips])
     else:
-        raise ApiProblem(
-            'Trip not found',
-            'No trips were found for the requested user',
-            404
-        )
+        raise ApiProblem('Trip not found', 'No trips were found for the requested user', 404)
 
 
 @api.route('/trips/<trip_id>', methods=['DELETE'])
 @auth
 def delete_trip(trip_id):
-
     trip = Trip.find_trip(trip_id)
     if not trip:
         raise ApiProblem('Failed to change owner of trip', 'The requested trip was not found', 404)
@@ -239,11 +224,7 @@ def remove_trip_date(trip_id, trip_date_id):
             break
 
     if trip_date is None:
-        raise ApiProblem(
-            'Failed to remove date from trip',
-            'The requested date was not found in this trip',
-            404
-        )
+        raise ApiProblem('Failed to remove date from trip', 'The requested date was not found in this trip', 404)
 
     try:
         trip_date.delete()
@@ -252,16 +233,13 @@ def remove_trip_date(trip_id, trip_date_id):
 
     return jsonify(status='ok')
 
+
 @api.route('/trips/<trip_id>/dates/<trip_date_id>/select', methods=['patch'])
 @auth
 def select_trip_Date(trip_id, trip_date_id):
     trip = Trip.find_trip(trip_id)
     if not trip:
-        raise ApiProblem(
-            'Failed to select trip date',
-            'The requested trip was not found',
-            404
-        )
+        raise ApiProblem('Failed to select trip date', 'The requested trip was not found', 404)
 
     trip_date = None
     for date in trip.dates:
@@ -270,28 +248,16 @@ def select_trip_Date(trip_id, trip_date_id):
             break
 
     if trip_date is None:
-        raise ApiProblem(
-            'Failed to select trip date',
-            'The requested date was not found in this trip',
-            404
-        )
+        raise ApiProblem('Failed to select trip date', 'The requested date was not found in this trip', 404)
 
     try:
         TripDate.unselect_by_trip_id(trip.id)
     except Exception:
-        raise ApiProblem(
-            'Failed to select trip date',
-            'Failed to unselect dates for the trip',
-            500
-        )
+        raise ApiProblem('Failed to select trip date', 'Failed to unselect dates for the trip', 500)
 
     try:
         trip_date.select()
     except Exception:
-        raise ApiProblem(
-            'Failed to select trip date',
-            'Unkown error',
-            500
-        )
+        raise ApiProblem('Failed to select trip date', 'Unkown error', 500)
 
     return jsonify(status='ok')
