@@ -36,7 +36,7 @@ class Trip:
                           the trip
         create_time (datetime): Time of creation,
                                 Default: datetime.now()
-        create_time (datetime): Time of update,
+        update_time (datetime): Time of update,
 
     """
 
