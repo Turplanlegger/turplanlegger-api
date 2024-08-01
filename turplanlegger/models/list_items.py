@@ -71,7 +71,7 @@ class ListItem:
             owner=json.get('owner', None),
             item_list=json.get('item_list', None),
             checked=json.get('checked', False),
-            content=json.get('content', None)
+            content=json.get('content', None),
         )
 
     @classmethod
@@ -93,7 +93,7 @@ class ListItem:
             owner=g.user.id,
             item_list=json.get('item_list', None),
             checked=checked,
-            content=json.get('content', None)
+            content=json.get('content', None),
         )
 
     @property
@@ -105,7 +105,7 @@ class ListItem:
             'item_list': self.item_list,
             'content': self.content,
             'checked': self.checked,
-            'create_time': self.create_time
+            'create_time': self.create_time,
         }
 
     @property
@@ -113,11 +113,7 @@ class ListItem:
         """Serialize a minimized ListItem and returns it as Dict(str, any)
         Returns only id and contet
         """
-        return {
-            'id': self.id,
-            'content': self.content,
-            'checked': self.checked
-        }
+        return {'id': self.id, 'content': self.content, 'checked': self.checked}
 
     def create(self) -> 'ListItem':
         """Create a ListItem in the database"""
@@ -189,5 +185,5 @@ class ListItem:
             item_list=rec.item_list,
             checked=rec.checked,
             content=rec.content,
-            create_time=rec.create_time
+            create_time=rec.create_time,
         )

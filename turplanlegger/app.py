@@ -17,9 +17,7 @@ cors = Cors()
 http_client = HttpClient()
 
 
-def create_app(config_override: Dict[str, Any] = None,
-               environment: str = None) -> Flask:
-
+def create_app(config_override: Dict[str, Any] = None, environment: str = None) -> Flask:
     app = Flask(__name__)
     app.config['ENVIRONMENT'] = environment
     config.init_app(app, config_override)
@@ -35,9 +33,11 @@ def create_app(config_override: Dict[str, Any] = None,
     cors.init_app(app)
 
     from turplanlegger.views import api
+
     app.register_blueprint(api)
 
     from turplanlegger.auth import auth
+
     app.register_blueprint(auth)
 
     return app

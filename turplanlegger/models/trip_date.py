@@ -60,9 +60,9 @@ class TripDate:
         return (
             f"TripDate(id='{self.id}', trip_id='{self.trip_id}', "
             f"selected={self.selected}, owner='{self.owner}', "
-            f"start_time={self.start_time}, end_time={self.end_time}, "
-            f"create_time={self.create_time}, deleted={self.deleted}, "
-            f"delete_time={self.delete_time})"
+            f'start_time={self.start_time}, end_time={self.end_time}, '
+            f'create_time={self.create_time}, deleted={self.deleted}, '
+            f'delete_time={self.delete_time})'
         )
 
     @classmethod
@@ -99,7 +99,7 @@ class TripDate:
             start_time=start_time,
             end_time=end_time,
             trip_id=json.get('trip_id', None),
-            selected=json.get('selected', False)
+            selected=json.get('selected', False),
         )
 
     @property
@@ -112,7 +112,7 @@ class TripDate:
             'end_time': self.end_time.isoformat(),
             'trip_id': self.trip_id,
             'selected': self.selected,
-            'create_time': self.create_time
+            'create_time': self.create_time,
         }
 
     def create(self) -> 'TripDate':
@@ -173,5 +173,5 @@ class TripDate:
             selected=rec.selected,
             create_time=rec.create_time,
             deleted=rec.deleted,
-            delete_time=rec.delete_time
+            delete_time=rec.delete_time,
         )

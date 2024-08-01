@@ -11,7 +11,6 @@ from . import api
 @api.route('/item_lists/<item_list_id>', methods=['GET'])
 @auth
 def get_item_list(item_list_id):
-
     item_list = ItemList.find_item_list(item_list_id)
 
     if item_list:
@@ -23,7 +22,6 @@ def get_item_list(item_list_id):
 @api.route('/item_lists/<item_list_id>', methods=['DELETE'])
 @auth
 def delete_item_list(item_list_id):
-
     item_list = ItemList.find_item_list(item_list_id)
 
     if not item_list:
@@ -59,7 +57,6 @@ def add_item_list():
 @api.route('/item_lists/<item_list_id>/add', methods=['PATCH'])
 @auth
 def add_item_list_items(item_list_id):
-
     item_list = ItemList.find_item_list(item_list_id)
 
     if not item_list:
@@ -72,23 +69,15 @@ def add_item_list_items(item_list_id):
     try:
         items = [
             ListItem.parse(
-                {
-                    'owner': g.user.id,
-                    'item_list': item_list.id,
-                    'checked': False,
-                    'content': item.get('content')
-                }
-            ) for item in items
+                {'owner': g.user.id, 'item_list': item_list.id, 'checked': False, 'content': item.get('content')}
+            )
+            for item in items
         ]
         items_checked = [
             ListItem.parse(
-                {
-                    'owner': g.user.id,
-                    'item_list': item_list.id,
-                    'checked': True,
-                    'content':  item.get('content')
-                }
-            ) for item in items_checked
+                {'owner': g.user.id, 'item_list': item_list.id, 'checked': True, 'content': item.get('content')}
+            )
+            for item in items_checked
         ]
     except (ValueError, TypeError) as e:
         raise ApiProblem('Failed to parse items', str(e), 400)
@@ -105,7 +94,6 @@ def add_item_list_items(item_list_id):
 @api.route('/item_lists/<item_list_id>/rename', methods=['PATCH'])
 @auth
 def rename_item_list(item_list_id):
-
     item_list = ItemList.find_item_list(item_list_id)
 
     if not item_list:
@@ -122,7 +110,6 @@ def rename_item_list(item_list_id):
 @api.route('/item_lists/<item_list_id>/toggle_check', methods=['PATCH'])
 @auth
 def toggle_list_item_check(item_list_id):
-
     if not request.json.get('items', []):
         raise ApiProblem('Failed to get items', 'Item(s) must be supplied as a JSON list', 400)
 
@@ -149,26 +136,17 @@ def toggle_list_item_check(item_list_id):
 @api.route('/item_lists/<item_list_id>/owner', methods=['PATCH'])
 @auth
 def change_item_list_owner(item_list_id):
-
     item_list = ItemList.find_item_list(item_list_id)
 
     if not item_list:
         raise ApiProblem('Item list not found', 'The requested item list was not found', 404)
 
     if item_list.owner == request.json.get('owner', None):
-        raise ApiProblem(
-            'Failed to change owner of item list',
-            'New owner is the same as old',
-            400
-        )
+        raise ApiProblem('Failed to change owner of item list', 'New owner is the same as old', 400)
     item_list.owner = request.json.get('owner', None)
 
     if not item_list.owner:
-        raise ApiProblem(
-            'Owner is not str',
-            'Owner must be passed as an str',
-            400
-        )
+        raise ApiProblem('Owner is not str', 'Owner must be passed as an str', 400)
 
     try:
         item_list.change_owner()
@@ -181,38 +159,20 @@ def change_item_list_owner(item_list_id):
 @api.route('/item_lists/mine', methods=['GET'])
 @auth
 def get_my_item_lists():
-
     item_lists = ItemList.find_item_list_by_owner(g.user.id)
 
     if item_lists:
-        return jsonify(
-            status='ok',
-            count=len(item_lists),
-            item_list=[item_list.serialize for item_list in item_lists]
-        )
+        return jsonify(status='ok', count=len(item_lists), item_list=[item_list.serialize for item_list in item_lists])
     else:
-        raise ApiProblem(
-            'Item lists not found',
-            'No item lists were found for the requested user',
-            404
-        )
+        raise ApiProblem('Item lists not found', 'No item lists were found for the requested user', 404)
 
 
 @api.route('/item_lists/public', methods=['GET'])
 @auth
 def get_public_item_lists():
-
     item_lists = ItemList.find_public_item_lists()
 
     if item_lists:
-        return jsonify(
-            status='ok',
-            count=len(item_lists),
-            item_list=[item_list.serialize for item_list in item_lists]
-        )
+        return jsonify(status='ok', count=len(item_lists), item_list=[item_list.serialize for item_list in item_lists])
     else:
-        raise ApiProblem(
-            'Item lists not found',
-            'No public item lists were found',
-            404
-        )
+        raise ApiProblem('Item lists not found', 'No public item lists were found', 404)

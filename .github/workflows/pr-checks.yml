@@ -22,11 +22,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install hatch
         pip install .[dev]
-    - name: Lint using pre-commit
-      run: |
-        echo '```bash' >> $GITHUB_STEP_SUMMARY
-        hatch run lint >> $GITHUB_STEP_SUMMARY
-        echo '```' >> $GITHUB_STEP_SUMMARY
+    - name: Lint using ruff
+      run: hatch run lint
+    - name: Format using ruff
+      run: hatch run format
 
   test-postgres15:
     runs-on: ubuntu-latest

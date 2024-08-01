@@ -37,7 +37,6 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "hatch==1.12.0",
-    "pre-commit==3.6.0",
     "pytest==8.3.1",
     "pytest-cov==5.0.0",
     "wheel==0.43.0",
@@ -57,7 +56,8 @@ path = "turplanlegger/__about__.py"
 [tool.hatch.envs.default.scripts]
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=turplanlegger --cov=tests {args}"
 no-cov = "cov --no-cov {args}"
-lint = "pre-commit run -a --show-diff-on-failure"
+lint = "ruff check"
+format = "ruff format --diff --no-cache"
 
 [tool.coverage.run]
 branch = true
@@ -74,9 +74,14 @@ include = [
 ]
 
 [tool.ruff]
-select = ["E", "W", "Q", "I", "F", "YTT", "C4", "T10", "ISC", "ICN", "RSE"]
 line-length = 120
 target-version = "py312"
 
-[tool.ruff.flake8-quotes]
+[tool.ruff.lint]
+select = ["E", "W", "Q", "I", "F", "YTT", "C4", "T10", "ICN", "RSE"]
+
+[tool.ruff.lint.flake8-quotes]
 inline-quotes = "single"
+
+[tool.ruff.format]
+quote-style = "single"

@@ -8,7 +8,6 @@ from turplanlegger.models.user import User
 
 
 class NotesTestCase(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         config = {
@@ -16,7 +15,7 @@ class NotesTestCase(unittest.TestCase):
             'SECRET_KEY': 'test',
             'SECRET_KEY_ID': 'test',
             'LOG_LEVEL': 'INFO',
-            'CREATE_ADMIN_USER': True
+            'CREATE_ADMIN_USER': True,
         }
 
         cls.app = create_app(config)
@@ -29,7 +28,7 @@ class NotesTestCase(unittest.TestCase):
                 last_name='Nordamnn',
                 email='old.nordmann@norge.no',
                 auth_method='basic',
-                password=hash_password('test')
+                password=hash_password('test'),
             )
         )
         cls.user2 = User.create(
@@ -39,18 +38,12 @@ class NotesTestCase(unittest.TestCase):
                 last_name='Nordamnn',
                 email='kari.nordmann@norge.no',
                 auth_method='basic',
-                password=hash_password('test')
+                password=hash_password('test'),
             )
         )
 
-        cls.note_full = {
-            'content': 'Are er kul',
-            'name': 'Best note ever'
-        }
-        cls.note_full2 = {
-            'content': 'Petter er kul',
-            'name': 'Best note ever'
-        }
+        cls.note_full = {'content': 'Are er kul', 'name': 'Best note ever'}
+        cls.note_full2 = {'content': 'Petter er kul', 'name': 'Best note ever'}
         cls.note_no_name = {
             'content': 'Are er kul',
         }
@@ -61,20 +54,15 @@ class NotesTestCase(unittest.TestCase):
         response = cls.client.post(
             '/login',
             data=json.dumps({'email': cls.user1.email, 'password': 'test'}),
-            headers={'Content-type': 'application/json'}
+            headers={'Content-type': 'application/json'},
         )
         if response.status_code != 200:
             raise RuntimeError('Failed to login')
 
         data = json.loads(response.data.decode('utf-8'))
 
-        cls.headers_json = {
-            'Content-type': 'application/json',
-            'Authorization': f'Bearer {data["token"]}'
-        }
-        cls.headers = {
-            'Authorization': f'Bearer {data["token"]}'
-        }
+        cls.headers_json = {'Content-type': 'application/json', 'Authorization': f'Bearer {data["token"]}'}
+        cls.headers = {'Authorization': f'Bearer {data["token"]}'}
 
     def tearDown(self):
         db.truncate_table('notes')
@@ -84,7 +72,6 @@ class NotesTestCase(unittest.TestCase):
         db.destroy()
 
     def test_add_note_ok(self):
-
         response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
 
@@ -155,8 +142,9 @@ class NotesTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
 
-        response = self.client.patch(f'/notes/{data["id"]}/owner',
-                                     data=json.dumps({'owner': self.user2.id}), headers=self.headers_json)
+        response = self.client.patch(
+            f'/notes/{data["id"]}/owner', data=json.dumps({'owner': self.user2.id}), headers=self.headers_json
+        )
         self.assertEqual(response.status_code, 200)
 
         response = self.client.get(f'/notes/{data["id"]}', headers=self.headers)
@@ -170,7 +158,8 @@ class NotesTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         response = self.client.patch(
-            '/notes/2/owner', data=json.dumps({'owner': self.user2.id}), headers=self.headers_json)
+            '/notes/2/owner', data=json.dumps({'owner': self.user2.id}), headers=self.headers_json
+        )
         self.assertEqual(response.status_code, 404)
 
         data = json.loads(response.data.decode('utf-8'))
@@ -208,7 +197,8 @@ class NotesTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         response = self.client.patch(
-            '/notes/1/content', data=json.dumps({'content': 'newcontent'}), headers=self.headers_json)
+            '/notes/1/content', data=json.dumps({'content': 'newcontent'}), headers=self.headers_json
+        )
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['status'], 'ok')
@@ -221,11 +211,9 @@ class NotesTestCase(unittest.TestCase):
 
         response = self.client.put(
             f'/notes/{note_id}',
-            data=json.dumps({
-                'name': 'newname',
-                'content': 'newcontent'
-            }),
-            headers=self.headers_json)
+            data=json.dumps({'name': 'newname', 'content': 'newcontent'}),
+            headers=self.headers_json,
+        )
 
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
@@ -243,11 +231,9 @@ class NotesTestCase(unittest.TestCase):
 
         response = self.client.put(
             f'/notes/{note_id}',
-            data=json.dumps({
-                'name': self.note_full['name'],
-                'content': self.note_full['content']
-            }),
-            headers=self.headers_json)
+            data=json.dumps({'name': self.note_full['name'], 'content': self.note_full['content']}),
+            headers=self.headers_json,
+        )
 
         self.assertEqual(response.status_code, 409)
         data = json.loads(response.data.decode('utf-8'))
@@ -261,12 +247,7 @@ class NotesTestCase(unittest.TestCase):
         note_id = data['id']
 
         response = self.client.put(
-            f'/notes/{note_id}',
-            data=json.dumps({
-                'name': None,
-                'content': None
-            }),
-            headers=self.headers_json
+            f'/notes/{note_id}', data=json.dumps({'name': None, 'content': None}), headers=self.headers_json
         )
 
         self.assertEqual(response.status_code, 409)
@@ -282,11 +263,8 @@ class NotesTestCase(unittest.TestCase):
 
         response = self.client.put(
             f'/notes/{note_id}',
-            data=json.dumps({
-                'name': 'It now has a new name',
-                'content': self.note_full['content']
-            }),
-            headers=self.headers_json
+            data=json.dumps({'name': 'It now has a new name', 'content': self.note_full['content']}),
+            headers=self.headers_json,
         )
 
         self.assertEqual(response.status_code, 200)
@@ -301,11 +279,8 @@ class NotesTestCase(unittest.TestCase):
         note_id = data['id']
 
         response = self.client.put(
-            f'/notes/{note_id}',
-            data=json.dumps({
-                'name': self.note_full['name']
-            }),
-            headers=self.headers_json)
+            f'/notes/{note_id}', data=json.dumps({'name': self.note_full['name']}), headers=self.headers_json
+        )
 
         self.assertEqual(response.status_code, 409)
         data = json.loads(response.data.decode('utf-8'))
@@ -320,11 +295,8 @@ class NotesTestCase(unittest.TestCase):
 
         response = self.client.put(
             f'/notes/{note_id}',
-            data=json.dumps({
-                'name': self.note_full['name'],
-                'content': 'It now has new content'
-            }),
-            headers=self.headers_json
+            data=json.dumps({'name': self.note_full['name'], 'content': 'It now has new content'}),
+            headers=self.headers_json,
         )
 
         self.assertEqual(response.status_code, 200)

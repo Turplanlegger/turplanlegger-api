@@ -23,6 +23,7 @@ def login():
         raise ApiProblem('Authorization failed', 'Email address is invalid', 401)
 
     from turplanlegger.models.user import User
+
     user = User.check_credentials(email, password)
 
     if not user:
@@ -37,6 +38,6 @@ def login():
         nbf=now,
         iat=now,
         jti=str(uuid4()),
-        typ='JWT'
+        typ='JWT',
     )
     return jsonify(token=token.tokenize())

@@ -18,13 +18,11 @@ def auth(func):
         except AttributeError:
             raise AuthError('must supply token by Authorization header', 401)
 
-        if (len(auth_header) == 2 and
-                auth_header[0] == 'Bearer' and auth_header[1]):
+        if len(auth_header) == 2 and auth_header[0] == 'Bearer' and auth_header[1]:
             token = auth_header[1]
             current_app.logger.debug(f'Supplied API token: {token}')
         else:
-            raise AuthError(
-                'must supply token by Authorization header', 401)
+            raise AuthError('must supply token by Authorization header', 401)
 
         try:
             jwt = JWT.parse(token)
@@ -60,4 +58,5 @@ def auth(func):
         current_app.logger.debug(f'user {user.id} signed up')
         g.user = user
         return func(*args, **kwargs)
+
     return wrapped

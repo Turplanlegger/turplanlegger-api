@@ -7,7 +7,6 @@ from turplanlegger.models.user import User
 
 
 class RoutesTestCase(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         config = {
@@ -15,7 +14,7 @@ class RoutesTestCase(unittest.TestCase):
             'SECRET_KEY': 'test',
             'SECRET_KEY_ID': 'test',
             'LOG_LEVEL': 'INFO',
-            'CREATE_ADMIN_USER': True
+            'CREATE_ADMIN_USER': True,
         }
 
         cls.app = create_app(config)
@@ -27,7 +26,7 @@ class RoutesTestCase(unittest.TestCase):
                 last_name='Nordamnn',
                 email='old.nordmann@norge.no',
                 auth_method='basic',
-                password=hash_password('test')
+                password=hash_password('test'),
             )
         )
         cls.user2 = User.create(
@@ -36,22 +35,22 @@ class RoutesTestCase(unittest.TestCase):
                 last_name='Nordamnn',
                 email='kari.nordmann@norge.no',
                 auth_method='basic',
-                password=hash_password('test')
+                password=hash_password('test'),
             )
         )
 
-        routeGeometry = ('{\"type\":\"LineString\",\"coordinates\":[[11.615295,60.603483],[11.638641,60.612921],'
-                         '[11.6819,60.613258],[11.697693,60.601797],[11.712112,60.586622],[11.703873,60.574476],'
-                         '[11.67984,60.568064],[11.640015,60.576838],[11.611862,60.587296]]}')
-        cls.route = {
-            'route': routeGeometry
-        }
+        routeGeometry = (
+            '{"type":"LineString","coordinates":[[11.615295,60.603483],[11.638641,60.612921],'
+            '[11.6819,60.613258],[11.697693,60.601797],[11.712112,60.586622],[11.703873,60.574476],'
+            '[11.67984,60.568064],[11.640015,60.576838],[11.611862,60.587296]]}'
+        )
+        cls.route = {'route': routeGeometry}
         cls.route_no_geometry = {}
 
         response = cls.client.post(
             '/login',
             data=json.dumps({'email': cls.user1.email, 'password': 'test'}),
-            headers={'Content-type': 'application/json'}
+            headers={'Content-type': 'application/json'},
         )
 
         if response.status_code != 200:
@@ -59,13 +58,8 @@ class RoutesTestCase(unittest.TestCase):
 
         data = json.loads(response.data.decode('utf-8'))
 
-        cls.headers_json = {
-            'Content-type': 'application/json',
-            'Authorization': f'Bearer {data["token"]}'
-        }
-        cls.headers = {
-            'Authorization': f'Bearer {data["token"]}'
-        }
+        cls.headers_json = {'Content-type': 'application/json', 'Authorization': f'Bearer {data["token"]}'}
+        cls.headers = {'Authorization': f'Bearer {data["token"]}'}
 
     def tearDown(self):
         db.truncate_table('routes')
@@ -145,9 +139,7 @@ class RoutesTestCase(unittest.TestCase):
         created_route_id = data['id']
 
         response = self.client.patch(
-            f'/routes/{created_route_id}/owner',
-            data=json.dumps({'owner': self.user2.id}),
-            headers=self.headers_json
+            f'/routes/{created_route_id}/owner', data=json.dumps({'owner': self.user2.id}), headers=self.headers_json
         )
         self.assertEqual(response.status_code, 200)
 
@@ -162,9 +154,7 @@ class RoutesTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         response = self.client.patch(
-            '/routes/2/owner',
-            data=json.dumps({'owner': self.user2.id}),
-            headers=self.headers_json
+            '/routes/2/owner', data=json.dumps({'owner': self.user2.id}), headers=self.headers_json
         )
         self.assertEqual(response.status_code, 404)
 
