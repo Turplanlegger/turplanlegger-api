@@ -109,8 +109,8 @@ class TripDate:
         return {
             'id': self.id,
             'owner': self.owner,
-            'start_time': self.start_time.isoformat(),
-            'end_time': self.end_time.isoformat(),
+            'start_time': self.start_time,
+            'end_time': self.end_time,
             'trip_id': self.trip_id,
             'selected': self.selected,
             'create_time': self.create_time,
