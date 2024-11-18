@@ -421,6 +421,12 @@ class Database:
                 update += ', name=%(name)s'
                 vars['name'] = trip.name
 
+        if 'private' in updated_fields:
+            if trip.private is True:
+                update += ', private=true'
+            else:
+                update += ', private=false'
+
         update += ' WHERE id=%(id)s'
         return self._updateone(update, vars, returning=False)
 
