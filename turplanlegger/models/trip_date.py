@@ -116,9 +116,10 @@ class TripDate:
             'create_time': self.create_time,
         }
 
-    def create(self) -> 'TripDate':
+    def create(self, return_result=True) -> 'TripDate':
         """Creates the TripDate instance in the database"""
-        return self.get_trip_date(db.create_trip_date(self))
+        date = db.create_trip_date(self)
+        return self.get_trip_date(date) if return_result is True else None
 
     def update(self) -> None:
         """Updates the TripDate instance in the database"""

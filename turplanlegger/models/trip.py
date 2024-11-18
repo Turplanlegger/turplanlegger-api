@@ -177,7 +177,7 @@ class Trip:
             if date.get('id', None) is None:
                 date['trip_id'] = trip.id
                 try:
-                    TripDate.parse(date).create()
+                    TripDate.parse(date).create(return_result=False)
                 except (ValueError, KeyError) as e:
                     errors.append({'error': 'Failed to parse new date', 'object': date, 'details': e})
                 else:
