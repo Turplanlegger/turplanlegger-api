@@ -1,5 +1,5 @@
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from uuid import uuid4
 
 from flask import current_app, jsonify, request
@@ -29,7 +29,7 @@ def login():
     if not user:
         raise ApiProblem('Authorization failed', 'Could not authorize user', 401)
 
-    now = datetime.utcnow()
+    now = datetime.now(UTC)
     token = JWT(
         iss=request.url_root,
         sub=user.id,
