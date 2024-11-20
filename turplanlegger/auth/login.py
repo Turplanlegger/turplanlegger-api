@@ -1,5 +1,5 @@
 import re
-from datetime import datetime, timedelta, UTC
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 from flask import current_app, jsonify, request
