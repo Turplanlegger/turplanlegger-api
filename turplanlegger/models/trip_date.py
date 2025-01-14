@@ -98,6 +98,7 @@ class TripDate:
             owner=g.user.id,
             start_time=start_time,
             end_time=end_time,
+            id=json.get('id', None),
             trip_id=json.get('trip_id', None),
             selected=json.get('selected', False),
         )
@@ -112,12 +113,17 @@ class TripDate:
             'end_time': self.end_time.isoformat(),
             'trip_id': self.trip_id,
             'selected': self.selected,
-            'create_time': self.create_time,
+            'create_time': self.create_time.isoformat(),
         }
 
-    def create(self) -> 'TripDate':
+    def create(self, return_result=True) -> 'TripDate':
         """Creates the TripDate instance in the database"""
-        return self.get_trip_date(db.create_trip_date(self))
+        date = db.create_trip_date(self)
+        return self.get_trip_date(date) if return_result is True else None
+
+    def update(self) -> None:
+        """Updates the TripDate instance in the database"""
+        return db.update_trip_date(self)
 
     def delete(self) -> bool:
         """Deletes the TripDate object from the database

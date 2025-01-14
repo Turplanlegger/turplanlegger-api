@@ -36,6 +36,50 @@ def add_trip():
     return jsonify(trip.serialize), 201
 
 
+@api.route('/trips/<trip_id>', methods=['PUT'])
+@auth
+def update_trip(trip_id):
+    trip = Trip.find_trip(trip_id)
+
+    if not trip:
+        raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
+
+    errors = []
+    trip_changed = False
+
+    dates = request.json.get('dates', None)
+
+    date_status = Trip.update_trip_dates(dates, trip)
+    if date_status.changed is True:
+        trip_changed = True
+    errors.extend(date_status.errors)
+
+    name = request.json.get('name', None)
+    private = request.json.get('private', None)
+    updated_fields = []
+    if name != trip.name:
+        updated_fields.append('name')
+    trip.name = name
+    if private != trip.private:
+        updated_fields.append('private')
+    trip.private = private
+
+    if len(updated_fields) > 0:
+        try:
+            trip.update(updated_fields)
+        except Exception as e:
+            errors.append({'error': 'Failed to update trip', 'object': trip, 'details': e})
+        else:
+            trip_changed = True
+
+    if trip_changed is False:
+        raise ApiProblem('Failed to update note', 'No new updates were written', 409)
+
+    trip = Trip.find_trip(trip.id)
+
+    return jsonify(status='ok', count=1, trip=trip.serialize, errors=errors)
+
+
 @api.route('/trips/notes', methods=['PATCH'])
 @auth
 def add_note_to_trip():

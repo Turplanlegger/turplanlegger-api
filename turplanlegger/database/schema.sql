@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS trips (
     private boolean DEFAULT FALSE,
     owner text REFERENCES users (id),
     create_time timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time timestamp without time zone,
     deleted boolean DEFAULT FALSE,
     delete_time timestamp without time zone
 );
