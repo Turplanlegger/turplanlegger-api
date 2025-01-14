@@ -43,7 +43,7 @@ dev = [
     "ruff==v0.5.5"
 ]
 prod = [
-    "gunicorn[gthread]==22.0.0",
+    "gunicorn[gthread]==23.0.0",
     "psycopg[c]==3.2.1"
 ]
 
