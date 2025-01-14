@@ -1,3 +1,4 @@
+from collections import namedtuple
 from datetime import datetime
 from typing import Dict, NamedTuple
 
@@ -7,6 +8,7 @@ from turplanlegger.app import db
 from turplanlegger.models.trip_date import TripDate
 
 JSON = Dict[str, any]
+TRIP_DATE_UPDATE_STATUS = namedtuple('TRIP_DATE_UPDATE_STATUS', ['changed', 'errors'])
 
 
 class Trip:
@@ -34,6 +36,7 @@ class Trip:
                           the trip
         create_time (datetime): Time of creation,
                                 Default: datetime.now()
+        update_time (datetime): Time of update,
 
     """
 
@@ -59,6 +62,7 @@ class Trip:
         self.routes = kwargs.get('routes', [])
         self.item_lists = kwargs.get('item_lists', [])
         self.create_time = kwargs.get('create_time', None) or datetime.now()
+        self.update_time = kwargs.get('update_time', None)
 
     def __repr__(self):
         return (
@@ -103,7 +107,7 @@ class Trip:
             'notes': self.notes,
             'routes': self.routes,
             'item_lists': self.item_lists,
-            'create_time': self.create_time,
+            'create_time': self.create_time.isoformat(),
         }
 
     def create(self) -> 'Trip':
@@ -121,6 +125,9 @@ class Trip:
         """Deletes the Trip object from the database
         Returns True if deleted"""
         return db.delete_trip(self.id)
+
+    def update(self, updated_fields) -> None:
+        return db.update_trip(self, updated_fields)
 
     def add_note_reference(self, note_id: int) -> 'Trip':
         """Adds a note to the trip instance
@@ -149,6 +156,77 @@ class Trip:
     def add_item_list_reference(self, item_list_id: int) -> 'Trip':
         db.add_trip_item_list_reference(self.id, item_list_id)
         self.routes = db.get_trip_item_lists(self.id)
+
+    @staticmethod
+    def update_trip_dates(dates: JSON, trip: 'Trip') -> 'TRIP_DATE_UPDATE_STATUS':
+        """Checks dates as JSON for updates in related Trip
+        Dates will be updated troughout the function
+
+        Args:
+            dates (JSON): TripDates as JSON structure
+            trip (Trip): Date related to dates
+
+        Returns: TRIP_DATE_UPDATE_STATUS
+        """
+        errors = []
+        dates_existing = []
+        date_ids_existing = []
+        trip_changed = False
+
+        for date in dates:
+            if date.get('id', None) is None:
+                date['trip_id'] = trip.id
+                try:
+                    TripDate.parse(date).create(return_result=False)
+                except (ValueError, KeyError) as e:
+                    errors.append({'error': 'Failed to parse new date', 'object': date, 'details': e})
+                else:
+                    trip_changed = True
+
+                continue
+
+            try:
+                dates_existing.append(TripDate.parse(date))
+            except (ValueError, KeyError) as e:
+                errors.append({'error': 'Failed to parse existing date', 'object': date, 'details': e})
+            else:
+                date_ids_existing.append(date.get('id', None))
+
+        for date in trip.dates:
+            if date.id not in date_ids_existing:
+                try:
+                    date.delete()
+                except Exception as e:
+                    errors.append({'error': 'Failed to delete existing date', 'object': date, 'details': e})
+                else:
+                    trip_changed = True
+
+        for date_from_input in dates_existing:
+            date_to_update = None
+            for date_in_db in trip.dates:
+                if date_in_db.id == date_from_input.id:
+                    date_to_update = date_in_db
+                    break
+
+            date_changed = False
+            if date_to_update is not None:
+                for attribute, value in vars(date_to_update).items():
+                    if attribute in ['id', 'trip_id', 'create_time']:
+                        continue
+                    if getattr(date_to_update, attribute, None) != getattr(date_from_input, attribute, None):
+                        trip_changed = True
+                        date_changed = True
+                        setattr(date_to_update, attribute, getattr(date_from_input, attribute, None))
+
+            if date_changed is True:
+                try:
+                    date_to_update.update()
+                except Exception as e:
+                    errors.append({'error': 'Failed to update existing date', 'object': date, 'details': e})
+                else:
+                    trip_changed = True
+
+        return TRIP_DATE_UPDATE_STATUS(trip_changed, errors)
 
     @staticmethod
     def find_trip(id: int) -> 'Trip':
