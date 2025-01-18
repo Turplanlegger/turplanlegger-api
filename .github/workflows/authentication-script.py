@@ -19,11 +19,7 @@ if installation_id is None:
     print('INSTALLATION_ID is not set')
     exit(1)
 
-payload = {
-    'iat': int(time.time()),
-    'exp': int(time.time()) + 60,
-    'iss': app_id
-}
+payload = {'iat': int(time.time()), 'exp': int(time.time()) + 60, 'iss': app_id}
 
 try:
     encoded_jwt = jwt.encode(payload, private_key.encode(), algorithm='RS256')
@@ -57,4 +53,3 @@ except requests.JSONDecodeError as e:
     exit(1)
 
 print(f'TOKEN={token}')
-
