@@ -107,4 +107,4 @@ jobs:
         with:
           containerAppName: turplanlegger
           resourceGroup: DefaultResourceGroup-NEU
-          imageToDeploy:  ${{ env.REGISTRY }}/${{ env.repository }}:${{ github.sha }}
+          imageToDeploy:  ${{ env.REGISTRY }}/${{ env.repository }}:sha-${{ github.sha }}
