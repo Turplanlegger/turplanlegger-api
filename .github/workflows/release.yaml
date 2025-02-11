@@ -66,6 +66,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Downcase repository name
+        run: echo "repository=${GITHUB_REPOSITORY@L}" >> ${GITHUB_ENV}
+
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
@@ -78,7 +81,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           context: git
-          images: ${{ env.REGISTRY }}/${{ github.repository }}
+          images: ${{ env.REGISTRY }}/${{ env.repository }}
           tags: |
             type=raw,value=latest
             type=pep440,pattern={{version}}
@@ -104,4 +107,4 @@ jobs:
         with:
           containerAppName: turplanlegger
           resourceGroup: DefaultResourceGroup-NEU
-          imageToDeploy:  ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.sha }}
+          imageToDeploy:  ${{ env.REGISTRY }}/${{ env.repository }}:${{ github.sha }}
