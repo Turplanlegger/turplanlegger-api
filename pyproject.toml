@@ -44,7 +44,7 @@ dev = [
 ]
 prod = [
     "gunicorn[gthread]==23.0.0",
-    "psycopg[c]==3.2.1"
+    "psycopg[c]==3.2.4"
 ]
 
 [project.urls]
