@@ -2,6 +2,7 @@ import time
 
 import psycopg
 from psycopg.rows import namedtuple_row
+from psycopg.types.json import Jsonb
 
 
 class Database:
@@ -227,13 +228,13 @@ class Database:
             select += ' AND deleted = FALSE'
         return self._fetchall(select, (owner_id,))
 
-    def create_route(self, route):
+    def create_route(self, route, owner, name, comment):
         insert = """
             INSERT INTO routes (route, owner, name, comment)
             VALUES (%(route)s, %(owner)s, %(name)s, %(comment)s)
             RETURNING *
         """
-        return self._insert(insert, vars(route))
+        return self._insert(insert, {'route': [Jsonb(route)], 'owner': owner, 'name': name, 'comment': comment})
 
     def delete_route(self, id):
         update = """
