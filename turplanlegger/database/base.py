@@ -234,7 +234,7 @@ class Database:
             VALUES (%(route)s, %(owner)s, %(name)s, %(comment)s)
             RETURNING *
         """
-        return self._insert(insert, {'route': [Jsonb(route)], 'owner': owner, 'name': name, 'comment': comment})
+        return self._insert(insert, {'route': Jsonb(route), 'owner': owner, 'name': name, 'comment': comment})
 
     def delete_route(self, id):
         update = """
