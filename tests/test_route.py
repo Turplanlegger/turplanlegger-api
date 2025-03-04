@@ -40,8 +40,8 @@ class RoutesTestCase(unittest.TestCase):
         )
 
         routeGeometry = {
-            "type": "LineString",
-            "coordinates": [
+            'type': 'LineString',
+            'coordinates': [
                 [
                     11.615295,
                     60.603483
