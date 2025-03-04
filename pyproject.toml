@@ -26,6 +26,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
 ]
 dependencies = [
+    "ujson==5.10.0",
     "bcrypt==4.2.1",
     "Flask==3.1.0",
     "flask-cors==4.0.2",
