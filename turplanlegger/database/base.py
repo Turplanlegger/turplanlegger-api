@@ -1,9 +1,9 @@
 import time
 
 import psycopg
-from psycopg.rows import namedtuple_row
-from psycopg.types.json import Jsonb, set_json_dumps, set_json_loads
 import ujson
+from psycopg.rows import namedtuple_row
+from psycopg.types.json import Jsonb, set_json_dumps
 
 
 class Database:
