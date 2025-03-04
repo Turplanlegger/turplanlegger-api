@@ -2,7 +2,8 @@ import time
 
 import psycopg
 from psycopg.rows import namedtuple_row
-from psycopg.types.json import Jsonb
+from psycopg.types.json import Jsonb, set_json_dumps, set_json_loads
+import ujson
 
 
 class Database:
@@ -16,6 +17,9 @@ class Database:
         self.uri = app.config.get('DATABASE_URI')
         self.max_retries = app.config.get('DATABASE_MAX_RETRIES', 5)
         self.timeout = app.config.get('DATABASE_TIMEOUT', 10)
+
+        # Use a faster dump function
+        set_json_dumps(ujson.dumps)
 
         self.conn = self.connect()
         self.cur = self.conn.cursor()
