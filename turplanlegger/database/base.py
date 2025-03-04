@@ -3,7 +3,7 @@ import time
 import psycopg
 import ujson
 from psycopg.rows import namedtuple_row
-from psycopg.types.json import Jsonb, set_json_dumps
+from psycopg.types.json import Jsonb, set_json_dumps, set_json_loads
 
 
 class Database:
@@ -20,6 +20,7 @@ class Database:
 
         # Use a faster dump function
         set_json_dumps(ujson.dumps)
+        set_json_loads(ujson.loads)
 
         self.conn = self.connect()
         self.cur = self.conn.cursor()
