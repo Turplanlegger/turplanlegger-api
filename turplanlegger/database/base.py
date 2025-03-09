@@ -1,7 +1,9 @@
 import time
 
 import psycopg
+import ujson
 from psycopg.rows import namedtuple_row
+from psycopg.types.json import Jsonb, set_json_dumps, set_json_loads
 
 
 class Database:
@@ -15,6 +17,10 @@ class Database:
         self.uri = app.config.get('DATABASE_URI')
         self.max_retries = app.config.get('DATABASE_MAX_RETRIES', 5)
         self.timeout = app.config.get('DATABASE_TIMEOUT', 10)
+
+        # Use a faster dump function
+        set_json_dumps(ujson.dumps)
+        set_json_loads(ujson.loads)
 
         self.conn = self.connect()
         self.cur = self.conn.cursor()
@@ -227,13 +233,13 @@ class Database:
             select += ' AND deleted = FALSE'
         return self._fetchall(select, (owner_id,))
 
-    def create_route(self, route):
+    def create_route(self, route, owner, name, comment):
         insert = """
             INSERT INTO routes (route, owner, name, comment)
             VALUES (%(route)s, %(owner)s, %(name)s, %(comment)s)
             RETURNING *
         """
-        return self._insert(insert, vars(route))
+        return self._insert(insert, {'route': Jsonb(route), 'owner': owner, 'name': name, 'comment': comment})
 
     def delete_route(self, id):
         update = """
