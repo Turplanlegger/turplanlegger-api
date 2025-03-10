@@ -27,7 +27,7 @@ classifiers = [
 ]
 dependencies = [
     "ujson==5.10.0",
-    "bcrypt==4.2.1",
+    "bcrypt==4.3.0",
     "Flask==3.1.0",
     "flask-cors==5.0.1",
     "psycopg==3.2.5",
