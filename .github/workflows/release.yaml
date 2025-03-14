@@ -32,7 +32,7 @@ jobs:
         id: auth
         env:
           APP_ID: ${{ secrets.APP_ID }}
-          PRIVATE_KEY: ${{ secrets.RELEASE_CLIENT_SECRET }}
+          PRIVATE_KEY: ${{ secrets.TURPLANLEGGER_PRIVATE_KEY }}
           INSTALLATION_ID: ${{ secrets.INSTALLATION_ID }}
         run: python3 .github/workflows/authentication-script.py >> "$GITHUB_OUTPUT"
 
