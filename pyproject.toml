@@ -40,7 +40,7 @@ dev = [
     "hatch==1.14.0",
     "pytest==8.3.4",
     "pytest-cov==6.0.0",
-    "ruff==v0.7.1",
+    "ruff==v0.11.0",
     "wheel==0.45.1"
 ]
 prod = [
