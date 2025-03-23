@@ -3,7 +3,10 @@ import time
 import psycopg
 import ujson
 from psycopg.rows import namedtuple_row
+from psycopg.types.enum import EnumInfo, register_enum
 from psycopg.types.json import Jsonb, set_json_dumps, set_json_loads
+
+from turplanlegger.models.permission import AccessLevel
 
 
 class Database:
@@ -33,6 +36,9 @@ class Database:
             except Exception as e:
                 self.logger.exception(e)
                 raise
+
+        access_level = EnumInfo.fetch(self.conn, 'access_level')
+        register_enum(access_level, self.conn, AccessLevel)
 
         if app.config.get('CREATE_ADMIN_USER', False) and not self.check_admin_user(app.config.get('ADMIN_EMAIL')):
             self.logger.debug('Did not find admin user, creating one')

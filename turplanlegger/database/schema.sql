@@ -1,3 +1,10 @@
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'access_level') THEN
+        CREATE TYPE access_level AS ENUM ('READ', 'MODIFY', 'DELETE');
+    END IF;
+END$$;
+
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY,
     name text NOT NULL,
@@ -66,6 +73,13 @@ CREATE TABLE IF NOT EXISTS trips (
     delete_time timestamp without time zone
 );
 
+CREATE TABLE IF NOT EXISTS trip_permissions (
+    trip_id int NOT NULL REFERENCES trips (id) ON DELETE CASCADE,
+    subject_id UUID NOT NULL REFERENCES users (id),
+    access_level access_level NOT NULL,
+    PRIMARY KEY (trip_id, subject_id)
+);
+
 CREATE TABLE IF NOT EXISTS trip_dates (
     id serial PRIMARY KEY,
     start_time timestamp without time zone CHECK (start_time < end_time),
@@ -79,7 +93,7 @@ CREATE TABLE IF NOT EXISTS trip_dates (
 );
 
 CREATE TABLE IF NOT EXISTS trips_notes_references (
-    trip_id int NOT NULL REFERENCES trips (id)ON DELETE CASCADE,
+    trip_id int NOT NULL REFERENCES trips (id) ON DELETE CASCADE,
     note_id int NOT NULL REFERENCES trips (id) ON DELETE CASCADE,
     PRIMARY KEY (trip_id, note_id)
 );
