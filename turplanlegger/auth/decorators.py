@@ -1,4 +1,5 @@
 from functools import wraps
+from uuid import UUID
 
 from flask import current_app, g, request
 from jwt import DecodeError, ExpiredSignatureError, InvalidAudienceError
@@ -38,7 +39,7 @@ def auth(func):
             current_app.logger.exception(f'Auth failed:\n{str(e)}')
             raise AuthError('Auth failed', 401)
 
-        user = User.find_user(jwt.subject)
+        user = User.find_user(UUID(jwt.subject))
         if user is not None:
             if user.deleted:
                 raise AuthError('Inactive user', 401)

@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Dict, NamedTuple
+from uuid import UUID
 
 from flask import g
 
@@ -13,14 +14,14 @@ class Route:
     to make up a route/path.
 
     Args:
-        owner (str): The UUID4 of the owner of the object
+        owner (UUID): The UUID4 of the owner of the object
         route (Dict[str, any]): JSON containing geometry
                                 that makes up the path/route
         **kwargs: Arbitrary keyword arguments.
 
     Attributes:
         id (int): Optional, the ID of the object
-        owner (str): The UUID4 of the owner of the object
+        owner (UUID): The UUID4 of the owner of the object
         route (Dict[str, any]): JSON containing geometry
                                 that makes up the path/route
         route_history (list): List of routes that makes up history
@@ -28,11 +29,11 @@ class Route:
                                 Default: datetime.now()
     """
 
-    def __init__(self, owner: str, route: JSON, **kwargs) -> None:
+    def __init__(self, owner: UUID, route: JSON, **kwargs) -> None:
         if not owner:
             raise ValueError("Missing mandatory field 'owner'")
-        if not isinstance(owner, str):
-            raise TypeError("'owner' must be string")
+        if not isinstance(owner, UUID):
+            raise TypeError("'owner' must be UUID")
         if not route:
             raise ValueError("Missing mandatory field 'route'")
 

@@ -339,7 +339,7 @@ class Database:
 
     # User
     def get_user(self, id, deleted=False):
-        select = 'SELECT * FROM users WHERE id = %s::VARCHAR'
+        select = 'SELECT * FROM users WHERE id = %s::UUID'
 
         if deleted:
             select += ' AND deleted = TRUE'

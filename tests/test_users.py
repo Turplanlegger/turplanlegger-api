@@ -175,6 +175,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['user']['id'], self.user1['id'])
         self.assertEqual(data['user']['name'], self.user1['name'])
         self.assertEqual(data['user']['last_name'], self.user1['last_name'])
         self.assertEqual(data['user']['email'], self.user1['email'])
@@ -187,6 +188,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['user']['id'], self.user11['id'])
         self.assertEqual(data['user']['name'], self.user11['name'])
         self.assertEqual(data['user']['last_name'], self.user11['last_name'])
         self.assertEqual(data['user']['email'], self.user11['email'])
@@ -264,6 +266,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data['user']['name'], 'Petter')
         self.assertEqual(data['user']['last_name'], 'Smart')
+        self.assertEqual(data['user']['id'], self.user1['id'])
         self.assertEqual(data['user']['email'], self.user1['email'])
         self.assertEqual(data['user']['auth_method'], self.user1['auth_method'])
         self.assertEqual(data['user']['private'], self.user1['private'])
@@ -281,6 +284,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
 
+        self.assertEqual(data['user']['id'], self.user1['id'])
         self.assertEqual(data['user']['name'], self.user1['name'])
         self.assertEqual(data['user']['last_name'], self.user1['last_name'])
         self.assertEqual(data['user']['email'], self.user1['email'])
@@ -303,6 +307,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['user']['id'], self.user5['id'])
         self.assertEqual(data['user']['name'], self.user5['name'])
         self.assertEqual(data['user']['last_name'], self.user5['last_name'])
         self.assertEqual(data['user']['email'], self.user5['email'])
@@ -327,6 +332,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['user']['id'], self.user9['id'])
         self.assertEqual(data['user']['name'], self.user9['name'])
         self.assertEqual(data['user']['last_name'], self.user9['last_name'])
         self.assertEqual(data['user']['email'], self.user9['email'])
@@ -339,6 +345,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['user']['id'], self.user6['id'])
         self.assertEqual(data['user']['name'], self.user6['name'])
         self.assertEqual(data['user']['last_name'], self.user6['last_name'])
         self.assertEqual(data['user']['email'], self.user6['email'])
@@ -363,6 +370,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['user']['id'], self.user7['id'])
         self.assertEqual(data['user']['name'], self.user7['name'])
         self.assertEqual(data['user']['last_name'], self.user7['last_name'])
         self.assertEqual(data['user']['email'], self.user7['email'])
@@ -387,6 +395,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['user']['id'], self.user8['id'])
         self.assertEqual(data['user']['name'], self.user8['name'])
         self.assertEqual(data['user']['last_name'], self.user8['last_name'])
         self.assertEqual(data['user']['email'], self.user8['email'])
@@ -411,6 +420,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['user']['id'], self.user9['id'])
         self.assertEqual(data['user']['name'], self.user9['name'])
         self.assertEqual(data['user']['last_name'], self.user9['last_name'])
         self.assertEqual(data['user']['email'], self.user9['email'])
@@ -435,6 +445,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['user']['id'], self.user10['id'])
         self.assertEqual(data['user']['name'], self.user10['name'])
         self.assertEqual(data['user']['last_name'], self.user10['last_name'])
         self.assertEqual(data['user']['email'], self.user10['email'])

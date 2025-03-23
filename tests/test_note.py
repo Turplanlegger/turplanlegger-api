@@ -76,7 +76,7 @@ class NotesTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['owner'], self.user1.id)
+        self.assertEqual(data['owner'], str(self.user1.id))
         self.assertEqual(data['content'], 'Are er kul')
         self.assertEqual(data['name'], 'Best note ever')
 
@@ -89,7 +89,7 @@ class NotesTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['note']['owner'], self.user1.id)
+        self.assertEqual(data['note']['owner'], str(self.user1.id))
         self.assertEqual(data['note']['content'], self.note_full['content'])
         self.assertEqual(data['note']['name'], self.note_full['name'])
 
@@ -143,14 +143,14 @@ class NotesTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         response = self.client.patch(
-            f'/notes/{data["id"]}/owner', data=json.dumps({'owner': self.user2.id}), headers=self.headers_json
+            f'/notes/{data["id"]}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json
         )
         self.assertEqual(response.status_code, 200)
 
         response = self.client.get(f'/notes/{data["id"]}', headers=self.headers)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['note']['owner'], self.user2.id)
+        self.assertEqual(data['note']['owner'], str(self.user2.id))
 
     def test_change_note_owner_note_not_found(self):
         response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
@@ -158,7 +158,7 @@ class NotesTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         response = self.client.patch(
-            '/notes/2/owner', data=json.dumps({'owner': self.user2.id}), headers=self.headers_json
+            '/notes/2/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json
         )
         self.assertEqual(response.status_code, 404)
 
@@ -314,9 +314,9 @@ class NotesTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['note'][0]['owner'], self.user1.id)
+        self.assertEqual(data['note'][0]['owner'], str(self.user1.id))
         self.assertEqual(data['note'][0]['content'], self.note_full['content'])
         self.assertEqual(data['note'][0]['name'], self.note_full['name'])
-        self.assertEqual(data['note'][1]['owner'], self.user1.id)
+        self.assertEqual(data['note'][1]['owner'], str(self.user1.id))
         self.assertEqual(data['note'][1]['content'], self.note_full2['content'])
         self.assertEqual(data['note'][1]['name'], self.note_full2['name'])

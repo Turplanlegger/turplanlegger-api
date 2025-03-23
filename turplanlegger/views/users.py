@@ -3,6 +3,7 @@ from flask import g, jsonify, request
 from turplanlegger.auth.decorators import auth
 from turplanlegger.exceptions import ApiProblem
 from turplanlegger.models.user import User
+from turplanlegger.utils.types import to_uuid
 
 from . import api
 
@@ -10,7 +11,10 @@ from . import api
 @api.route('/users/<user_id>', methods=['GET'])
 @auth
 def get_user(user_id):
-    user = User.find_user(user_id)
+    try:
+        user = User.find_user(to_uuid(user_id))
+    except (ValueError, TypeError) as e:
+        raise ApiProblem('Failed to find user', str(e), 400)
 
     if user:
         return jsonify(status='ok', count=1, user=user.serialize)

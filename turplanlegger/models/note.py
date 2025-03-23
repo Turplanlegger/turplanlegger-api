@@ -1,4 +1,5 @@
 from typing import Dict
+from uuid import UUID
 
 from flask import g
 
@@ -8,11 +9,11 @@ JSON = Dict[str, any]
 
 
 class Note:
-    def __init__(self, owner: str, content: str, **kwargs) -> None:
+    def __init__(self, owner: UUID, content: str, **kwargs) -> None:
         if not owner:
             raise ValueError("Missing mandatory field 'owner'")
-        if not isinstance(owner, str):
-            raise TypeError("'owner' must be str")
+        if not isinstance(owner, UUID):
+            raise TypeError("'owner' must be UUID")
         if not content:
             raise ValueError("Missing mandatory field 'content'")
         if not isinstance(content, str):

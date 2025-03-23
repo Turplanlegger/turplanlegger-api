@@ -110,7 +110,7 @@ class ItemListsTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(data['item_list']['private'], True)
-        self.assertEqual(data['item_list']['owner'], self.user1.id)
+        self.assertEqual(data['item_list']['owner'], str(self.user1.id))
 
     def test_create_list(self):
         response = self.client.post('/item_lists', data=json.dumps(self.item_list), headers=self.headers_json)
@@ -120,7 +120,7 @@ class ItemListsTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(data['item_list']['name'], 'Test list')
-        self.assertEqual(data['item_list']['owner'], self.user1.id)
+        self.assertEqual(data['item_list']['owner'], str(self.user1.id))
         self.assertEqual(data['item_list']['private'], self.item_list['private'])
         self.assertIsInstance(data['item_list']['items'], list)
         self.assertEqual(len(data['item_list']['items']), 3)
@@ -148,7 +148,7 @@ class ItemListsTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(data['item_list']['name'], 'Empty test list')
-        self.assertEqual(data['item_list']['owner'], self.user1.id)
+        self.assertEqual(data['item_list']['owner'], str(self.user1.id))
         self.assertEqual(data['item_list']['private'], self.empty_item_list['private'])
         self.assertIsInstance(data['item_list']['items'], list)
         self.assertEqual(len(data['item_list']['items']), 0)
@@ -165,7 +165,7 @@ class ItemListsTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(data['item_list']['name'], 'Test list')
-        self.assertEqual(data['item_list']['owner'], self.user1.id)
+        self.assertEqual(data['item_list']['owner'], str(self.user1.id))
         self.assertEqual(data['item_list']['private'], self.item_list['private'])
         self.assertIsInstance(data['item_list']['items'], list)
         self.assertEqual(len(data['item_list']['items']), 3)
@@ -285,14 +285,14 @@ class ItemListsTestCase(unittest.TestCase):
         list_id = create_data['id']
 
         response = self.client.patch(
-            f'/item_lists/{list_id}/owner', data=json.dumps({'owner': self.user2.id}), headers=self.headers_json
+            f'/item_lists/{list_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json
         )
         self.assertEqual(response.status_code, 200)
 
         response = self.client.get(f'/item_lists/{list_id}', headers=self.headers)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['item_list']['owner'], self.user2.id)
+        self.assertEqual(data['item_list']['owner'], str(self.user2.id))
 
     def test_toggle_check(self):
         response = self.client.post('/item_lists', data=json.dumps(self.item_list), headers=self.headers_json)
@@ -334,7 +334,7 @@ class ItemListsTestCase(unittest.TestCase):
         self.assertEqual(data['count'], 2)
         self.assertEqual(data['item_list'][0]['id'], 1)
         self.assertEqual(data['item_list'][0]['name'], self.item_list['name'])
-        self.assertEqual(data['item_list'][0]['owner'], self.user1.id)
+        self.assertEqual(data['item_list'][0]['owner'], str(self.user1.id))
         self.assertEqual(data['item_list'][0]['private'], self.item_list['private'])
         self.assertEqual(data['item_list'][0]['items'][0]['content'], self.item_list['items'][0]['content'])
         self.assertEqual(data['item_list'][0]['items'][0]['owner'], data['item_list'][0]['owner'])
@@ -358,7 +358,7 @@ class ItemListsTestCase(unittest.TestCase):
 
         self.assertEqual(data['item_list'][1]['id'], 2)
         self.assertEqual(data['item_list'][1]['name'], self.item_list2['name'])
-        self.assertEqual(data['item_list'][1]['owner'], self.user1.id)
+        self.assertEqual(data['item_list'][1]['owner'], str(self.user1.id))
         self.assertEqual(data['item_list'][1]['private'], True)
         self.assertEqual(data['item_list'][1]['items'][0]['content'], self.item_list2['items'][0]['content'])
         self.assertEqual(data['item_list'][1]['items'][0]['owner'], data['item_list'][1]['owner'])

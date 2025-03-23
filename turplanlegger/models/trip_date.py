@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Dict, NamedTuple
+from uuid import UUID
 
 from flask import g
 
@@ -14,13 +15,13 @@ class TripDate:
     from the trip (parent)
 
     Args:
-        owner (str): Id of the owner
+        owner (UUID): Id of the owner
         start_time (datetime): Datetime object as start date
         end_time (datetime): Datetime object as end date
         **kwargs: Arbitrary keyword arguments.
 
     Attributes:
-        owner (str): The UUID4 of the owner of the object
+        owner (UUID): The UUID4 of the owner of the object
         id (int): Optional, the ID of the object
         trip_id (int): The ID of the trip (parent)
         selected (bool): Flag if the trip_date is the selected date
@@ -36,11 +37,11 @@ class TripDate:
 
     """
 
-    def __init__(self, owner: str, start_time: datetime, end_time: datetime, **kwargs) -> None:
+    def __init__(self, owner: UUID, start_time: datetime, end_time: datetime, **kwargs) -> None:
         if not owner:
             raise ValueError("Missing mandatory field 'owner'")
-        if not isinstance(owner, str):
-            raise TypeError("'owner' must be string")
+        if not isinstance(owner, UUID):
+            raise TypeError("'owner' must be UUID")
         if not isinstance(start_time, datetime):
             raise TypeError("'start_time' must be an datetime instance")
         if not isinstance(end_time, datetime):
