@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS lists_items (
     id serial PRIMARY KEY,
     content text,
     checked boolean DEFAULT FALSE,
-    item_list int REFERENCES item_lists (id) NOT NULL,
+    item_list int NOT NULL REFERENCES item_lists (id) ON DELETE CASCADE,
     owner UUID NOT NULL REFERENCES users (id),
     create_time timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted boolean DEFAULT FALSE,
@@ -70,8 +70,8 @@ CREATE TABLE IF NOT EXISTS trip_dates (
     id serial PRIMARY KEY,
     start_time timestamp without time zone CHECK (start_time < end_time),
     end_time timestamp without time zone CHECK (start_time < end_time),
-    trip_id int REFERENCES trips (id) NOT NULL,
     owner UUID REFERENCES users (id) NOT NULL,
+    trip_id int NOT NULL REFERENCES trips (id) ON DELETE CASCADE,
     selected boolean DEFAULT FALSE,
     create_time timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted boolean DEFAULT FALSE,
@@ -79,19 +79,19 @@ CREATE TABLE IF NOT EXISTS trip_dates (
 );
 
 CREATE TABLE IF NOT EXISTS trips_notes_references (
-    id serial PRIMARY KEY,
-    trip_id int references trips (id),
-    note_id int references notes (id)
+    trip_id int NOT NULL REFERENCES trips (id)ON DELETE CASCADE,
+    note_id int NOT NULL REFERENCES trips (id) ON DELETE CASCADE,
+    PRIMARY KEY (trip_id, note_id)
 );
 
 CREATE TABLE IF NOT EXISTS trips_routes_references (
-    id serial PRIMARY KEY,
-    trip_id int references trips (id),
-    route_id int references routes (id)
+    trip_id int NOT NULL REFERENCES trips (id) ON DELETE CASCADE,
+    route_id int NOT NULL REFERENCES routes (id) ON DELETE CASCADE,
+    PRIMARY KEY (trip_id, route_id)
 );
 
 CREATE TABLE IF NOT EXISTS trips_item_lists_references (
-    id serial PRIMARY KEY,
-    trip_id int references trips (id),
-    item_list_id int references item_lists (id)
+    trip_id int NOT NULL REFERENCES trips (id) ON DELETE CASCADE,
+    item_list_id int NOT NULL REFERENCES item_lists (id) ON DELETE CASCADE,
+    PRIMARY KEY (trip_id, item_list_id)
 );
