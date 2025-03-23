@@ -1,7 +1,0 @@
-include VERSION
-include LICENSE
-include README.md
-exclude .gitignore
-global-exclude *.pyc
-include wsgi.py
-include turplanlegger/database/schema.sql
