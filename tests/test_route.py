@@ -148,7 +148,9 @@ class RoutesTestCase(unittest.TestCase):
         created_route_id = data['id']
 
         response = self.client.patch(
-            f'/routes/{created_route_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json
+            f'/routes/{created_route_id}/owner',
+            data=json.dumps({'owner': str(self.user2.id)}),
+            headers=self.headers_json,
         )
         self.assertEqual(response.status_code, 200)
 

@@ -59,7 +59,6 @@ class User:
         if not auth_method:
             raise ValueError("Missing mandatory field 'auth_method'")
 
-
         self.id = kwargs.get('id') or uuid4()
         self.name = name
         self.last_name = last_name

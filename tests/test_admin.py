@@ -7,7 +7,14 @@ from turplanlegger.app import create_app, db
 class UsersTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.config = {'TESTING': True, 'SECRET_KEY': 'test', 'SECRET_KEY_ID': 'test', 'CREATE_ADMIN_USER': True, 'ADMIN_EMAIL': 'admin@admintestturplanlegger.com' , 'ADMIN_PASSWORD': 'tesme' }
+        cls.config = {
+            'TESTING': True,
+            'SECRET_KEY': 'test',
+            'SECRET_KEY_ID': 'test',
+            'CREATE_ADMIN_USER': True,
+            'ADMIN_EMAIL': 'admin@admintestturplanlegger.com',
+            'ADMIN_PASSWORD': 'tesme',
+        }
 
         cls.app = create_app(cls.config)
         cls.client = cls.app.test_client()
