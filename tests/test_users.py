@@ -160,12 +160,23 @@ class UsersTestCase(unittest.TestCase):
         db.destroy()
 
     def test_user_not_found(self):
-        response = self.client.get('/users/3', headers=self.headers)
+        _id = str(uuid4())
+        response = self.client.get(f'/users/{_id}', headers=self.headers)
         self.assertEqual(response.status_code, 404)
 
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['title'], 'User not found')
         self.assertEqual(data['detail'], 'The requested user was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/users/{_id}')
+
+    def test_invalid_user_id_format(self):
+        response = self.client.get('/users/3', headers=self.headers)
+        self.assertEqual(response.status_code, 400)
+
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Failed to find user')
+        self.assertEqual(data['detail'], 'Invalid UUID string: 3')
         self.assertEqual(data['type'], 'about:blank')
         self.assertEqual(data['instance'], 'http://localhost/users/3')
 
