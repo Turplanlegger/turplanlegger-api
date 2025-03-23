@@ -1,6 +1,7 @@
 import datetime
 import unittest
 from collections import namedtuple
+from uuid import uuid4
 
 from turplanlegger.app import create_app, db
 from turplanlegger.auth.utils import hash_password
@@ -20,6 +21,7 @@ class UsersTestCase(unittest.TestCase):
         cls.app = create_app(config)
         cls.client = cls.app.test_client()
         cls.hashed_password = hash_password('test')
+        cls.user_id = uuid4()
 
     def tearDown(self):
         db.truncate_table('users')
@@ -38,7 +40,7 @@ class UsersTestCase(unittest.TestCase):
         now = datetime.datetime.now()
 
         faulty_vars = {
-            'id': 1,
+            'id': self.user_id,
             'name': 'n',
             'last_name': 'l',
             'email': 'e',
@@ -53,7 +55,7 @@ class UsersTestCase(unittest.TestCase):
             self.assertIn(cm.exception, 'invalid input syntax for type boolean: "NEI"')
 
         correct_vars = {
-            'id': 1,
+            'id': self.user_id,
             'name': 'n',
             'last_name': 'l',
             'email': 'e',
@@ -78,7 +80,7 @@ class UsersTestCase(unittest.TestCase):
                 'delete_time',
             ],
         )
-        correct = Row('1', 'n', 'l', 'e', 'a', 'adsadsa', False, now, False, None)
+        correct = Row(self.user_id, 'n', 'l', 'e', 'a', 'adsadsa', False, now, False, None)
 
         res = db._insert(insert, correct_vars)
         self.assertEqual(correct, res)

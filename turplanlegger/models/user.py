@@ -1,9 +1,10 @@
 import re
 from typing import Dict, NamedTuple
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from turplanlegger.app import db, logger
 from turplanlegger.auth import utils
+from turplanlegger.utils.types import to_uuid
 
 JSON = Dict[str, any]
 
@@ -21,7 +22,7 @@ class User:
         **kwargs: Arbitrary keyword arguments.
 
     Attributes:
-        id (int): Optional, the ID of the object
+        id (UUID): Optional, the ID of the object
         name (str): First name of the user
         last_name (str): Last name/sir name of the user
         email (str): Email of the user
@@ -58,7 +59,7 @@ class User:
         if not auth_method:
             raise ValueError("Missing mandatory field 'auth_method'")
 
-        self.id = kwargs.get('id') or str(uuid4())
+        self.id = kwargs.get('id') or uuid4()
         self.name = name
         self.last_name = last_name
         self.email = email
@@ -76,6 +77,12 @@ class User:
             f'private={self.private}, deleted={self.deleted}, '
             f'delete_time={self.delete_time}, create_time={self.create_time})'
         )
+
+    def __setattr__(self, name, value):
+        if name == 'id':
+            self.__dict__[name] = to_uuid(value)
+        else:
+            self.__dict__[name] = value
 
     @classmethod
     def parse(cls, json: JSON) -> 'User':
@@ -133,7 +140,7 @@ class User:
     def serialize(self) -> JSON:
         """Serialize the User instance, returns it as Dict(str, any)"""
         return {
-            'id': self.id,
+            'id': str(self.id),
             'name': self.name,
             'last_name': self.last_name,
             'email': self.email,
@@ -165,11 +172,11 @@ class User:
         return db.toggle_private_user(self.id, False if self.private else True)
 
     @staticmethod
-    def find_user(id: str) -> 'User':
+    def find_user(id: UUID) -> 'User':
         """Looks up an user based on id
 
         Args:
-            id (int): Id (uuid4) of user
+            id (UUID): Id (uuid4) of user
 
         Returns:
             An User instance

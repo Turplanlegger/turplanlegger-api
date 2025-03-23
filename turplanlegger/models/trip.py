@@ -1,6 +1,7 @@
 from collections import namedtuple
 from datetime import datetime
 from typing import Dict, NamedTuple
+from uuid import UUID
 
 from flask import g
 
@@ -19,12 +20,12 @@ class Trip:
     Notes or Routes.
 
     Args:
-        owner (str): The UUID4 of the owner of the object
+        owner (UUID): The UUID4 of the owner of the object
         name (str): Name of the Trip.
         **kwargs: Arbitrary keyword arguments.
 
     Attributes:
-        owner (str): The UUID4 of the owner of the object
+        owner (UUID): The UUID4 of the owner of the object
         name (str): Name of the Trip
         id (int): Optional, the ID of the object
         private (bool): Flag if the trip is private
@@ -40,11 +41,11 @@ class Trip:
 
     """
 
-    def __init__(self, owner: str, name: str, **kwargs) -> None:
+    def __init__(self, owner: UUID, name: str, **kwargs) -> None:
         if not owner:
             raise ValueError("Missing mandatory field 'owner'")
-        if not isinstance(owner, str):
-            raise TypeError("'owner' must be string")
+        if not isinstance(owner, UUID):
+            raise TypeError("'owner' must be UUID")
         if not name:
             raise ValueError("Missing mandatory field 'name'")
         if not isinstance(name, str):

@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Dict, NamedTuple
+from uuid import UUID
 
 from flask import g
 
@@ -13,14 +14,14 @@ class ListItem:
     A ListItem object represents one item in a list.
 
     Args:
-        owner (str): The UUID4 of the owner of the object
+        owner (UUID): The UUID4 of the owner of the object
         item_list (int): The item_list the item belongs too
         checked (bool): Flag if the item is checked or not
         **kwargs: Arbitrary keyword arguments.
 
     Attributes:
         id (int): Optional, the ID of the object
-        owner (str): The UUID4 of the owner of the object
+        owner (UUID): The UUID4 of the owner of the object
         item_list (int): The item_list the item belongs too
         checked (bool): Flag if the item is checked or not
         content (str): Optional, the content of the item
@@ -28,11 +29,11 @@ class ListItem:
                                 Default: datetime.now()
     """
 
-    def __init__(self, owner: str, checked: bool, **kwargs) -> None:
+    def __init__(self, owner: UUID, checked: bool, **kwargs) -> None:
         if not owner:
             raise ValueError("missing mandatory field 'owner'")
-        if not isinstance(owner, str):
-            raise TypeError("'owner' must be str")
+        if not isinstance(owner, UUID):
+            raise TypeError("'owner' must be UUID")
         if not isinstance(checked, bool):
             raise TypeError("'checked' must be boolean")
 

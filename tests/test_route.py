@@ -83,7 +83,7 @@ class RoutesTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['owner'], self.user1.id)
+        self.assertEqual(data['owner'], str(self.user1.id))
 
     def test_add_route_no_geometry(self):
         response = self.client.post('/routes', data=json.dumps(self.route_no_geometry), headers=self.headers_json)
@@ -105,7 +105,7 @@ class RoutesTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['route']['owner'], self.user1.id)
+        self.assertEqual(data['route']['owner'], str(self.user1.id))
 
     def test_get_route_not_found(self):
         response = self.client.post('/routes', data=json.dumps(self.route), headers=self.headers_json)
@@ -148,14 +148,16 @@ class RoutesTestCase(unittest.TestCase):
         created_route_id = data['id']
 
         response = self.client.patch(
-            f'/routes/{created_route_id}/owner', data=json.dumps({'owner': self.user2.id}), headers=self.headers_json
+            f'/routes/{created_route_id}/owner',
+            data=json.dumps({'owner': str(self.user2.id)}),
+            headers=self.headers_json,
         )
         self.assertEqual(response.status_code, 200)
 
         response = self.client.get(f'/routes/{created_route_id}', headers=self.headers)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['route']['owner'], self.user2.id)
+        self.assertEqual(data['route']['owner'], str(self.user2.id))
 
     def test_change_route_owner_route_not_found(self):
         response = self.client.post('/routes', data=json.dumps(self.route), headers=self.headers_json)
@@ -163,7 +165,7 @@ class RoutesTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         response = self.client.patch(
-            '/routes/2/owner', data=json.dumps({'owner': self.user2.id}), headers=self.headers_json
+            '/routes/2/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json
         )
         self.assertEqual(response.status_code, 404)
 
@@ -195,4 +197,4 @@ class RoutesTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['route'][0]['owner'], self.user1.id)
+        self.assertEqual(data['route'][0]['owner'], str(self.user1.id))

@@ -25,7 +25,7 @@ services:
       - turplanlegger-dev-network
 
   dev-db:
-    image: postgres:15-alpine
+    image: postgres@sha256:8df947e4b872177cbc2d6bae01c46542631982deaf8777849decd495f3fae0be
     hostname:  turplanlegger-dev-db
     restart: unless-stopped
     healthcheck:

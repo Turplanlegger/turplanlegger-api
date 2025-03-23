@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Dict, NamedTuple
+from uuid import UUID
 
 from flask import g
 
@@ -16,14 +17,14 @@ class ItemList:
     E.g shopping list, packing list, name list
 
     Args:
-        owner (str): The UUID4 of the owner of the object
+        owner (UUID): The UUID4 of the owner of the object
         private (bool): Flag if the trip is private
                         Default so False (public)
         **kwargs: Arbitrary keyword arguments.
 
     Attributes:
         id (int): Optional, the ID of the object
-        owner (str): The UUID4 of the owner of the object
+        owner (UUID): The UUID4 of the owner of the object
         private (bool): Flag if the trip is private
                         Default so False (public)
         name (str): Optional, name of the list
@@ -35,11 +36,11 @@ class ItemList:
                                 Default: datetime.now()
     """
 
-    def __init__(self, owner: str, private: bool = True, **kwargs) -> None:
+    def __init__(self, owner: UUID, private: bool = True, **kwargs) -> None:
         if not owner:
             raise ValueError("missing mandatory field 'owner'")
-        if not isinstance(owner, str):
-            raise TypeError("'owner' must be str")
+        if not isinstance(owner, UUID):
+            raise TypeError("'owner' must be UUID")
         if not isinstance(private, bool):
             raise TypeError("'private' must be boolean")
 
