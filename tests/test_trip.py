@@ -115,6 +115,15 @@ class TripsTestCase(unittest.TestCase):
                 }
             ],
         }
+        cls.trip_with_permissions = {
+            'name': 'trippin pete perms',
+            'permissions': [
+                {
+                    'subject_id': str(cls.user2.id),
+                    'access_level': 'read',
+                },
+            ],
+        }
 
         response = cls.client.post(
             '/login',
@@ -738,3 +747,14 @@ class TripsTestCase(unittest.TestCase):
         response = self.client.put(f'/trips/{trip["id"]}', data=json.dumps(trip), headers=self.headers_json)
 
         self.assertEqual(response.status_code, 409)
+
+    def test_create_trip_with_permissions_ok(self):
+        response = self.client.post('/trips', data=json.dumps(self.trip_with_permissions), headers=self.headers_json)
+        self.assertEqual(response.status_code, 201)
+
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(data['owner'], str(self.user1.id))
+        self.assertEqual(data['permissions'][0]['access_level'], 'READ')
+        self.assertEqual(data['permissions'][0]['object_id'], data['id'])
+        self.assertEqual(data['permissions'][0]['subject_id'], str(self.user2.id))
