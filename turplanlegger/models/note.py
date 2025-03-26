@@ -4,6 +4,7 @@ from uuid import UUID
 from flask import g
 
 from turplanlegger.app import db
+from turplanlegger.models.permission import Permission
 
 JSON = Dict[str, any]
 
@@ -33,16 +34,25 @@ class Note:
             f"Note(id='{self.id}', owner='{self.owner}', "
             f"name='{self.name}', content='{self.content}', "
             f'create_time={self.create_time}, update_time={self.update_time}, '
-            f'deleted={self.deleted}, delete_time={self.delete_time})'
+            f'deleted={self.deleted}, delete_time={self.delete_time}), '
+            f'permission={self.permission})'
         )
 
     @classmethod
     def parse(cls, json: JSON) -> 'Note':
+        permissions = json.get('permissions', [])
+
+        if not isinstance(permissions, list):
+            raise TypeError('permissions has to be a list of permission objects')
+        
+        permissions[:] = [Permission.parse(permission) for permission in permissions]
+
         return Note(
             id=json.get('id', None),
             owner=g.user.id,
             content=json.get('content', None),
             name=json.get('name', None),
+            permissions=permissions
         )
 
     @property
@@ -53,10 +63,19 @@ class Note:
             'name': self.name,
             'content': self.content,
             'create_time': self.create_time,
+            'permissions': [permission.serialize for permission in self.permissions],
         }
 
     def create(self) -> 'Note':
         note = self.get_note(db.create_note(self))
+
+        if self.permissions:
+            permissions = []
+            for permission in self.permissions:
+                permission.object_id = note.id
+                permissions.append(permission.create())
+            note.permissions = permissions
+
         return note
 
     def update(self, updated_fields) -> 'Note':
