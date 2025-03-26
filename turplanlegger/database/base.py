@@ -343,6 +343,24 @@ class Database:
             RETURNING *
         """
         return self._updateone(update, {'id': id, 'content': content}, returning=True)
+    
+    # Note permissions
+    def get_note_subject_permissions(self, note_id: int, owner_id: UUID):
+        select = 'SELECT access_level FROM note_permissions WHERE note_id =%(note_id)s AND user_id = %(owner_id)s'
+        return self._fetchone(select, {'note_id': note_id, 'owner_id': owner_id})
+
+    def get_note_all_permissions(self, note_id: int):
+        select = 'SELECT note_id, access_level, subject_id FROM note_permissions WHERE note_id =%s'
+        return self._fetchall(select, (note_id,) )
+
+    def create_note_permissions(self, note_permission):
+        insert_note_permission = """
+            INSERT INTO note_permissions (note_id, subject_id, access_level)
+            VALUES (%(object_id)s, %(subject_id)s, %(access_level)s)
+            RETURNING *
+        """
+        return self._insert(insert_note_permission, vars(note_permission))
+
 
     # User
     def get_user(self, id, deleted=False):
