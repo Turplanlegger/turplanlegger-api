@@ -10,7 +10,6 @@ JSON = Dict[str, any]
 @dataclass
 class Permission():
     object_id: int
-    object_type: str
     subject_id: UUID
     access_level: AccessLevel
 
@@ -27,7 +26,6 @@ class Permission():
 
         return Permission(
             object_id=json.get('id', None),
-            object_type=json.get('type', None),
             subject_id=json.get('subject_id', None),
             access_level=AccessLevel(json.get('access_level', None))
         )
@@ -65,4 +63,4 @@ class Permission():
         """
         if rec is None:
             return None
-        return Permission(object_id=rec.trip_id, object_type='trip', subject_id=rec.subject_id, access_level=rec.access_level)
+        return Permission(object_id=rec.trip_id, subject_id=rec.subject_id, access_level=rec.access_level)
