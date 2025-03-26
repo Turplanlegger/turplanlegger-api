@@ -1,4 +1,5 @@
 import time
+from uuid import UUID
 
 import psycopg
 import ujson
@@ -6,7 +7,7 @@ from psycopg.rows import namedtuple_row
 from psycopg.types.enum import EnumInfo, register_enum
 from psycopg.types.json import Jsonb, set_json_dumps, set_json_loads
 
-from turplanlegger.models.permission import AccessLevel
+from turplanlegger.models.access_level import AccessLevel
 
 
 class Database:
@@ -492,6 +493,23 @@ class Database:
         else:
             select += ' AND deleted = FALSE'
         return self._fetchall(select, (owner_id,))
+
+    # Trip permissions
+    def get_trip_subject_permissions(self, trip_id: int, owner_id: UUID):
+        select = 'SELECT access_level FROM trip_permissions WHERE trip_id =%(trip_id)s AND user_id = %(owner_id)s'
+        return self._fetchone(select, {'trip_id': trip_id, 'owner_id': owner_id})
+
+    def get_trip_all_permissions(self, trip_id: int):
+        select = 'SELECT trip_id, access_level, subject_id FROM trip_permissions WHERE trip_id =%s'
+        return self._fetchall(select, (trip_id,) )
+
+    def create_trip_permissions(self, trip_permission):
+        insert_trip_permission = """
+            INSERT INTO trip_permissions (trip_id, subject_id, access_level)
+            VALUES (%(object_id)s, %(subject_id)s, %(access_level)s)
+            RETURNING *
+        """
+        return self._insert(insert_trip_permission, vars(trip_permission))
 
     def get_trip_notes(self, id):
         select = 'SELECT note_id FROM trips_notes_references WHERE trip_id = %s'
