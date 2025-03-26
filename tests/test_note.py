@@ -50,6 +50,15 @@ class NotesTestCase(unittest.TestCase):
         cls.note_no_content = {
             'name': 'Best note ever',
         }
+        cls.note_with_permissions = {
+            'name': 'dobby scoreboard socks',
+            'permissions': [
+                {
+                    'subject_id': str(cls.user2.id),
+                    'access_level': 'read',
+                },
+            ],
+        }
 
         response = cls.client.post(
             '/login',
@@ -66,6 +75,7 @@ class NotesTestCase(unittest.TestCase):
 
     def tearDown(self):
         db.truncate_table('notes')
+        db.truncate_table('note_permissions')
 
     @classmethod
     def tearDownClass(cls):
@@ -320,3 +330,13 @@ class NotesTestCase(unittest.TestCase):
         self.assertEqual(data['note'][1]['owner'], str(self.user1.id))
         self.assertEqual(data['note'][1]['content'], self.note_full2['content'])
         self.assertEqual(data['note'][1]['name'], self.note_full2['name'])
+
+    def test_create_trip_with_permissions_ok(self):
+        response = self.client.post('/notes', data=json.dumps(self.note_with_permissions), headers=self.headers_json)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(data['owner'], str(self.user1.id))
+        self.assertEqual(data['permissions'][0]['access_level'], 'READ')
+        self.assertEqual(data['permissions'][0]['object_id'], data['id'])
+        self.assertEqual(data['permissions'][0]['subject_id'], str(self.user2.id))
