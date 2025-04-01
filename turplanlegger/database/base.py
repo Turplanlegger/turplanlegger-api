@@ -38,8 +38,12 @@ class Database:
                 self.logger.exception(e)
                 raise
 
-        access_level = EnumInfo.fetch(self.conn, 'access_level')
-        register_enum(access_level, self.conn, AccessLevel)
+        # Close cursor in preperation of creating ENUM access_level
+        self.cur.close()
+        info = EnumInfo.fetch(self.conn, 'access_level')
+        register_enum(info, self.conn, AccessLevel)
+        # Re-create cursor with ENUM
+        self.cur = self.conn.cursor()
 
         if app.config.get('CREATE_ADMIN_USER', False) and not self.check_admin_user(app.config.get('ADMIN_EMAIL')):
             self.logger.debug('Did not find admin user, creating one')
@@ -87,6 +91,7 @@ class Database:
                 'users',
                 'routes',
                 'notes',
+                'trip_permissions',
                 'trips_notes_references',
                 'trips_routes_references',
                 'trips_item_lists_references',
