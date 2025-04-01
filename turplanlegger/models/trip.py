@@ -6,6 +6,7 @@ from uuid import UUID
 from flask import g
 
 from turplanlegger.app import db
+from turplanlegger.models.access_level import AccessLevel
 from turplanlegger.models.permission import Permission
 from turplanlegger.models.trip_date import TripDate
 
@@ -36,9 +37,10 @@ class Trip:
         routes (list): List of route ids that are related to the trip
         item_list (list): List of item list ids that are related to
                           the trip
+        permissions (list): List of permissions that are related to the trip
         create_time (datetime): Time of creation,
                                 Default: datetime.now()
-        update_time (datetime): Time of update,
+        update_time (datetime): Time of update
 
     """
 
@@ -63,9 +65,9 @@ class Trip:
         self.notes = kwargs.get('notes', [])
         self.routes = kwargs.get('routes', [])
         self.item_lists = kwargs.get('item_lists', [])
+        self.permissions = kwargs.get('permissions', None)
         self.create_time = kwargs.get('create_time', None) or datetime.now()
         self.update_time = kwargs.get('update_time', None)
-        self.permissions = kwargs.get('permissions', None)
 
     def __repr__(self):
         return (
@@ -74,7 +76,7 @@ class Trip:
             f'notes={self.notes}, routes={self.routes}, '
             f'item_lists={self.item_lists}, '
             f'create_time={self.create_time}, '
-            f'permission={self.permission})'
+            f'permission={self.permissions})'
         )
 
     @classmethod
@@ -138,6 +140,27 @@ class Trip:
                 permissions.append(permission.create())
             trip.permissions = permissions
         return trip
+
+    def verify_permissions(self, user_id: UUID, access_level: AccessLevel) -> bool:
+        """Verify permissions on a trip
+
+        Args:
+            user_id (UUID): The ID requesting to verify
+            access_level (AccessLevel): The access level to verify
+
+        Returns:
+            Bool: True if access, False if no access
+        """
+
+        if self.owner == user_id:
+            return True
+
+        for permission in self.permissions:
+            if permission.subject_id == user_id:
+                if permission.access_level >= access_level:
+                    return True
+
+        return False
 
     def delete(self) -> bool:
         """Deletes the Trip object from the database
