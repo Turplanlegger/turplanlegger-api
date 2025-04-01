@@ -18,10 +18,10 @@ class AccessLevel(StrEnum, metaclass=CachedEnumMeta):
         return self._index < other._index
 
     def __le__(self, other):
-        return self._index < other._index
+        return self._index <= other._index
 
     def __gt__(self, other):
-        return self._index < other._index
+        return self._index > other._index
 
     def __ge__(self, other):
-        return self._index < other._index
+        return self._index >= other._index
