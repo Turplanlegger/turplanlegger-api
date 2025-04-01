@@ -2,6 +2,7 @@ from flask import g, jsonify, request
 
 from turplanlegger.auth.decorators import auth
 from turplanlegger.exceptions import ApiProblem
+from turplanlegger.models.access_level import AccessLevel
 from turplanlegger.models.item_lists import ItemList
 from turplanlegger.models.note import Note
 from turplanlegger.models.route import Route
@@ -15,7 +16,7 @@ from . import api
 @auth
 def get_trip(trip_id):
     trip = Trip.find_trip(trip_id)
-    if trip:
+    if trip and trip.verify_permissions(g.user.id, AccessLevel.READ):
         return jsonify(status='ok', count=1, trip=trip.serialize)
     else:
         raise ApiProblem('Trip not found', 'The requested trip was not found', 404)

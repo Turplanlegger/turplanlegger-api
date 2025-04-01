@@ -63,4 +63,5 @@ class Permission():
         """
         if rec is None:
             return None
+
         return Permission(object_id=rec.trip_id, subject_id=rec.subject_id, access_level=rec.access_level)
