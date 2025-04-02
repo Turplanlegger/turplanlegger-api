@@ -151,7 +151,6 @@ class Trip:
         Returns:
             Bool: True if access, False if no access
         """
-
         if self.owner == user_id:
             return True
 
