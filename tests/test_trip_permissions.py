@@ -57,6 +57,15 @@ class TripsPermissionsTestCase(unittest.TestCase):
                 },
             ],
         }
+        cls.trip2 = {
+            'name': 'trippin pete perms',
+            'permissions': [
+                {
+                    'subject_id': str(cls.user2.id),
+                    'access_level': 'MODIFY',
+                },
+            ],
+        }
 
         # User 1
         response = cls.client.post(
@@ -129,7 +138,7 @@ class TripsPermissionsTestCase(unittest.TestCase):
         self.assertEqual(data['permissions'][0]['object_id'], data['id'])
         self.assertEqual(data['permissions'][0]['subject_id'], str(self.user2.id))
 
-    def test_get_trip_with_permissions_ok(self):
+    def test_get_trip(self):
         response = self.client.post(
             '/trips',
             data=json.dumps(self.trip1),
@@ -160,3 +169,49 @@ class TripsPermissionsTestCase(unittest.TestCase):
         self.assertEqual(data['detail'], 'The requested trip was not found')
         self.assertEqual(data['type'], 'about:blank')
         self.assertEqual(data['instance'], f'http://localhost/trips/{trip_id}')
+
+    def test_update_trip(self):
+        response = self.client.post(
+            '/trips',
+            data=json.dumps(self.trip2),
+            headers=self.headers_json_user1
+        )
+        self.assertEqual(response.status_code, 201)
+        trip = json.loads(response.data.decode('utf-8'))
+        trip['name'] = 'Tripper'
+        response = self.client.put(
+            f'/trips/{trip["id"]}', data=json.dumps({'name': trip.get('name')}), headers=self.headers_json_user1
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data.get('trip'), trip)
+
+        # User 2 - ok
+        response = self.client.get(f'/trips/{trip["id"]}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        trip['name'] = 'Tripper2'
+        response = self.client.put(
+            f'/trips/{trip["id"]}', data=json.dumps({'name': trip.get('name')}), headers=self.headers_json_user2
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data.get('trip'), trip)
+
+        response = self.client.get(f'/trips/{trip["id"]}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+
+        # User 3 - not ok
+        response = self.client.put(
+            f'/trips/{trip["id"]}', data=json.dumps({'name': 'poopy'}), headers=self.headers_json_user3
+        )
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(response.status_code, 404)
+
+        self.assertEqual(data['title'], 'Trip not found')
+        self.assertEqual(data['detail'], 'The requested trip was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/trips/{trip["id"]}')
