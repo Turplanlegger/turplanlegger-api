@@ -42,7 +42,7 @@ def add_trip():
 def update_trip(trip_id):
     trip = Trip.find_trip(trip_id)
 
-    if not trip:
+    if not trip or not trip.verify_permissions(g.user.id, AccessLevel.MODIFY):
         raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
 
     errors = []
@@ -50,10 +50,11 @@ def update_trip(trip_id):
 
     dates = request.json.get('dates', None)
 
-    date_status = Trip.update_trip_dates(dates, trip)
-    if date_status.changed is True:
-        trip_changed = True
-    errors.extend(date_status.errors)
+    if dates is not None:
+        date_status = Trip.update_trip_dates(dates, trip)
+        if date_status.changed is True:
+            trip_changed = True
+        errors.extend(date_status.errors)
 
     name = request.json.get('name', None)
     private = request.json.get('private', None)
