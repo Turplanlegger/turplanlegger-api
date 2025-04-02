@@ -582,15 +582,10 @@ class TripsTestCase(unittest.TestCase):
         response = self.client.post(
             '/trips', data=json.dumps(self.trip_with_multiple_dates_one_selected), headers=self.headers_json
         )
-
         self.assertEqual(response.status_code, 201)
-
         trip = json.loads(response.data.decode('utf-8'))
 
-        trip['name'] = 'New tripin pete'
-
-        response = self.client.put(f'/trips/{trip["id"]}', data=json.dumps(trip), headers=self.headers_json)
-
+        response = self.client.put(f'/trips/{trip["id"]}', data=json.dumps({'name': 'New tripin pete'}), headers=self.headers_json)
         self.assertEqual(response.status_code, 200)
 
         data = json.loads(response.data.decode('utf-8'))
@@ -598,7 +593,7 @@ class TripsTestCase(unittest.TestCase):
 
         self.assertEqual(data['id'], trip['id'])
         self.assertEqual(data['owner'], trip['owner'])
-        self.assertEqual(data['name'], trip['name'])
+        self.assertEqual(data['name'], 'New tripin pete')
 
         self.assertCountEqual(data['dates'], trip['dates'])
 
