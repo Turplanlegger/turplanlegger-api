@@ -66,6 +66,15 @@ class TripsPermissionsTestCase(unittest.TestCase):
                 },
             ],
         }
+        cls.trip3 = {
+            'name': 'trippin pete perms',
+            'permissions': [
+                {
+                    'subject_id': str(cls.user2.id),
+                    'access_level': 'DELETE',
+                },
+            ],
+        }
 
         # User 1
         response = cls.client.post(
@@ -210,6 +219,34 @@ class TripsPermissionsTestCase(unittest.TestCase):
         )
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(response.status_code, 404)
+
+        self.assertEqual(data['title'], 'Trip not found')
+        self.assertEqual(data['detail'], 'The requested trip was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/trips/{trip["id"]}')
+
+    def test_delete_trip(self):
+        response = self.client.post('/trips',data=json.dumps(self.trip3),headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        trip = json.loads(response.data.decode('utf-8'))
+        response = self.client.delete(f'/trips/{trip["id"]}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 200)
+
+        # User 2 - ok
+        response = self.client.post('/trips',data=json.dumps(self.trip3),headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        trip = json.loads(response.data.decode('utf-8'))
+        response = self.client.delete(f'/trips/{trip["id"]}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+
+        # User 3 - not ok
+        response = self.client.post('/trips',data=json.dumps(self.trip3),headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        trip = json.loads(response.data.decode('utf-8'))
+
+        response = self.client.delete(f'/trips/{trip["id"]}', headers=self.headers_user3)
+        self.assertEqual(response.status_code, 404)
+        data = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(data['title'], 'Trip not found')
         self.assertEqual(data['detail'], 'The requested trip was not found')

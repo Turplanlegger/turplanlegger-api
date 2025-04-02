@@ -175,8 +175,8 @@ def get_my_trips():
 @auth
 def delete_trip(trip_id):
     trip = Trip.find_trip(trip_id)
-    if not trip:
-        raise ApiProblem('Failed to change owner of trip', 'The requested trip was not found', 404)
+    if not trip or not trip.verify_permissions(g.user.id, AccessLevel.DELETE):
+        raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
 
     try:
         trip.delete()
