@@ -27,22 +27,19 @@ class Database:
         set_json_loads(ujson.loads)
 
         self.conn = self.connect()
-        self.cur = self.conn.cursor()
         self.logger.debug('Database connection opened')
 
         with app.open_resource('database/schema.sql') as schema:
             try:
                 with self.conn.transaction():
-                    self.cur.execute(schema.read())
+                    self.conn.execute(schema.read())
             except Exception as e:
                 self.logger.exception(e)
                 raise
 
-        # Close cursor in preperation of creating ENUM access_level
-        self.cur.close()
         info = EnumInfo.fetch(self.conn, 'access_level')
         register_enum(info, self.conn, AccessLevel)
-        # Re-create cursor with ENUM
+        # Create cursor with ENUM
         self.cur = self.conn.cursor()
 
         if app.config.get('CREATE_ADMIN_USER', False) and not self.check_admin_user(app.config.get('ADMIN_EMAIL')):
@@ -97,6 +94,7 @@ class Database:
                 'trips_item_lists_references',
             ]:
                 self.cur.execute(psycopg.sql.SQL('DROP TABLE IF EXISTS {} CASCADE'.format(table)))
+            self.cur.execute('DROP TYPE access_level CASCADE')
 
     def truncate_table(self, table: str):
         with self.conn.transaction():
