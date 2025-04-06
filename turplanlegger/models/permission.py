@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from enum import Enum, auto
 from typing import Dict, NamedTuple
 from uuid import UUID
 
@@ -6,6 +7,13 @@ from turplanlegger.app import db
 from turplanlegger.models.access_level import AccessLevel
 
 JSON = Dict[str, any]
+
+
+class PermissionResult(Enum):
+    ALLOWED = auto()
+    NOT_FOUND = auto()
+    INSUFFICIENT_PERMISSIONS = auto()
+
 
 @dataclass
 class Permission():

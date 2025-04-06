@@ -7,7 +7,7 @@ from flask import g
 
 from turplanlegger.app import db
 from turplanlegger.models.access_level import AccessLevel
-from turplanlegger.models.permission import Permission
+from turplanlegger.models.permission import Permission, PermissionResult
 from turplanlegger.models.trip_date import TripDate
 
 JSON = Dict[str, any]
@@ -141,6 +141,8 @@ class Trip:
             trip.permissions = permissions
         return trip
 
+
+
     def verify_permissions(self, user_id: UUID, access_level: AccessLevel) -> bool:
         """Verify permissions on a trip
 
@@ -149,15 +151,18 @@ class Trip:
             access_level (AccessLevel): The access level to verify
 
         Returns:
-            Bool: True if access, False if no access
+            PermissionResult:
+                - ALLOWED: if the user has the required permission,
+                - NOT_FOUND: if the user doesn't even have read permission (as if the object doesn't exist),
+                - INSUFFICIENT_PERMISSIONS: if the user can read the object but not perform the requested action.
         """
         if self.owner == user_id:
-            return True
+            return PermissionResult.ALLOWED
 
         for permission in self.permissions:
             if permission.subject_id == user_id:
                 if permission.access_level >= access_level:
-                    return True
+                    return PermissionResult.ALLOWED
 
         return False
 
