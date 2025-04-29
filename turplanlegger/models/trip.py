@@ -143,12 +143,12 @@ class Trip:
 
 
 
-    def verify_permissions(self, user_id: UUID, access_level: AccessLevel) -> bool:
+    def verify_permissions(self, subject_id: UUID, required_level: AccessLevel) -> bool:
         """Verify permissions on a trip
 
         Args:
-            user_id (UUID): The ID requesting to verify
-            access_level (AccessLevel): The access level to verify
+            subject_id (UUID): The ID requesting to verify
+            required_level (AccessLevel): The access level to verify
 
         Returns:
             PermissionResult:
@@ -156,15 +156,26 @@ class Trip:
                 - NOT_FOUND: if the user doesn't even have read permission (as if the object doesn't exist),
                 - INSUFFICIENT_PERMISSIONS: if the user can read the object but not perform the requested action.
         """
-        if self.owner == user_id:
+        if self.owner == subject_id:
             return PermissionResult.ALLOWED
 
-        for permission in self.permissions:
-            if permission.subject_id == user_id:
-                if permission.access_level >= access_level:
-                    return PermissionResult.ALLOWED
-
-        return False
+        if required_level == AccessLevel.READ:
+            return PermissionResult.ALLOWED if any(
+                perm.subject_id == subject_id
+                and perm.access_level >= AccessLevel.READ for perm in self.permissions
+            ) else PermissionResult.NOT_FOUND
+        else:
+            # If user has the modify or higer
+            if any(perm.subject_id == subject_id and perm.access_level >= required_level for perm in self.permissions):
+                return PermissionResult.ALLOWED
+            # If subject has read but not more
+            elif any(
+                perm.subject_id == subject_id
+                and perm.access_level == AccessLevel.READ for perm in self.permissions
+            ):
+                return PermissionResult.INSUFFICIENT_PERMISSIONS
+            else:
+                return PermissionResult.NOT_FOUND
 
     def delete(self) -> bool:
         """Deletes the Trip object from the database
