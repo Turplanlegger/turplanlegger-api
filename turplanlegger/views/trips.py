@@ -5,6 +5,7 @@ from turplanlegger.exceptions import ApiProblem
 from turplanlegger.models.access_level import AccessLevel
 from turplanlegger.models.item_lists import ItemList
 from turplanlegger.models.note import Note
+from turplanlegger.models.permission import PermissionResult
 from turplanlegger.models.route import Route
 from turplanlegger.models.trip import Trip
 from turplanlegger.models.trip_date import TripDate
@@ -16,7 +17,7 @@ from . import api
 @auth
 def get_trip(trip_id):
     trip = Trip.find_trip(trip_id)
-    if trip and trip.verify_permissions(g.user.id, AccessLevel.READ):
+    if trip and trip.verify_permissions(g.user.id, AccessLevel.READ) is PermissionResult.ALLOWED:
         return jsonify(status='ok', count=1, trip=trip.serialize)
     else:
         raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
@@ -42,8 +43,14 @@ def add_trip():
 def update_trip(trip_id):
     trip = Trip.find_trip(trip_id)
 
-    if not trip or not trip.verify_permissions(g.user.id, AccessLevel.MODIFY):
+    if not trip:
         raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
+
+    perms = trip.verify_permissions(g.user.id, AccessLevel.MODIFY)
+    if perms is PermissionResult.NOT_FOUND:
+        raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
+    if perms is PermissionResult.INSUFFICIENT_PERMISSIONS:
+        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the trip', 403)
 
     errors = []
     trip_changed = False
@@ -175,7 +182,7 @@ def get_my_trips():
 @auth
 def delete_trip(trip_id):
     trip = Trip.find_trip(trip_id)
-    if not trip or not trip.verify_permissions(g.user.id, AccessLevel.DELETE):
+    if not trip or trip.verify_permissions(g.user.id, AccessLevel.DELETE) is PermissionResult.NOT_FOUND:
         raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
 
     try:
@@ -214,6 +221,12 @@ def remove_trip_date(trip_id, trip_date_id):
     trip = Trip.find_trip(trip_id)
     if not trip:
         raise ApiProblem('Failed to remove date from trip', 'The requested trip was not found', 404)
+
+    perms = trip.verify_permissions(g.user.id, AccessLevel.DELETE)
+    if perms is PermissionResult.NOT_FOUND:
+        raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
+    if perms is PermissionResult.INSUFFICIENT_PERMISSIONS:
+        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to delete the trip', 403)
 
     trip_date = None
     for date in trip.dates:
