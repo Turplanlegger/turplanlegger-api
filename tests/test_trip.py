@@ -139,6 +139,21 @@ class TripsTestCase(unittest.TestCase):
         cls.headers_json = {'Content-type': 'application/json', 'Authorization': f'Bearer {data["token"]}'}
         cls.headers = {'Authorization': f'Bearer {data["token"]}'}
 
+        response = cls.client.post(
+            '/login',
+            data=json.dumps({'email': cls.user2.email, 'password': 'test'}),
+            headers={'Content-type': 'application/json'},
+        )
+
+        if response.status_code != 200:
+            raise RuntimeError('Failed to login')
+
+        data = json.loads(response.data.decode('utf-8'))
+
+        cls.headers_json2 = {'Content-type': 'application/json', 'Authorization': f'Bearer {data["token"]}'}
+        cls.headers2 = {'Authorization': f'Bearer {data["token"]}'}
+
+
     def tearDown(self):
         db.truncate_table('trips')
         db.truncate_table('trip_dates')
@@ -270,7 +285,7 @@ class TripsTestCase(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get(f'/trips/{data["id"]}', headers=self.headers)
+        response = self.client.get(f'/trips/{data["id"]}', headers=self.headers2)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['trip']['owner'], str(self.user2.id))
