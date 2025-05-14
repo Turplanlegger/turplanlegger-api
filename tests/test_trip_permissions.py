@@ -1,5 +1,4 @@
 import json
-from pprint import pprint
 import unittest
 
 from turplanlegger.app import create_app, db
@@ -291,7 +290,7 @@ class TripsPermissionsTestCase(unittest.TestCase):
         response = self.client.get(f'/trips/{id}', headers=self.headers_user2)
         self.assertEqual(response.status_code, 200)
 
-        ## Not ok 
+        ## Not ok
         response = self.client.get(f'/trips/{id}', headers=self.headers_user1)
         self.assertEqual(response.status_code, 404)
         data = json.loads(response.data.decode('utf-8'))
@@ -302,7 +301,7 @@ class TripsPermissionsTestCase(unittest.TestCase):
         self.assertEqual(data['instance'], f'http://localhost/trips/{id}')
 
         # User 1 -> user 3
-        ## Not ok 
+        ## Not ok
         response = self.client.patch(
             f'/trips/{id}/owner', data=json.dumps({'owner': str(self.user3.id)}), headers=self.headers_json_user1
         )
