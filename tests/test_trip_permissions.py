@@ -1,4 +1,5 @@
 import json
+from pprint import pprint
 import unittest
 
 from turplanlegger.app import create_app, db
@@ -273,5 +274,62 @@ class TripsPermissionsTestCase(unittest.TestCase):
 
         self.assertEqual(data['title'], 'Insufficient permissions')
         self.assertEqual(data['detail'], 'Not sufficient permissions to modify the trip')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/trips/{id}')
+
+    def test_change_trip_owner(self):
+        response = self.client.post('/trips',data=json.dumps(self.trip_read),headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+        id = data['id']
+
+        # User 1 -> user 2
+        ## Ok
+        response = self.client.patch(
+            f'/trips/{id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user1
+        )
+        response = self.client.get(f'/trips/{id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+
+        ## Not ok 
+        response = self.client.get(f'/trips/{id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 404)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['title'], 'Trip not found')
+        self.assertEqual(data['detail'], 'The requested trip was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/trips/{id}')
+
+        # User 1 -> user 3
+        ## Not ok 
+        response = self.client.patch(
+            f'/trips/{id}/owner', data=json.dumps({'owner': str(self.user3.id)}), headers=self.headers_json_user1
+        )
+        self.assertEqual(response.status_code, 403)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['title'], 'Insufficient permissions')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to change ownership the trip')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/trips/{id}/owner')
+
+        # User 2 -> user 3
+        ## Ok
+        response = self.client.patch(
+            f'/trips/{id}/owner', data=json.dumps({'owner': str(self.user3.id)}), headers=self.headers_json_user2
+        )
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(f'/trips/{id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+
+        ## Not ok
+        response = self.client.get(f'/trips/{id}', headers=self.headers_user1)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(response.status_code, 404)
+
+        self.assertEqual(data['title'], 'Trip not found')
+        self.assertEqual(data['detail'], 'The requested trip was not found')
         self.assertEqual(data['type'], 'about:blank')
         self.assertEqual(data['instance'], f'http://localhost/trips/{id}')
