@@ -153,7 +153,6 @@ class TripsTestCase(unittest.TestCase):
         cls.headers_json2 = {'Content-type': 'application/json', 'Authorization': f'Bearer {data["token"]}'}
         cls.headers2 = {'Authorization': f'Bearer {data["token"]}'}
 
-
     def tearDown(self):
         db.truncate_table('trips')
         db.truncate_table('trip_dates')
