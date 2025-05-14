@@ -1,0 +1,15 @@
+repos:
+  - repo: local
+    hooks:
+
+      #- id: ruff-check
+      #  name: ruff check
+      #  description: Run the linter
+      #  language: python
+      #  entry: ruff check
+
+      - id: ruff-format
+        name: ruff format
+        description: Run the formatter
+        language: python
+        entry: ruff format --diff --no-cache
