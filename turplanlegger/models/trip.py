@@ -101,11 +101,7 @@ class Trip:
         permissions[:] = [Permission.parse(permission) for permission in permissions]
 
         return Trip(
-            id=json.get('id', None),
-            owner=g.user.id,
-            name=json.get('name', None),
-            dates=dates,
-            permissions=permissions
+            id=json.get('id', None), owner=g.user.id, name=json.get('name', None), dates=dates, permissions=permissions
         )
 
     @property
@@ -141,8 +137,6 @@ class Trip:
             trip.permissions = permissions
         return trip
 
-
-
     def verify_permissions(self, subject_id: UUID, required_level: AccessLevel) -> bool:
         """Verify permissions on a trip
 
@@ -160,18 +154,20 @@ class Trip:
             return PermissionResult.ALLOWED
 
         if required_level == AccessLevel.READ:
-            return PermissionResult.ALLOWED if any(
-                perm.subject_id == subject_id
-                and perm.access_level >= AccessLevel.READ for perm in self.permissions
-            ) else PermissionResult.NOT_FOUND
+            return (
+                PermissionResult.ALLOWED
+                if any(
+                    perm.subject_id == subject_id and perm.access_level >= AccessLevel.READ for perm in self.permissions
+                )
+                else PermissionResult.NOT_FOUND
+            )
         else:
             # If user has the modify or higer
             if any(perm.subject_id == subject_id and perm.access_level >= required_level for perm in self.permissions):
                 return PermissionResult.ALLOWED
             # If subject has read but not more
             elif any(
-                perm.subject_id == subject_id
-                and perm.access_level == AccessLevel.READ for perm in self.permissions
+                perm.subject_id == subject_id and perm.access_level == AccessLevel.READ for perm in self.permissions
             ):
                 return PermissionResult.INSUFFICIENT_PERMISSIONS
             else:

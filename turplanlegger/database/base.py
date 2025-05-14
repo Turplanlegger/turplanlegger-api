@@ -504,7 +504,7 @@ class Database:
 
     def get_trip_all_permissions(self, trip_id: int):
         select = 'SELECT trip_id, access_level, subject_id FROM trip_permissions WHERE trip_id =%s'
-        return self._fetchall(select, (trip_id,) )
+        return self._fetchall(select, (trip_id,))
 
     def create_trip_permissions(self, trip_permission):
         insert_trip_permission = """

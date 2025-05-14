@@ -1,4 +1,3 @@
-
 from enum import EnumMeta, StrEnum
 
 
@@ -8,6 +7,7 @@ class CachedEnumMeta(EnumMeta):
         # Get index based on definition order
         for index, member in enumerate(cls):
             member._index = index
+
 
 class AccessLevel(StrEnum, metaclass=CachedEnumMeta):
     READ = 'READ'
