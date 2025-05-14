@@ -16,7 +16,7 @@ class PermissionResult(Enum):
 
 
 @dataclass
-class Permission():
+class Permission:
     object_id: int
     subject_id: UUID
     access_level: AccessLevel
@@ -35,17 +35,13 @@ class Permission():
         return Permission(
             object_id=json.get('id', None),
             subject_id=json.get('subject_id', None),
-            access_level=AccessLevel(json.get('access_level', None))
+            access_level=AccessLevel(json.get('access_level', None)),
         )
 
     @property
     def serialize(self) -> JSON:
         """Serialize the Permission instance and returns it as Dict(str, any)"""
-        return {
-            'object_id': self.object_id,
-            'subject_id': self.subject_id,
-            'access_level': self.access_level
-        }
+        return {'object_id': self.object_id, 'subject_id': self.subject_id, 'access_level': self.access_level}
 
     @staticmethod
     def find_trip_all_permissions(trip_id: int) -> 'Permission':
