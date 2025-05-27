@@ -179,3 +179,88 @@ class NotesTestCase(unittest.TestCase):
         self.assertEqual(data['detail'], 'The requested note was not found')
         self.assertEqual(data['type'], 'about:blank')
         self.assertEqual(data['instance'], f'http://localhost/notes/{note_id}')
+
+    def test_update_note(self):
+        response = self.client.post('/notes', data=json.dumps(self.note_modify), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        note = json.loads(response.data.decode('utf-8'))
+        note['content'] = 'Tripper'
+        response = self.client.put(
+            f'/notes/{note["id"]}', data=json.dumps({'name': self.note_modify['name'], 'content': note.get('content')}), headers=self.headers_json_user1
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data.get('note'), note)
+
+        # User 2 - ok
+        response = self.client.get(f'/notes/{note["id"]}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        note['content'] = 'Tripper2'
+        response = self.client.put(
+            f'/notes/{note["id"]}', data=json.dumps({'name': self.note_modify['name'], 'content': note.get('content')}), headers=self.headers_json_user2
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data.get('note'), note)
+
+        response = self.client.get(f'/notes/{note["id"]}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+
+        # User 3 - not ok
+        response = self.client.put(
+            f'/notes/{note["id"]}', data=json.dumps({'name': self.note_modify['name'], 'content': 'poopy'}), headers=self.headers_json_user3
+        )
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(response.status_code, 404)
+
+        self.assertEqual(data['title'], 'Note not found')
+        self.assertEqual(data['detail'], 'The requested note was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/notes/{note["id"]}')
+
+    def test_update_note_fail(self):
+        response = self.client.post('/notes', data=json.dumps(self.note_read), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        note = json.loads(response.data.decode('utf-8'))
+        note['content'] = 'Tripper'
+        response = self.client.put(
+            f'/notes/{note["id"]}', data=json.dumps({'name': self.note_read['name'], 'content': note.get('content')}), headers=self.headers_json_user1
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data.get('note'), note)
+
+        # User 2 - Not ok
+        response = self.client.get(f'/notes/{note["id"]}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        note['content'] = 'Tripper2'
+        response = self.client.put(
+            f'/notes/{note["id"]}', data=json.dumps({'name': self.note_read['name'], 'content': note.get('content')}), headers=self.headers_json_user2
+        )
+
+        self.assertEqual(response.status_code, 403)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['title'], 'Insufficient permissions')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to modify the note')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/notes/{note["id"]}')
+
+        # User 3 - not ok
+        response = self.client.put(
+            f'/notes/{note["id"]}', data=json.dumps({'name': self.note_read['name'], 'content': 'poopy'}), headers=self.headers_json_user3
+        )
+        self.assertEqual(response.status_code, 404)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['title'], 'Note not found')
+        self.assertEqual(data['detail'], 'The requested note was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/notes/{note["id"]}')
