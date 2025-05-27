@@ -60,6 +60,12 @@ def update_note(note_id):
     if not note:
         raise ApiProblem('Note not found', 'The requested note was not found', 404)
 
+    perms = Permission.verify(note.owner, note.permissions, g.user.id, AccessLevel.MODIFY)
+    if perms is PermissionResult.NOT_FOUND:
+        raise ApiProblem('Note not found', 'The requested note was not found', 404)
+    if perms is PermissionResult.INSUFFICIENT_PERMISSIONS:
+        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the note', 403)
+
     name = request.json.get('name', None)
     content = request.json.get('content', None)
 
@@ -69,17 +75,10 @@ def update_note(note_id):
     if name == note.name and content == note.content:
         raise ApiProblem('Failed to update note', 'No new updates were provided', 409)
 
-    updated_fields = []
-
-    if name != note.name:
-        updated_fields.append('name')
     note.name = name
-
-    if content != note.content:
-        updated_fields.append('content')
     note.content = content
 
-    if note.update(updated_fields):
+    if note.update():
         return jsonify(status='ok', count=1, note=note.serialize)
     else:
         raise ApiProblem('Failed to update note', 'Unknown error', 500)

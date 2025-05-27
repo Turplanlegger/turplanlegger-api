@@ -91,11 +91,11 @@ class Note:
             for permission in self.permissions:
                 permission.object_id = note.id
                 permissions.append(permission.create_note())
-        note.permissions = permissions
+            note.permissions = permissions
         return note
 
-    def update(self, updated_fields) -> 'Note':
-        return db.update_note(self, updated_fields)
+    def update(self) -> 'Note':
+        return db.update_note(self)
 
     def delete(self) -> bool:
         return db.delete_note(self.id)

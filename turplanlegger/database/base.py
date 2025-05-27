@@ -298,18 +298,14 @@ class Database:
         """
         return self._insert(insert, vars(note))
 
-    def update_note(self, note, updated_fields=None):
+    def update_note(self, note):
         update = 'UPDATE notes SET update_time=CURRENT_TIMESTAMP'
-        if 'name' in updated_fields:
-            if note.name is None:
-                update += ', name=NULL'
-            else:
-                update += ', name=%(name)s'
+        if note.name is None:
+            update += ', name=NULL'
+        else:
+            update += ', name=%(name)s'
 
-        if 'content' in updated_fields:
-            update += ', content=%(content)s'
-
-        update += ' WHERE id=%(id)s RETURNING *'
+        update += ', content=%(content)s WHERE id=%(id)s RETURNING *'
         return self._updateone(update, vars(note), returning=True)
 
     def delete_note(self, id):
