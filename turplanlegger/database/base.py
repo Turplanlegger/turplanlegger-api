@@ -499,16 +499,16 @@ class Database:
 
     # Trip permissions
     def get_trip_subject_permissions(self, trip_id: int, owner_id: UUID):
-        select = 'SELECT access_level FROM trip_permissions WHERE trip_id =%(trip_id)s AND user_id = %(owner_id)s'
-        return self._fetchone(select, {'trip_id': trip_id, 'owner_id': owner_id})
+        select = 'SELECT access_level FROM trip_permissions WHERE object_id=%(trip_id)s AND user_id = %(owner_id)s'
+        return self._fetchone(select, {'object_id': trip_id, 'owner_id': owner_id})
 
     def get_trip_all_permissions(self, trip_id: int):
-        select = 'SELECT trip_id, access_level, subject_id FROM trip_permissions WHERE trip_id =%s'
+        select = 'SELECT object_id, access_level, subject_id FROM trip_permissions WHERE object_id = %s'
         return self._fetchall(select, (trip_id,))
 
     def create_trip_permissions(self, trip_permission):
         insert_trip_permission = """
-            INSERT INTO trip_permissions (trip_id, subject_id, access_level)
+            INSERT INTO trip_permissions (object_id, subject_id, access_level)
             VALUES (%(object_id)s, %(subject_id)s, %(access_level)s)
             RETURNING *
         """

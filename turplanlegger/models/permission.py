@@ -51,8 +51,9 @@ class Permission:
     def find_trip_user_permissions(trip_id: int, user_id: UUID) -> 'Permission':
         return Permission.get_permission(db.get_trip_permissions(trip_id, user_id))
 
-    def create(self) -> 'Permission':
-        """Creates the Permission instance in the database"""
+
+    def create_trip(self) -> 'Permission':
+        """Creates a trip Permission instance in the database"""
         return self.get_permission(db.create_trip_permissions(self))
 
     @classmethod
@@ -68,4 +69,4 @@ class Permission:
         if rec is None:
             return None
 
-        return Permission(object_id=rec.trip_id, subject_id=rec.subject_id, access_level=rec.access_level)
+        return Permission(object_id=rec.object_id, subject_id=rec.subject_id, access_level=rec.access_level)
