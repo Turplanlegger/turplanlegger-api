@@ -133,7 +133,7 @@ class Trip:
             permissions = []
             for permission in self.permissions:
                 permission.object_id = trip.id
-                permissions.append(permission.create())
+                permissions.append(permission.create_trip())
             trip.permissions = permissions
         return trip
 
