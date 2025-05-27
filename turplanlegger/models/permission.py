@@ -83,6 +83,11 @@ class Permission:
             else:
                 return PermissionResult.NOT_FOUND
 
+    # Note
+    @staticmethod
+    def find_note_all_permissions(note_id: int) -> 'Permission':
+        return [Permission.get_permission(permission) for permission in db.get_note_all_permissions(note_id)]
+
     # Trip
     @staticmethod
     def find_trip_all_permissions(trip_id: int) -> 'Permission':
@@ -92,6 +97,9 @@ class Permission:
     def find_trip_user_permissions(trip_id: int, user_id: UUID) -> 'Permission':
         return Permission.get_permission(db.get_trip_permissions(trip_id, user_id))
 
+    def create_note(self) -> 'Permission':
+        """Creates a note Permission instance in the database"""
+        return self.get_permission(db.create_note_permissions(self))
 
     def create_trip(self) -> 'Permission':
         """Creates a trip Permission instance in the database"""

@@ -2,7 +2,9 @@ from flask import g, jsonify, request
 
 from turplanlegger.auth.decorators import auth
 from turplanlegger.exceptions import ApiProblem
+from turplanlegger.models.access_level import AccessLevel
 from turplanlegger.models.note import Note
+from turplanlegger.models.permission import Permission, PermissionResult
 
 from . import api
 
@@ -12,7 +14,7 @@ from . import api
 def get_note(note_id):
     note = Note.find_note(note_id)
 
-    if note:
+    if note and Permission.verify(note.owner, note.permissions, g.user.id, AccessLevel.READ) is PermissionResult.ALLOWED:
         return jsonify(status='ok', count=1, note=note.serialize)
     else:
         raise ApiProblem('Note not found', 'The requested note was not found', 404)
