@@ -43,6 +43,47 @@ class Permission:
         """Serialize the Permission instance and returns it as Dict(str, any)"""
         return {'object_id': self.object_id, 'subject_id': self.subject_id, 'access_level': self.access_level}
 
+
+    @staticmethod
+    def verify(owner: UUID, permissions: list['Permission'], subject_id: UUID, required_level: AccessLevel) -> PermissionResult:
+        """Verify permissions on a trip
+
+        Args:
+            owner: (UUID): The ID of the owner of the object
+            permissions ([Permission]): List of permissions for the object
+            subject_id (UUID): The ID requesting to verify
+            required_level (AccessLevel): The access level to verify
+
+        Returns:
+            PermissionResult:
+                - ALLOWED: if the user has the required permission,
+                - NOT_FOUND: if the user doesn't even have read permission (as if the object doesn't exist),
+                - INSUFFICIENT_PERMISSIONS: if the user can read the object but not perform the requested action.
+        """
+        if owner == subject_id:
+            return PermissionResult.ALLOWED
+
+        if required_level == AccessLevel.READ:
+            return (
+                PermissionResult.ALLOWED
+                if any(
+                    perm.subject_id == subject_id and perm.access_level >= AccessLevel.READ for perm in permissions
+                )
+                else PermissionResult.NOT_FOUND
+            )
+        else:
+            # If user has the modify or higer
+            if any(perm.subject_id == subject_id and perm.access_level >= required_level for perm in permissions):
+                return PermissionResult.ALLOWED
+            # If subject has read but not more
+            elif any(
+                perm.subject_id == subject_id and perm.access_level == AccessLevel.READ for perm in permissions
+            ):
+                return PermissionResult.INSUFFICIENT_PERMISSIONS
+            else:
+                return PermissionResult.NOT_FOUND
+
+    # Trip
     @staticmethod
     def find_trip_all_permissions(trip_id: int) -> 'Permission':
         return [Permission.get_permission(permission) for permission in db.get_trip_all_permissions(trip_id)]
