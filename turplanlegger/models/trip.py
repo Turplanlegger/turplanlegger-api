@@ -6,8 +6,7 @@ from uuid import UUID
 from flask import g
 
 from turplanlegger.app import db
-from turplanlegger.models.access_level import AccessLevel
-from turplanlegger.models.permission import Permission, PermissionResult
+from turplanlegger.models.permission import Permission
 from turplanlegger.models.trip_date import TripDate
 
 JSON = Dict[str, any]
@@ -136,42 +135,6 @@ class Trip:
                 permissions.append(permission.create_trip())
             trip.permissions = permissions
         return trip
-
-    def verify_permissions(self, subject_id: UUID, required_level: AccessLevel) -> bool:
-        """Verify permissions on a trip
-
-        Args:
-            subject_id (UUID): The ID requesting to verify
-            required_level (AccessLevel): The access level to verify
-
-        Returns:
-            PermissionResult:
-                - ALLOWED: if the user has the required permission,
-                - NOT_FOUND: if the user doesn't even have read permission (as if the object doesn't exist),
-                - INSUFFICIENT_PERMISSIONS: if the user can read the object but not perform the requested action.
-        """
-        if self.owner == subject_id:
-            return PermissionResult.ALLOWED
-
-        if required_level == AccessLevel.READ:
-            return (
-                PermissionResult.ALLOWED
-                if any(
-                    perm.subject_id == subject_id and perm.access_level >= AccessLevel.READ for perm in self.permissions
-                )
-                else PermissionResult.NOT_FOUND
-            )
-        else:
-            # If user has the modify or higer
-            if any(perm.subject_id == subject_id and perm.access_level >= required_level for perm in self.permissions):
-                return PermissionResult.ALLOWED
-            # If subject has read but not more
-            elif any(
-                perm.subject_id == subject_id and perm.access_level == AccessLevel.READ for perm in self.permissions
-            ):
-                return PermissionResult.INSUFFICIENT_PERMISSIONS
-            else:
-                return PermissionResult.NOT_FOUND
 
     def delete(self) -> bool:
         """Deletes the Trip object from the database
