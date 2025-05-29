@@ -1,3 +1,4 @@
+from IPython import embed
 from flask import g, jsonify, request
 
 from turplanlegger.auth.decorators import auth
@@ -27,6 +28,12 @@ def delete_note(note_id):
 
     if note is None:
         raise ApiProblem('Note not found', 'The requested note was not found', 404)
+
+    perms = Permission.verify(note.owner, note.permissions, g.user.id, AccessLevel.DELETE)
+    if perms is PermissionResult.NOT_FOUND:
+        raise ApiProblem('Note not found', 'The requested note was not found', 404)
+    if perms is PermissionResult.INSUFFICIENT_PERMISSIONS:
+        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to delete the note', 403)
 
     try:
         note.delete()
