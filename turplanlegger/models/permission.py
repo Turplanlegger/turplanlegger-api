@@ -77,7 +77,7 @@ class Permission:
                 return PermissionResult.ALLOWED
             # If subject has read but not more
             elif any(
-                perm.subject_id == subject_id and perm.access_level == AccessLevel.READ for perm in permissions
+                perm.subject_id == subject_id and perm.access_level >= AccessLevel.READ for perm in permissions
             ):
                 return PermissionResult.INSUFFICIENT_PERMISSIONS
             else:
