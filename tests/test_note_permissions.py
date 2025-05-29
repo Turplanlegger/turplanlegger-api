@@ -264,3 +264,63 @@ class NotesTestCase(unittest.TestCase):
         self.assertEqual(data['detail'], 'The requested note was not found')
         self.assertEqual(data['type'], 'about:blank')
         self.assertEqual(data['instance'], f'http://localhost/notes/{note["id"]}')
+
+    def test_delete_note(self):
+        response = self.client.post('/notes', data=json.dumps(self.note_delete), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        note_id = json.loads(response.data.decode('utf-8'))['id']
+
+        # Not ok
+        response = self.client.delete(f'/notes/{note_id}', headers=self.headers_json_user3)
+        self.assertEqual(response.status_code, 404)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['title'], 'Note not found')
+        self.assertEqual(data['detail'], 'The requested note was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/notes/{note_id}')
+
+        # OK
+        response = self.client.delete(f'/notes/{note_id}', headers=self.headers_json_user2)
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(f'/notes/{note_id}', headers=self.headers_json_user2)
+        self.assertEqual(response.status_code, 404)
+
+    def test_delete_note_modify_fail(self):
+        response = self.client.post('/notes', data=json.dumps(self.note_modify), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        note_id = json.loads(response.data.decode('utf-8'))['id']
+
+        # Not ok
+        response = self.client.delete(f'/notes/{note_id}', headers=self.headers_json_user2)
+        self.assertEqual(response.status_code, 403)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['title'], 'Insufficient permissions')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to delete the note')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/notes/{note_id}')
+
+        # OK
+        response = self.client.delete(f'/notes/{note_id}', headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 200)
+
+    def test_delete_note_read_fail(self):
+        response = self.client.post('/notes', data=json.dumps(self.note_read), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        note_id = json.loads(response.data.decode('utf-8'))['id']
+
+        # Not ok
+        response = self.client.delete(f'/notes/{note_id}', headers=self.headers_json_user2)
+        self.assertEqual(response.status_code, 403)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['title'], 'Insufficient permissions')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to delete the note')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/notes/{note_id}')
+
+        # OK
+        response = self.client.delete(f'/notes/{note_id}', headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 200)
+
