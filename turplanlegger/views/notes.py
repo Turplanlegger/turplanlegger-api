@@ -133,6 +133,9 @@ def rename_note(note_id):
 @api.route('/notes/<note_id>/content', methods=['PATCH'])
 @auth
 def update_note_content(note_id):
+
+    raise ApiProblem('Endpoint has been deprecated', 'Use PUT /notes/<note_id> instead', 410)
+
     note = Note.find_note(note_id)
 
     if not note:
