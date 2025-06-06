@@ -212,9 +212,13 @@ class NotesTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         response = self.client.patch('/notes/1/rename', data=json.dumps({'name': 'newlist'}), headers=self.headers_json)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 410)
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['status'], 'ok')
+
+        self.assertEqual(data['title'], 'Endpoint has been deprecated')
+        self.assertEqual(data['detail'], 'Use PUT /notes/<note_id> instead')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], 'http://localhost/notes/1/rename')
 
     def test_update_note_content(self):
         response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
