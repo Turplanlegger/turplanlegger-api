@@ -51,6 +51,7 @@ class NotesTestCase(unittest.TestCase):
             'name': 'Best note ever',
         }
 
+        # User 1
         response = cls.client.post(
             '/login',
             data=json.dumps({'email': cls.user1.email, 'password': 'test'}),
@@ -63,6 +64,20 @@ class NotesTestCase(unittest.TestCase):
 
         cls.headers_json = {'Content-type': 'application/json', 'Authorization': f'Bearer {data["token"]}'}
         cls.headers = {'Authorization': f'Bearer {data["token"]}'}
+
+        # User 2
+        response = cls.client.post(
+            '/login',
+            data=json.dumps({'email': cls.user2.email, 'password': 'test'}),
+            headers={'Content-type': 'application/json'},
+        )
+        if response.status_code != 200:
+            raise RuntimeError('Failed to login')
+
+        data = json.loads(response.data.decode('utf-8'))
+
+        cls.headers_json2 = {'Content-type': 'application/json', 'Authorization': f'Bearer {data["token"]}'}
+        cls.headers2 = {'Authorization': f'Bearer {data["token"]}'}
 
     def tearDown(self):
         db.truncate_table('notes')
@@ -140,17 +155,27 @@ class NotesTestCase(unittest.TestCase):
     def test_change_note_owner(self):
         response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
-        data = json.loads(response.data.decode('utf-8'))
+        note = json.loads(response.data.decode('utf-8'))
 
         response = self.client.patch(
-            f'/notes/{data["id"]}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json
+            f'/notes/{note["id"]}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json
         )
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get(f'/notes/{data["id"]}', headers=self.headers)
-        self.assertEqual(response.status_code, 200)
+        response = self.client.get(f'/notes/{note["id"]}', headers=self.headers2)
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['note']['owner'], str(self.user2.id))
+        self.assertEqual(data['note']['content'], self.note_full['content'])
+        self.assertEqual(data['note']['name'], self.note_full['name'])
+
+        response = self.client.get(f'/notes/{note["id"]}', headers=self.headers)
+        self.assertEqual(response.status_code, 404)
+
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Note not found')
+        self.assertEqual(data['detail'], 'The requested note was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], 'http://localhost/notes/1')
 
     def test_change_note_owner_note_not_found(self):
         response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)

@@ -99,6 +99,13 @@ def change_note_owner(note_id):
     if not note:
         raise ApiProblem('Note not found', 'The requested note was not found', 404)
 
+    perms = Permission.verify(note.owner, note.permissions, g.user.id, AccessLevel.READ)
+    if perms is PermissionResult.NOT_FOUND:
+        raise ApiProblem('Note not found', 'The requested note was not found', 404)
+    
+    if note.owner != g.user.id:
+        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to change owner the note', 403)
+
     owner = request.json.get('owner', None)
 
     if not owner:

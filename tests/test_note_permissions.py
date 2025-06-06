@@ -1,4 +1,5 @@
 import json
+from pprint import pprint
 import unittest
 from uuid import uuid4
 
@@ -324,3 +325,172 @@ class NotesTestCase(unittest.TestCase):
         response = self.client.delete(f'/notes/{note_id}', headers=self.headers_json_user1)
         self.assertEqual(response.status_code, 200)
 
+
+    def test_change_note_owner(self):
+        response = self.client.post('/notes', data=json.dumps(self.note_read), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        note_id = json.loads(response.data.decode('utf-8'))['id']
+
+        # Ok
+        response = self.client.get(f'/notes/{note_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 200)
+        # Ok
+        response = self.client.get(f'/notes/{note_id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+        # Not ok
+        response = self.client.patch(
+            f'/notes/{note_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user2
+        )
+        self.assertEqual(response.status_code, 403)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Insufficient permissions')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to change owner the note')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/notes/{note_id}/owner')
+        # Not ok
+        response = self.client.get(f'/notes/{note_id}', headers=self.headers_user3)
+        self.assertEqual(response.status_code, 404)
+        # Not ok
+        response = self.client.patch(
+            f'/notes/{note_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user3
+        )
+        self.assertEqual(response.status_code, 404)
+
+        # Change owner
+        response = self.client.patch(
+            f'/notes/{note_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user1
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Not ok
+        response = self.client.get(f'/notes/{note_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 404)
+        # Ok
+        response = self.client.get(f'/notes/{note_id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(len(data['note']['permissions']), 1)
+        self.assertEqual(data['note']['permissions'][0]['access_level'], 'READ')
+        self.assertEqual(data['note']['permissions'][0]['object_id'], data['note']['id'])
+        self.assertEqual(data['note']['permissions'][0]['subject_id'], str(self.user2.id))
+        # Not ok
+        response = self.client.get(f'/notes/{note_id}', headers=self.headers_user3)
+        self.assertEqual(response.status_code, 404)
+        # Not ok
+        response = self.client.patch(
+            f'/notes/{note_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user3
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_change_note_owner_modify(self):
+        response = self.client.post('/notes', data=json.dumps(self.note_modify), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        note_id = json.loads(response.data.decode('utf-8'))['id']
+
+        # Ok
+        response = self.client.get(f'/notes/{note_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 200)
+        # Ok
+        response = self.client.get(f'/notes/{note_id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+        # Not ok
+        response = self.client.patch(
+            f'/notes/{note_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user2
+        )
+        self.assertEqual(response.status_code, 403)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Insufficient permissions')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to change owner the note')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/notes/{note_id}/owner')
+        # Not ok
+        response = self.client.get(f'/notes/{note_id}', headers=self.headers_user3)
+        self.assertEqual(response.status_code, 404)
+        # Not ok
+        response = self.client.patch(
+            f'/notes/{note_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user3
+        )
+        self.assertEqual(response.status_code, 404)
+
+        # Change owner
+        response = self.client.patch(
+            f'/notes/{note_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user1
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Not ok
+        response = self.client.get(f'/notes/{note_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 404)
+        # Ok
+        response = self.client.get(f'/notes/{note_id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(len(data['note']['permissions']), 1)
+        self.assertEqual(data['note']['permissions'][0]['access_level'], 'MODIFY')
+        self.assertEqual(data['note']['permissions'][0]['object_id'], data['note']['id'])
+        self.assertEqual(data['note']['permissions'][0]['subject_id'], str(self.user2.id))
+        # Not ok
+        response = self.client.get(f'/notes/{note_id}', headers=self.headers_user3)
+        self.assertEqual(response.status_code, 404)
+        # Not ok
+        response = self.client.patch(
+            f'/notes/{note_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user3
+        )
+        self.assertEqual(response.status_code, 404)
+
+
+    def test_change_note_owner_delete(self):
+        response = self.client.post('/notes', data=json.dumps(self.note_delete), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        note_id = json.loads(response.data.decode('utf-8'))['id']
+
+        # Ok
+        response = self.client.get(f'/notes/{note_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 200)
+        # Ok
+        response = self.client.get(f'/notes/{note_id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+        # Not ok
+        response = self.client.patch(
+            f'/notes/{note_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user2
+        )
+        self.assertEqual(response.status_code, 403)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Insufficient permissions')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to change owner the note')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/notes/{note_id}/owner')
+        # Not ok
+        response = self.client.get(f'/notes/{note_id}', headers=self.headers_user3)
+        self.assertEqual(response.status_code, 404)
+        # Not ok
+        response = self.client.patch(
+            f'/notes/{note_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user3
+        )
+        self.assertEqual(response.status_code, 404)
+
+        # Change owner
+        response = self.client.patch(
+            f'/notes/{note_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user1
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Not ok
+        response = self.client.get(f'/notes/{note_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 404)
+        # Ok
+        response = self.client.get(f'/notes/{note_id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(len(data['note']['permissions']), 1)
+        self.assertEqual(data['note']['permissions'][0]['access_level'], 'DELETE')
+        self.assertEqual(data['note']['permissions'][0]['object_id'], data['note']['id'])
+        self.assertEqual(data['note']['permissions'][0]['subject_id'], str(self.user2.id))
+        # Not ok
+        response = self.client.get(f'/notes/{note_id}', headers=self.headers_user3)
+        self.assertEqual(response.status_code, 404)
+        # Not ok
+        response = self.client.patch(
+            f'/notes/{note_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user3
+        )
+        self.assertEqual(response.status_code, 404)
