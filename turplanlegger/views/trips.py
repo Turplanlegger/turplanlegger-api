@@ -5,7 +5,7 @@ from turplanlegger.exceptions import ApiProblem
 from turplanlegger.models.access_level import AccessLevel
 from turplanlegger.models.item_lists import ItemList
 from turplanlegger.models.note import Note
-from turplanlegger.models.permission import PermissionResult, Permission
+from turplanlegger.models.permission import Permission, PermissionResult
 from turplanlegger.models.route import Route
 from turplanlegger.models.trip import Trip
 from turplanlegger.models.trip_date import TripDate
@@ -17,7 +17,10 @@ from . import api
 @auth
 def get_trip(trip_id):
     trip = Trip.find_trip(trip_id)
-    if trip and Permission.verify(trip.owner, trip.permissions, g.user.id, AccessLevel.READ) is PermissionResult.ALLOWED:
+    if (
+        trip
+        and Permission.verify(trip.owner, trip.permissions, g.user.id, AccessLevel.READ) is PermissionResult.ALLOWED
+    ):
         return jsonify(status='ok', count=1, trip=trip.serialize)
     else:
         raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
@@ -185,7 +188,10 @@ def get_my_trips():
 @auth
 def delete_trip(trip_id):
     trip = Trip.find_trip(trip_id)
-    if not trip or Permission.verify(trip.owner, trip.permissions, g.user.id, AccessLevel.DELETE) is PermissionResult.NOT_FOUND:
+    if (
+        not trip
+        or Permission.verify(trip.owner, trip.permissions, g.user.id, AccessLevel.DELETE) is PermissionResult.NOT_FOUND
+    ):
         raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
 
     try:

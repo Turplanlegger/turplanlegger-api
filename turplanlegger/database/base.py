@@ -271,7 +271,7 @@ class Database:
         return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
 
     # Note
-    def get_note(self, id: int, deleted: bool=False):
+    def get_note(self, id: int, deleted: bool = False):
         select = """
             SELECT * FROM notes WHERE id = %s
         """
