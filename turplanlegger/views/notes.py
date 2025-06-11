@@ -122,41 +122,13 @@ def change_note_owner(note_id):
 
 
 @api.route('/notes/<note_id>/rename', methods=['PATCH'])
-@auth
 def rename_note(note_id):
-
     raise ApiProblem('Endpoint has been deprecated', 'Use PUT /notes/<note_id> instead', 410)
-
-    note = Note.find_note(note_id)
-
-    if not note:
-        raise ApiProblem('Note not found', 'The requested note was not found', 404)
-
-    note.name = request.json.get('name', '')
-
-    if note.rename():
-        return jsonify(status='ok')
-    else:
-        raise ApiProblem('Failed to rename note', 'Unknown error', 500)
 
 
 @api.route('/notes/<note_id>/content', methods=['PATCH'])
-@auth
 def update_note_content(note_id):
-
     raise ApiProblem('Endpoint has been deprecated', 'Use PUT /notes/<note_id> instead', 410)
-
-    note = Note.find_note(note_id)
-
-    if not note:
-        raise ApiProblem('Note not found', 'The requested note was not found', 404)
-
-    note.content = request.json.get('content', '')
-
-    if note.update_content():
-        return jsonify(status='ok')
-    else:
-        raise ApiProblem('Failed to update note', 'Unknown error', 500)
 
 
 @api.route('/notes/mine', methods=['GET'])
