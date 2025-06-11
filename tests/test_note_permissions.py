@@ -1,5 +1,4 @@
 import json
-from pprint import pprint
 import unittest
 from uuid import uuid4
 
@@ -85,7 +84,6 @@ class NotesTestCase(unittest.TestCase):
                 },
             ],
         }
-
 
         # User 1
         response = cls.client.post(
@@ -187,7 +185,9 @@ class NotesTestCase(unittest.TestCase):
         note = json.loads(response.data.decode('utf-8'))
         note['content'] = 'Tripper'
         response = self.client.put(
-            f'/notes/{note["id"]}', data=json.dumps({'name': self.note_modify['name'], 'content': note.get('content')}), headers=self.headers_json_user1
+            f'/notes/{note["id"]}',
+            data=json.dumps({'name': self.note_modify['name'], 'content': note.get('content')}),
+            headers=self.headers_json_user1,
         )
 
         self.assertEqual(response.status_code, 200)
@@ -201,7 +201,9 @@ class NotesTestCase(unittest.TestCase):
 
         note['content'] = 'Tripper2'
         response = self.client.put(
-            f'/notes/{note["id"]}', data=json.dumps({'name': self.note_modify['name'], 'content': note.get('content')}), headers=self.headers_json_user2
+            f'/notes/{note["id"]}',
+            data=json.dumps({'name': self.note_modify['name'], 'content': note.get('content')}),
+            headers=self.headers_json_user2,
         )
 
         self.assertEqual(response.status_code, 200)
@@ -213,7 +215,9 @@ class NotesTestCase(unittest.TestCase):
 
         # User 3 - not ok
         response = self.client.put(
-            f'/notes/{note["id"]}', data=json.dumps({'name': self.note_modify['name'], 'content': 'poopy'}), headers=self.headers_json_user3
+            f'/notes/{note["id"]}',
+            data=json.dumps({'name': self.note_modify['name'], 'content': 'poopy'}),
+            headers=self.headers_json_user3,
         )
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(response.status_code, 404)
@@ -229,7 +233,9 @@ class NotesTestCase(unittest.TestCase):
         note = json.loads(response.data.decode('utf-8'))
         note['content'] = 'Tripper'
         response = self.client.put(
-            f'/notes/{note["id"]}', data=json.dumps({'name': self.note_read['name'], 'content': note.get('content')}), headers=self.headers_json_user1
+            f'/notes/{note["id"]}',
+            data=json.dumps({'name': self.note_read['name'], 'content': note.get('content')}),
+            headers=self.headers_json_user1,
         )
 
         self.assertEqual(response.status_code, 200)
@@ -243,7 +249,9 @@ class NotesTestCase(unittest.TestCase):
 
         note['content'] = 'Tripper2'
         response = self.client.put(
-            f'/notes/{note["id"]}', data=json.dumps({'name': self.note_read['name'], 'content': note.get('content')}), headers=self.headers_json_user2
+            f'/notes/{note["id"]}',
+            data=json.dumps({'name': self.note_read['name'], 'content': note.get('content')}),
+            headers=self.headers_json_user2,
         )
 
         self.assertEqual(response.status_code, 403)
@@ -256,7 +264,9 @@ class NotesTestCase(unittest.TestCase):
 
         # User 3 - not ok
         response = self.client.put(
-            f'/notes/{note["id"]}', data=json.dumps({'name': self.note_read['name'], 'content': 'poopy'}), headers=self.headers_json_user3
+            f'/notes/{note["id"]}',
+            data=json.dumps({'name': self.note_read['name'], 'content': 'poopy'}),
+            headers=self.headers_json_user3,
         )
         self.assertEqual(response.status_code, 404)
         data = json.loads(response.data.decode('utf-8'))
@@ -324,7 +334,6 @@ class NotesTestCase(unittest.TestCase):
         # OK
         response = self.client.delete(f'/notes/{note_id}', headers=self.headers_json_user1)
         self.assertEqual(response.status_code, 200)
-
 
     def test_change_note_owner(self):
         response = self.client.post('/notes', data=json.dumps(self.note_read), headers=self.headers_json_user1)
@@ -437,7 +446,6 @@ class NotesTestCase(unittest.TestCase):
             f'/notes/{note_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user3
         )
         self.assertEqual(response.status_code, 404)
-
 
     def test_change_note_owner_delete(self):
         response = self.client.post('/notes', data=json.dumps(self.note_delete), headers=self.headers_json_user1)

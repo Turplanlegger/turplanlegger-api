@@ -1,4 +1,3 @@
-from IPython import embed
 from flask import g, jsonify, request
 
 from turplanlegger.auth.decorators import auth
@@ -15,7 +14,10 @@ from . import api
 def get_note(note_id):
     note = Note.find_note(note_id)
 
-    if note and Permission.verify(note.owner, note.permissions, g.user.id, AccessLevel.READ) is PermissionResult.ALLOWED:
+    if (
+        note
+        and Permission.verify(note.owner, note.permissions, g.user.id, AccessLevel.READ) is PermissionResult.ALLOWED
+    ):
         return jsonify(status='ok', count=1, note=note.serialize)
     else:
         raise ApiProblem('Note not found', 'The requested note was not found', 404)
@@ -102,7 +104,7 @@ def change_note_owner(note_id):
     perms = Permission.verify(note.owner, note.permissions, g.user.id, AccessLevel.READ)
     if perms is PermissionResult.NOT_FOUND:
         raise ApiProblem('Note not found', 'The requested note was not found', 404)
-    
+
     if note.owner != g.user.id:
         raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to change owner the note', 403)
 

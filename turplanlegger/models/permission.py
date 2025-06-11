@@ -43,9 +43,10 @@ class Permission:
         """Serialize the Permission instance and returns it as Dict(str, any)"""
         return {'object_id': self.object_id, 'subject_id': self.subject_id, 'access_level': self.access_level}
 
-
     @staticmethod
-    def verify(owner: UUID, permissions: list['Permission'], subject_id: UUID, required_level: AccessLevel) -> PermissionResult:
+    def verify(
+        owner: UUID, permissions: list['Permission'], subject_id: UUID, required_level: AccessLevel
+    ) -> PermissionResult:
         """Verify permissions on a trip
 
         Args:
@@ -66,9 +67,7 @@ class Permission:
         if required_level == AccessLevel.READ:
             return (
                 PermissionResult.ALLOWED
-                if any(
-                    perm.subject_id == subject_id and perm.access_level >= AccessLevel.READ for perm in permissions
-                )
+                if any(perm.subject_id == subject_id and perm.access_level >= AccessLevel.READ for perm in permissions)
                 else PermissionResult.NOT_FOUND
             )
         else:
@@ -76,9 +75,7 @@ class Permission:
             if any(perm.subject_id == subject_id and perm.access_level >= required_level for perm in permissions):
                 return PermissionResult.ALLOWED
             # If subject has read but not more
-            elif any(
-                perm.subject_id == subject_id and perm.access_level >= AccessLevel.READ for perm in permissions
-            ):
+            elif any(perm.subject_id == subject_id and perm.access_level >= AccessLevel.READ for perm in permissions):
                 return PermissionResult.INSUFFICIENT_PERMISSIONS
             else:
                 return PermissionResult.NOT_FOUND

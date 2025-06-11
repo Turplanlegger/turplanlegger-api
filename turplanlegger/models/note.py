@@ -28,6 +28,7 @@ class Note:
         deleted (bool): Flag indicating if the note has been deleted
         delete_time (datetime): Time the note was deleted
     """
+
     def __init__(self, owner: UUID, content: str, **kwargs) -> None:
         if not owner:
             raise ValueError("Missing mandatory field 'owner'")
@@ -59,7 +60,6 @@ class Note:
 
     @classmethod
     def parse(cls, json: JSON) -> 'Note':
-
         permissions = json.get('permissions', [])
         if not isinstance(permissions, list):
             raise TypeError('permissions has to be a list of permission objects')
@@ -70,7 +70,7 @@ class Note:
             owner=g.user.id,
             content=json.get('content', None),
             name=json.get('name', None),
-            permissions=permissions
+            permissions=permissions,
         )
 
     @property
