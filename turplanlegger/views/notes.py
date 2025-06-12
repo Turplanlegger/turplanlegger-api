@@ -185,6 +185,10 @@ def add_permissions(note_id):
     except ValueError as e:
         raise ApiProblem('Failed to add new permissions', 'No new permissions were parsed', 400)
 
+    for perm in permissions:
+        if perm in note.permissions:
+            raise ApiProblem('Failed to add permissions', 'The permission already exists', 409)
+
     try:
         new_permissions = note.add_permissions(permissions)
     except ValueError as e:
