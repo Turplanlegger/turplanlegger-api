@@ -33,7 +33,7 @@ class Permission:
         """
 
         return Permission(
-            object_id=json.get('id', None),
+            object_id=json.get('object_id', None),
             subject_id=json.get('subject_id', None),
             access_level=AccessLevel(json.get('access_level', None)),
         )

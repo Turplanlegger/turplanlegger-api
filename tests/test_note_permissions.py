@@ -502,3 +502,72 @@ class NotesTestCase(unittest.TestCase):
             f'/notes/{note_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user3
         )
         self.assertEqual(response.status_code, 404)
+
+    def test_add_permissions(self):
+        response = self.client.post('/notes', data=json.dumps(self.note_read), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        note_id = json.loads(response.data.decode('utf-8'))['id']
+
+        # Not ok
+        response = self.client.patch(
+            f'/notes/{note_id}/permissions',
+            data=json.dumps({'permissions': [{'subject_id': str(self.user3.id),'access_level': 'READ',},]}),
+            headers=self.headers_json_user2
+        )
+
+        self.assertEqual(response.status_code, 403)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Insufficient permissions')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to add note permissions')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/notes/{note_id}/permissions')
+
+        for user in (self.headers_json_user1, self.headers_json_user2):
+            response = self.client.get(f'/notes/{note_id}', headers=user)
+            self.assertEqual(response.status_code, 200)
+            data = json.loads(response.data.decode('utf-8'))
+            self.assertEqual(data['note']['owner'], str(self.user1.id))
+            self.assertEqual(data['note']['content'], self.note_read['content'])
+            self.assertEqual(data['note']['name'], self.note_read['name'])
+            self.assertEqual(len(data['note']['permissions']), 1)
+            self.assertEqual(data['note']['permissions'][0]['access_level'], 'READ')
+            self.assertEqual(data['note']['permissions'][0]['object_id'], note_id)
+            self.assertEqual(data['note']['permissions'][0]['subject_id'], str(self.user2.id))
+
+        response = self.client.get(f'/notes/{note_id}', headers=self.headers_json_user3)
+        self.assertEqual(response.status_code, 404)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['title'], 'Note not found')
+        self.assertEqual(data['detail'], 'The requested note was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/notes/{note_id}')
+
+        # Ok
+        response = self.client.patch(
+            f'/notes/{note_id}/permissions',
+            data=json.dumps({'permissions': [{'subject_id': str(self.user3.id),'access_level': 'READ',},]}),
+            headers=self.headers_json_user1
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(len(data['permissions']), 1)
+        self.assertEqual(data['permissions'][0]['access_level'], 'READ')
+        self.assertEqual(data['permissions'][0]['object_id'], note_id)
+        self.assertEqual(data['permissions'][0]['subject_id'], str(self.user3.id))
+
+        for user in (self.headers_json_user1, self.headers_json_user2, self.headers_json_user3):
+            response = self.client.get(f'/notes/{note_id}', headers=user)
+            self.assertEqual(response.status_code, 200)
+            data = json.loads(response.data.decode('utf-8'))
+            self.assertEqual(data['note']['owner'], str(self.user1.id))
+            self.assertEqual(data['note']['content'], self.note_read['content'])
+            self.assertEqual(data['note']['name'], self.note_read['name'])
+            self.assertEqual(len(data['note']['permissions']), 2)
+            self.assertEqual(data['note']['permissions'][0]['access_level'], 'READ')
+            self.assertEqual(data['note']['permissions'][0]['object_id'], note_id)
+            self.assertEqual(data['note']['permissions'][0]['subject_id'], str(self.user2.id))
+            self.assertEqual(data['note']['permissions'][1]['access_level'], 'READ')
+            self.assertEqual(data['note']['permissions'][1]['object_id'], note_id)
+            self.assertEqual(data['note']['permissions'][1]['subject_id'], str(self.user3.id))
