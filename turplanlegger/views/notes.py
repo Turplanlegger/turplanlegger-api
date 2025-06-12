@@ -147,3 +147,52 @@ def get_my_notes():
         return jsonify(status='ok', count=len(notes), note=[note.serialize for note in notes])
     else:
         raise ApiProblem('Note not found', 'No notes were found for the requested user', 404)
+
+@api.route('/notes/<note_id>/permissions', methods=['PATCH'])
+@auth
+def add_permissions(note_id):
+    note = Note.find_note(note_id)
+    if not note:
+        raise ApiProblem('Note not found', 'The requested note was not found', 404)
+
+    perms = Permission.verify(note.owner, note.permissions, g.user.id, AccessLevel.READ)
+    if perms is PermissionResult.NOT_FOUND:
+        raise ApiProblem('Note not found', 'The requested note was not found', 404)
+
+    if note.owner != g.user.id:
+        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to add note permissions', 403)
+
+    permissions_input = request.json.get('permissions', [])
+
+    if not isinstance(permissions_input, list) or not permissions_input:
+        raise ApiProblem(
+            'Bad Request',
+            'You must supply a non‐empty "permissions" array',
+            400
+        )
+
+    new_permissions = []
+    for perm in permissions_input:
+        if perm.get('object_id', None) is None:
+            perm['object_id'] = note.id
+            new_permissions.append(perm)
+            continue
+        if perm.get('object_id', None) != note.id:
+            continue
+
+    try:
+        permissions = tuple(Permission.parse(permission) for permission in new_permissions)
+    except ValueError as e:
+        raise ApiProblem('Failed to add new permissions', 'No new permissions were parsed', 400)
+
+    try:
+        new_permissions = note.add_permissions(permissions)
+    except ValueError as e:
+        raise ApiProblem('Failed to add new permissions', str(e), 400)
+    except Exception as e:
+        raise ApiProblem('Failed to add new permissions', str(e), 500)
+
+    if len(new_permissions) > 0:
+        return jsonify(status='ok', permissions=tuple(perm.serialize for perm in new_permissions))
+    else:
+        raise ApiProblem('Failed to add new permissions', 'No new permissions were parsed', 400)

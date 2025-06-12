@@ -120,6 +120,9 @@ class Note:
 
         return Note.get_note(db.change_note_owner(self.id, owner))
 
+    def add_permissions(self, permissions: tuple[Permission]) -> tuple[Permission]:
+        return tuple(perm.create_note() for perm in permissions)
+
     @classmethod
     def get_note(cls, rec) -> 'Note':
         if rec is None:
