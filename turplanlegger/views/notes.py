@@ -148,6 +148,7 @@ def get_my_notes():
     else:
         raise ApiProblem('Note not found', 'No notes were found for the requested user', 404)
 
+
 @api.route('/notes/<note_id>/permissions', methods=['PATCH'])
 @auth
 def add_permissions(note_id):
@@ -165,11 +166,7 @@ def add_permissions(note_id):
     permissions_input = request.json.get('permissions', [])
 
     if not isinstance(permissions_input, list) or not permissions_input:
-        raise ApiProblem(
-            'Bad Request',
-            'You must supply a non‐empty "permissions" array',
-            400
-        )
+        raise ApiProblem('Bad Request', 'You must supply a non‐empty "permissions" array', 400)
 
     new_permissions = []
     for perm in permissions_input:
@@ -182,7 +179,7 @@ def add_permissions(note_id):
 
     try:
         permissions = tuple(Permission.parse(permission) for permission in new_permissions)
-    except ValueError as e:
+    except ValueError:
         raise ApiProblem('Failed to add new permissions', 'No new permissions were parsed', 400)
 
     for perm in permissions:

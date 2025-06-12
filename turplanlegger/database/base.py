@@ -306,7 +306,7 @@ class Database:
                 WHERE id = %(id)s
             RETURNING *
         """
-        return self._updateone(update, {'name': note.name, 'content': note.content, 'id': note.id }, returning=True)
+        return self._updateone(update, {'name': note.name, 'content': note.content, 'id': note.id}, returning=True)
 
     def delete_note(self, id):
         update = """

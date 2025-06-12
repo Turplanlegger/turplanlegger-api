@@ -511,8 +511,17 @@ class NotesTestCase(unittest.TestCase):
         # Not ok
         response = self.client.patch(
             f'/notes/{note_id}/permissions',
-            data=json.dumps({'permissions': [{'subject_id': str(self.user3.id),'access_level': 'READ',},]}),
-            headers=self.headers_json_user2
+            data=json.dumps(
+                {
+                    'permissions': [
+                        {
+                            'subject_id': str(self.user3.id),
+                            'access_level': 'READ',
+                        },
+                    ]
+                }
+            ),
+            headers=self.headers_json_user2,
         )
 
         self.assertEqual(response.status_code, 403)
@@ -546,8 +555,17 @@ class NotesTestCase(unittest.TestCase):
         # Ok
         response = self.client.patch(
             f'/notes/{note_id}/permissions',
-            data=json.dumps({'permissions': [{'subject_id': str(self.user3.id),'access_level': 'READ',},]}),
-            headers=self.headers_json_user1
+            data=json.dumps(
+                {
+                    'permissions': [
+                        {
+                            'subject_id': str(self.user3.id),
+                            'access_level': 'READ',
+                        },
+                    ]
+                }
+            ),
+            headers=self.headers_json_user1,
         )
 
         self.assertEqual(response.status_code, 200)
@@ -580,8 +598,17 @@ class NotesTestCase(unittest.TestCase):
         # Not ok
         response = self.client.patch(
             f'/notes/{note_id}/permissions',
-            data=json.dumps({'permissions': [{'subject_id': str(self.user2.id),'access_level': 'READ',},]}),
-            headers=self.headers_json_user1
+            data=json.dumps(
+                {
+                    'permissions': [
+                        {
+                            'subject_id': str(self.user2.id),
+                            'access_level': 'READ',
+                        },
+                    ]
+                }
+            ),
+            headers=self.headers_json_user1,
         )
 
         self.assertEqual(response.status_code, 409)
