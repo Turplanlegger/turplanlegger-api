@@ -571,3 +571,23 @@ class NotesTestCase(unittest.TestCase):
             self.assertEqual(data['note']['permissions'][1]['access_level'], 'READ')
             self.assertEqual(data['note']['permissions'][1]['object_id'], note_id)
             self.assertEqual(data['note']['permissions'][1]['subject_id'], str(self.user3.id))
+
+    def test_add_existing_permissions(self):
+        response = self.client.post('/notes', data=json.dumps(self.note_read), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        note_id = json.loads(response.data.decode('utf-8'))['id']
+
+        # Not ok
+        response = self.client.patch(
+            f'/notes/{note_id}/permissions',
+            data=json.dumps({'permissions': [{'subject_id': str(self.user2.id),'access_level': 'READ',},]}),
+            headers=self.headers_json_user1
+        )
+
+        self.assertEqual(response.status_code, 409)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['title'], 'Failed to add permissions')
+        self.assertEqual(data['detail'], 'The permission already exists')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/notes/{note_id}/permissions')
