@@ -64,33 +64,38 @@ def add_note():
 @api.route('/notes/<note_id>', methods=['PUT'])
 @auth
 def update_note(note_id):
-    note = Note.find_note(note_id)
+    note_existing = Note.find_note(note_id)
 
-    if not note:
+    if not note_existing:
         raise ApiProblem('Note not found', 'The requested note was not found', 404)
 
-    perms = Permission.verify(note.owner, note.permissions, g.user.id, AccessLevel.MODIFY)
+    perms = Permission.verify(note_existing.owner, note_existing.permissions, g.user.id, AccessLevel.MODIFY)
     if perms is PermissionResult.NOT_FOUND:
         raise ApiProblem('Note not found', 'The requested note was not found', 404)
     if perms is PermissionResult.INSUFFICIENT_PERMISSIONS:
         raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the note', 403)
 
-    name = request.json.get('name', None)
-    content = request.json.get('content', None)
+    try:
+        note_update = Note.parse(request.json)
+    except (ValueError, TypeError) as e:
+        raise ApiProblem('Failed to parse note update', str(e), 400)
 
-    if content is None:
-        raise ApiProblem('Failed to update note', 'Field content can not be empty', 409)
+    updated = False
 
-    if name == note.name and content == note.content:
-        raise ApiProblem('Failed to update note', 'No new updates were provided', 409)
+    for attribute in ('content', 'name'):
+        if note_update.__getattribute__(attribute) != note_existing.__getattribute__(attribute):
+            note_existing.__setattr__(attribute, note_update.__getattribute__(attribute))
+            updated = True
 
-    note.name = name
-    note.content = content
-
-    if note.update():
-        return jsonify(status='ok', count=1, note=note.serialize)
+    if updated is True:
+        try:
+            note = note_existing.update()
+        except Exception as e:
+            raise ApiProblem('Failed to update note', str(e), 500)
     else:
-        raise ApiProblem('Failed to update note', 'Unknown error', 500)
+        note = note_existing
+
+    return jsonify(status='ok', count=1, note=note.serialize)
 
 
 @api.route('/notes/<note_id>/owner', methods=['PATCH'])

@@ -95,7 +95,7 @@ class Note:
         return note
 
     def update(self) -> 'Note':
-        return db.update_note(self)
+        return Note.get_note(db.update_note(self))
 
     def delete(self) -> bool:
         return db.delete_note(self.id)

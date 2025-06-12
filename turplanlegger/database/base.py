@@ -299,14 +299,14 @@ class Database:
         return self._insert(insert, vars(note))
 
     def update_note(self, note):
-        update = 'UPDATE notes SET update_time=CURRENT_TIMESTAMP'
-        if note.name is None:
-            update += ', name=NULL'
-        else:
-            update += ', name=%(name)s'
-
-        update += ', content=%(content)s WHERE id=%(id)s RETURNING *'
-        return self._updateone(update, vars(note), returning=True)
+        update = """
+            UPDATE notes SET
+                update_time=CURRENT_TIMESTAMP,
+                name=%(name)s, content=%(content)s
+                WHERE id = %(id)s
+            RETURNING *
+        """
+        return self._updateone(update, {'name': note.name, 'content': note.content, 'id': note.id }, returning=True)
 
     def delete_note(self, id):
         update = """
