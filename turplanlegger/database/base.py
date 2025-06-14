@@ -367,6 +367,16 @@ class Database:
         del_perms = 'DELETE FROM note_permissions WHERE object_id = %(object_id)s AND subject_id = %(subject_id)s'
         return self._deleteone(del_perms, {'object_id': object_id, 'subject_id': subject_id})
 
+    def update_note_permission(self, note_permission):
+        """Update permission"""
+        update = """
+            UPDATE note_permissions
+                SET access_level = %(access_level)s
+                WHERE object_id = %(object_id)s AND subject_id = %(subject_id)s
+            RETURNING *
+        """
+        return self._updateone(update, vars(note_permission), returning=True)
+
     # User
     def get_user(self, id, deleted=False):
         select = 'SELECT * FROM users WHERE id = %s::UUID'
