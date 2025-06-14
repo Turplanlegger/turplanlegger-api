@@ -266,10 +266,10 @@ class NotesTestCase(unittest.TestCase):
             f'/notes/{note_id}', data=json.dumps({'name': None, 'content': None}), headers=self.headers_json
         )
 
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 400)
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['title'], 'Failed to update note')
-        self.assertEqual(data['detail'], 'Field content can not be empty')
+        self.assertEqual(data['title'], 'Failed to parse note update')
+        self.assertEqual(data['detail'], "Missing mandatory field 'content'")
 
     def test_update_content(self):
         response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
