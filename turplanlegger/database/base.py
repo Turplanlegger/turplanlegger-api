@@ -351,7 +351,7 @@ class Database:
 
     def get_note_all_permissions(self, note_id: int):
         "Select all note permissions based on note id"
-        select = 'SELECT object_id, access_level, subject_id FROM note_permissions WHERE object_id= %s'
+        select = 'SELECT object_id, access_level, subject_id FROM note_permissions WHERE object_id = %s'
         return self._fetchall(select, (note_id,))
 
     def create_note_permissions(self, note_permission):
@@ -361,6 +361,11 @@ class Database:
             RETURNING *
         """
         return self._insert(insert_note_permission, vars(note_permission))
+
+    def delete_note_permissions(self, object_id: int, subject_id: UUID):
+        """Delete permission by primary key"""
+        del_perms = 'DELETE FROM note_permissions WHERE object_id = %(object_id)s AND subject_id = %(subject_id)s'
+        return self._deleteone(del_perms, {'object_id': object_id, 'subject_id': subject_id})
 
     # User
     def get_user(self, id, deleted=False):
@@ -656,7 +661,7 @@ class Database:
         """
         Delete, with optional return.
         """
-        self._log('_updateone', query, vars)
+        self._log('_deleteone', query, vars)
         with self.conn.transaction():
             self.cur.execute(query, vars)
             return self.cur.fetchone() if returning else None

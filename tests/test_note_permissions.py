@@ -618,3 +618,101 @@ class NotesTestCase(unittest.TestCase):
         self.assertEqual(data['detail'], 'The permission already exists')
         self.assertEqual(data['type'], 'about:blank')
         self.assertEqual(data['instance'], f'http://localhost/notes/{note_id}/permissions')
+
+    def test_delete_permissions(self):
+        response = self.client.post('/notes', data=json.dumps(self.note_read), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        note_id = json.loads(response.data.decode('utf-8'))['id']
+
+        # Not ok
+        response = self.client.delete(
+            f'/notes/{note_id}/permissions/{str(self.user2.id)}',
+            headers=self.headers_json_user3,
+        )
+        self.assertEqual(response.status_code, 404)
+
+        # Ok - Delete own permissions
+        response = self.client.delete(
+            f'/notes/{note_id}/permissions/{str(self.user2.id)}',
+            headers=self.headers_json_user2,
+        )
+        self.assertEqual(response.status_code, 204)
+        response = self.client.get(
+            f'/notes/{note_id}',
+            headers=self.headers_json_user2,
+        )
+        self.assertEqual(response.status_code, 404)
+
+        # Re-create permission
+        response = self.client.patch(
+            f'/notes/{note_id}/permissions',
+            data=json.dumps(
+                {
+                    'permissions': [
+                        {
+                            'subject_id': str(self.user2.id),
+                            'access_level': 'READ',
+                        },
+                        {
+                            'subject_id': str(self.user3.id),
+                            'access_level': 'DELETE',
+                        },
+                    ]
+                }
+            ),
+            headers=self.headers_json_user1,
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Not ok - Delete other users permissions
+        response = self.client.delete(
+            f'/notes/{note_id}/permissions/{str(self.user2.id)}',
+            headers=self.headers_json_user3,
+        )
+        self.assertEqual(response.status_code, 403)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['title'], 'Insufficient permissions')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to remove note permissions')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/notes/{note_id}/permissions/{str(self.user2.id)}')
+
+        response = self.client.get(
+            f'/notes/{note_id}',
+            headers=self.headers_json_user2,
+        )
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(
+            f'/notes/{note_id}',
+            headers=self.headers_json_user3,
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Ok - Delete users permissions
+        response = self.client.delete(
+            f'/notes/{note_id}/permissions/{str(self.user2.id)}',
+            headers=self.headers_json_user1,
+        )
+        self.assertEqual(response.status_code, 204)
+        response = self.client.get(
+            f'/notes/{note_id}',
+            headers=self.headers_json_user2,
+        )
+        self.assertEqual(response.status_code, 404)
+
+        # Not ok - Delete non existing permissions
+        response = self.client.delete(
+            f'/notes/{note_id}/permissions/{str(self.user2.id)}',
+            headers=self.headers_json_user1,
+        )
+        self.assertEqual(response.status_code, 400)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Failed to delete permissions')
+        self.assertEqual(data['detail'], 'User not found in permissions')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/notes/{note_id}/permissions/{str(self.user2.id)}')
+        response = self.client.get(
+            f'/notes/{note_id}',
+            headers=self.headers_json_user2,
+        )
+        self.assertEqual(response.status_code, 404)

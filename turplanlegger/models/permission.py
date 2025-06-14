@@ -98,6 +98,10 @@ class Permission:
         """Creates a note Permission instance in the database"""
         return self.get_permission(db.create_note_permissions(self))
 
+    def delete_note(self) -> None:
+        """Removes a note Permission instance in the database"""
+        return self.get_permission(db.delete_note_permissions(self.object_id, self.subject_id))
+
     def create_trip(self) -> 'Permission':
         """Creates a trip Permission instance in the database"""
         return self.get_permission(db.create_trip_permissions(self))
