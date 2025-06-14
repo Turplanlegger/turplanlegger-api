@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from flask import g, jsonify, request
 
 from turplanlegger.auth.decorators import auth
@@ -197,3 +199,34 @@ def add_permissions(note_id):
         return jsonify(status='ok', permissions=tuple(perm.serialize for perm in new_permissions))
     else:
         raise ApiProblem('Failed to add new permissions', 'No new permissions were parsed', 400)
+
+
+@api.route('/notes/<note_id>/permissions/<user_id>', methods=['DELETE'])
+@auth
+def delete_permissions(note_id, user_id):
+    note = Note.find_note(note_id)
+    if not note:
+        raise ApiProblem('Note not found', 'The requested note was not found', 404)
+
+    perms = Permission.verify(note.owner, note.permissions, g.user.id, AccessLevel.READ)
+    if perms is PermissionResult.NOT_FOUND:
+        raise ApiProblem('Note not found', 'The requested note was not found', 404)
+
+    user_id = UUID(user_id)
+
+    if g.user.id != user_id and note.owner != g.user.id:
+        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to remove note permissions', 403)
+
+    permission = next((perm for perm in note.permissions if perm.subject_id == user_id), None)
+
+    if permission is None:
+        raise ApiProblem('Failed to delete permissions', 'User not found in permissions', 400)
+
+    try:
+        note.delete_permission(permission)
+    except ValueError as e:
+        raise ApiProblem('Failed to delete permissions', str(e), 400)
+    except Exception as e:
+        raise ApiProblem('Failed to delete permissions', str(e), 500)
+
+    return ('', 204)
