@@ -168,7 +168,7 @@ def add_permissions(note_id):
     permissions_input = request.json.get('permissions', [])
 
     if not isinstance(permissions_input, list) or not permissions_input:
-        raise ApiProblem('Bad Request', 'You must supply a non‐empty "permissions" array', 400)
+        raise ApiProblem('Bad Request', 'You must supply a non-empty "permissions" array', 400)
 
     new_permissions = []
     for perm in permissions_input:
@@ -230,3 +230,43 @@ def delete_permissions(note_id, user_id):
         raise ApiProblem('Failed to delete permissions', str(e), 500)
 
     return ('', 204)
+
+
+@api.route('/notes/<note_id>/permissions/<user_id>', methods=['PATCH'])
+@auth
+def change_permissions(note_id, user_id):
+    note = Note.find_note(note_id)
+    if not note:
+        raise ApiProblem('Note not found', 'The requested note was not found', 404)
+
+    perms = Permission.verify(note.owner, note.permissions, g.user.id, AccessLevel.READ)
+    if perms is PermissionResult.NOT_FOUND:
+        raise ApiProblem('Note not found', 'The requested note was not found', 404)
+
+    if note.owner != g.user.id:
+        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to change permissions', 403)
+
+    user_id = UUID(user_id)
+    permission = next((perm for perm in note.permissions if perm.subject_id == user_id), None)
+    if permission is None:
+        raise ApiProblem('Failed to update permissions', 'User not found in permissions', 400)
+
+    access_level_in = request.json.get('access_level', None)
+
+    if access_level_in is None:
+        raise ApiProblem('Bad Request', 'You must supply access_level as an string', 400)
+    try:
+        access_level = AccessLevel(access_level_in)
+    except ValueError:
+        raise ApiProblem('Failed to update permissions', 'Ensure access level is one of READ, MODIFY, OR DELETE', 400)
+
+    permission.access_level = access_level
+
+    try:
+        permission = note.update_permission(permission)
+    except ValueError as e:
+        raise ApiProblem('Failed to update permissions', str(e), 400)
+    except Exception as e:
+        raise ApiProblem('Failed to update permissions', str(e), 500)
+
+    return jsonify(status='ok', permission=permission.serialize)

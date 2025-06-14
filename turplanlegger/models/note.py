@@ -128,6 +128,10 @@ class Note:
     def delete_permission(permission: Permission) -> None:
         return permission.delete_note()
 
+    @staticmethod
+    def update_permission(permission: Permission) -> None:
+        return permission.update_note()
+
     @classmethod
     def get_note(cls, rec) -> 'Note':
         if rec is None:
