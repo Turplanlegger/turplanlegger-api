@@ -49,10 +49,11 @@ def update_trip(trip_id):
 
     dates = request.json.get('dates', None)
 
-    date_status = Trip.update_trip_dates(dates, trip)
-    if date_status.changed is True:
-        trip_changed = True
-    errors.extend(date_status.errors)
+    if dates is not None:
+        date_status = Trip.update_trip_dates(dates, trip)
+        if date_status.changed is True:
+            trip_changed = True
+        errors.extend(date_status.errors)
 
     name = request.json.get('name', None)
     private = request.json.get('private', None)
