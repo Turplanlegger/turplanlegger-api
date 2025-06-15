@@ -4,11 +4,31 @@ from uuid import UUID
 from flask import g
 
 from turplanlegger.app import db
+from turplanlegger.models.permission import Permission
 
 JSON = Dict[str, any]
 
 
 class Note:
+    """A note object. For saving and sharing content.
+
+    Args:
+        owner (UUID): The UUID4 of the owner of the note
+        content (str): The main text content of the note
+        **kwargs: Arbitrary keyword arguments
+
+    Attributes:
+        owner (UUID): The UUID4 of the owner of the note
+        content (str): The main text content of the note
+        id (int): Optional, the ID of the note
+        name (str): Optional, the name/title of the note
+        permissions (list): List of permissions related to the note
+        create_time (datetime): Time of creation
+        update_time (datetime): Time of last update
+        deleted (bool): Flag indicating if the note has been deleted
+        delete_time (datetime): Time the note was deleted
+    """
+
     def __init__(self, owner: UUID, content: str, **kwargs) -> None:
         if not owner:
             raise ValueError("Missing mandatory field 'owner'")
@@ -23,6 +43,7 @@ class Note:
         self.content = content
         self.id = kwargs.get('id', None)
         self.name = kwargs.get('name', None)
+        self.permissions = kwargs.get('permissions', None)
         self.create_time = kwargs.get('create_time', None)
         self.update_time = kwargs.get('update_time', None)
         self.deleted = kwargs.get('deleted', None)
@@ -32,17 +53,24 @@ class Note:
         return (
             f"Note(id='{self.id}', owner='{self.owner}', "
             f"name='{self.name}', content='{self.content}', "
+            f'permissions={self.permissions}), '
             f'create_time={self.create_time}, update_time={self.update_time}, '
             f'deleted={self.deleted}, delete_time={self.delete_time})'
         )
 
     @classmethod
     def parse(cls, json: JSON) -> 'Note':
+        permissions = json.get('permissions', [])
+        if not isinstance(permissions, list):
+            raise TypeError('permissions has to be a list of permission objects')
+        permissions[:] = [Permission.parse(permission) for permission in permissions]
+
         return Note(
             id=json.get('id', None),
             owner=g.user.id,
             content=json.get('content', None),
             name=json.get('name', None),
+            permissions=permissions,
         )
 
     @property
@@ -53,14 +81,21 @@ class Note:
             'name': self.name,
             'content': self.content,
             'create_time': self.create_time,
+            'permissions': [permission.serialize for permission in self.permissions],
         }
 
     def create(self) -> 'Note':
         note = self.get_note(db.create_note(self))
+        if self.permissions:
+            permissions = []
+            for permission in self.permissions:
+                permission.object_id = note.id
+                permissions.append(permission.create_note())
+            note.permissions = permissions
         return note
 
-    def update(self, updated_fields) -> 'Note':
-        return db.update_note(self, updated_fields)
+    def update(self) -> 'Note':
+        return Note.get_note(db.update_note(self))
 
     def delete(self) -> bool:
         return db.delete_note(self.id)
@@ -85,6 +120,18 @@ class Note:
 
         return Note.get_note(db.change_note_owner(self.id, owner))
 
+    @staticmethod
+    def add_permissions(permissions: tuple[Permission]) -> tuple[Permission]:
+        return tuple(perm.create_note() for perm in permissions)
+
+    @staticmethod
+    def delete_permission(permission: Permission) -> None:
+        return permission.delete_note()
+
+    @staticmethod
+    def update_permission(permission: Permission) -> None:
+        return permission.update_note()
+
     @classmethod
     def get_note(cls, rec) -> 'Note':
         if rec is None:
@@ -95,6 +142,7 @@ class Note:
             owner=rec.owner,
             name=rec.name,
             content=rec.content,
+            permissions=Permission.find_note_all_permissions(rec.id),
             create_time=rec.create_time,
             update_time=rec.update_time,
             deleted=rec.deleted,

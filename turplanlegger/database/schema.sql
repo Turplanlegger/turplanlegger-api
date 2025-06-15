@@ -62,6 +62,13 @@ CREATE TABLE IF NOT EXISTS notes (
     delete_time timestamp without time zone
 );
 
+CREATE TABLE IF NOT EXISTS note_permissions (
+    object_id int NOT NULL REFERENCES notes (id) ON DELETE CASCADE,
+    subject_id UUID NOT NULL REFERENCES users (id),
+    access_level access_level NOT NULL,
+    PRIMARY KEY (object_id, subject_id)
+);
+
 CREATE TABLE IF NOT EXISTS trips (
     id serial PRIMARY KEY,
     name text NOT NULL,
@@ -74,10 +81,10 @@ CREATE TABLE IF NOT EXISTS trips (
 );
 
 CREATE TABLE IF NOT EXISTS trip_permissions (
-    trip_id int NOT NULL REFERENCES trips (id) ON DELETE CASCADE,
+    object_id int NOT NULL REFERENCES trips (id) ON DELETE CASCADE,
     subject_id UUID NOT NULL REFERENCES users (id),
     access_level access_level NOT NULL,
-    PRIMARY KEY (trip_id, subject_id)
+    PRIMARY KEY (object_id, subject_id)
 );
 
 CREATE TABLE IF NOT EXISTS trip_dates (
