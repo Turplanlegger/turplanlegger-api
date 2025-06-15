@@ -29,7 +29,7 @@ dependencies = [
     "ujson==5.10.0",
     "bcrypt==4.3.0",
     "Flask==3.1.1",
-    "flask-cors==5.0.1",
+    "flask-cors==6.0.0",
     "psycopg==3.2.5",
     "PyJWT==2.10.1",
     "cryptography==44.0.1",
