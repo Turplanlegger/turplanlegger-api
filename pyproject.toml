@@ -32,7 +32,7 @@ dependencies = [
     "flask-cors==5.0.1",
     "psycopg==3.2.5",
     "PyJWT==2.10.1",
-    "cryptography==44.0.1",
+    "cryptography==45.0.4",
     "httpx==0.28.1"
 ]
 [project.optional-dependencies]
