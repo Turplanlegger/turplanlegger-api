@@ -229,7 +229,7 @@ class ItemListsTestCase(unittest.TestCase):
         created_data = json.loads(response.data.decode('utf-8'))
 
         response = self.client.patch(
-            f"/item_lists/{created_data['id']}/add", data=json.dumps(self.item_to_add), headers=self.headers_json
+            f'/item_lists/{created_data["id"]}/add', data=json.dumps(self.item_to_add), headers=self.headers_json
         )
         self.assertEqual(response.status_code, 200)
         added_data = json.loads(response.data.decode('utf-8'))
@@ -238,7 +238,7 @@ class ItemListsTestCase(unittest.TestCase):
         self.assertEqual(added_data['count_items'], 2)
         self.assertEqual(added_data['count_items_checked'], 1)
 
-        response = self.client.get(f"/item_lists/{created_data['id']}", headers=self.headers)
+        response = self.client.get(f'/item_lists/{created_data["id"]}', headers=self.headers)
         self.assertEqual(response.status_code, 200)
 
         data = json.loads(response.data.decode('utf-8'))
