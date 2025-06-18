@@ -85,11 +85,6 @@ class Permission:
     def find_note_all_permissions(note_id: int) -> 'Permission':
         return [Permission.get_permission(permission) for permission in db.get_note_all_permissions(note_id)]
 
-    # Trip
-    @staticmethod
-    def find_trip_all_permissions(trip_id: int) -> 'Permission':
-        return [Permission.get_permission(permission) for permission in db.get_trip_all_permissions(trip_id)]
-
     @staticmethod
     def find_trip_user_permissions(trip_id: int, user_id: UUID) -> 'Permission':
         return Permission.get_permission(db.get_trip_permissions(trip_id, user_id))
@@ -105,6 +100,28 @@ class Permission:
     def update_note(self) -> None:
         """Updates a note Permission instance in the database"""
         return self.get_permission(db.update_note_permission(self))
+
+    # Item list
+    @staticmethod
+    def find_item_list_all_permissions(note_id: int) -> 'Permission':
+        return tuple(Permission.get_permission(permission) for permission in db.get_item_list_all_permissions(note_id))
+
+    def create_item_list(self) -> 'Permission':
+        """Creates an Item List Permission instance in the database"""
+        return self.get_permission(db.create_item_list_permissions(self))
+
+    def delete_item_list(self) -> None:
+        """Removes an note Permission instance in the database"""
+        return self.get_permission(db.delete_item_list_permissions(self.object_id, self.subject_id))
+
+    def update_item_list(self) -> None:
+        """Updates a Item List Permission instance in the database"""
+        return self.get_permission(db.update_item_list_permission(self))
+
+    # Trip
+    @staticmethod
+    def find_trip_all_permissions(trip_id: int) -> 'Permission':
+        return [Permission.get_permission(permission) for permission in db.get_trip_all_permissions(trip_id)]
 
     def create_trip(self) -> 'Permission':
         """Creates a trip Permission instance in the database"""

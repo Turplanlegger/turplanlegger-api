@@ -84,6 +84,7 @@ class Database:
                 'trips',
                 'trip_dates',
                 'item_lists',
+                'item_list_permissions',
                 'lists_items',
                 'users',
                 'routes',
@@ -225,6 +226,39 @@ class Database:
             select += ' AND checked = TRUE'
 
         return self._fetchall(select, [item_list_id])
+
+    # Item list permissions
+    def get_item_list_subject_permissions(self, object_id: int, subject_id: UUID):
+        select = 'SELECT access_level FROM item_list_permissions WHERE object_id = %(object_id)s AND subject_id = %(subject_id)s'
+        return self._fetchone(select, {'object_id': object_id, 'owner_id': subject_id})
+
+    def get_item_list_all_permissions(self, object_id: int):
+        "Select all note permissions based on note id"
+        select = 'SELECT object_id, access_level, subject_id FROM item_list_permissions WHERE object_id = %s'
+        return self._fetchall(select, (object_id,))
+
+    def create_item_list_permissions(self, permission):
+        insert = """
+            INSERT INTO item_list_permissions (object_id, subject_id, access_level)
+            VALUES (%(object_id)s, %(subject_id)s, %(access_level)s)
+            RETURNING *
+        """
+        return self._insert(insert, vars(permission))
+
+    def delete_item_list_permissions(self, object_id: int, subject_id: UUID):
+        """Delete permission by primary key"""
+        del_perms = 'DELETE FROM item_list_permissions WHERE object_id = %(object_id)s AND subject_id = %(subject_id)s'
+        return self._deleteone(del_perms, {'object_id': object_id, 'subject_id': subject_id})
+
+    def update_item_list_permission(self, permission):
+        """Update permission"""
+        update = """
+            UPDATE item_list_permissions
+                SET access_level = %(access_level)s
+                WHERE object_id = %(object_id)s AND subject_id = %(subject_id)s
+            RETURNING *
+        """
+        return self._updateone(update, vars(permission), returning=True)
 
     # Route
     def get_route(self, id, deleted=False):
