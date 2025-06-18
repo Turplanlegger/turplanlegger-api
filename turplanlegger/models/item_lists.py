@@ -6,6 +6,7 @@ from flask import g
 
 from turplanlegger.app import db
 from turplanlegger.models.list_items import ListItem
+from turplanlegger.models.permission import Permission
 
 JSON = Dict[str, any]
 
@@ -32,6 +33,7 @@ class ItemList:
         items (list): List of items that are unchecked
                       Default: empty list
         items_checked (list): list of items that are checked
+        permissions (list): List of permissions related to the note
         create_time (datetime): Time of creation,
                                 Default: datetime.now()
     """
@@ -54,6 +56,7 @@ class ItemList:
         self.private = private
         self.items = kwargs.get('items', [])
         self.items_checked = kwargs.get('items_checked', [])
+        self.permissions = kwargs.get('permissions', None)
         self.create_time = kwargs.get('create_time', None) or datetime.now()
 
     def __repr__(self):
@@ -61,6 +64,7 @@ class ItemList:
             f"ItemList(id='{self.id}', owner='{self.owner}', "
             f"name='{self.name}', private={self.private}, "
             f'items={self.items}, items_checked={self.items_checked}, '
+            f'permissions={self.permissions}), '
             f'create_time={self.create_time})'
         )
 
@@ -74,6 +78,11 @@ class ItemList:
         Returns:
             A ItemList object
         """
+        permissions = json.get('permissions', [])
+        if not isinstance(permissions, list):
+            raise TypeError('permissions has to be a list of permission objects')
+        permissions[:] = [Permission.parse(permission) for permission in permissions]
+
         items = json.get('items', [])
         if not isinstance(items, list):
             raise TypeError("'items' must be JSON list")
@@ -91,6 +100,7 @@ class ItemList:
             private=json.get('private', True),
             items=items,
             items_checked=items_checked,
+            permissions=permissions,
         )
 
     @property
@@ -104,6 +114,7 @@ class ItemList:
             'items': [item.serialize for item in self.items],
             'items_checked': [item.serialize for item in self.items_checked],
             'create_time': self.create_time,
+            'permissions': tuple(permission.serialize for permission in self.permissions),
         }
 
     def create(self) -> 'ItemList':
@@ -112,6 +123,13 @@ class ItemList:
         and add them to the ItemList instance
         """
         item_list = self.get_item_list(db.create_item_list(self))
+
+        if self.permissions:
+            permissions = []
+            for permission in self.permissions:
+                permission.object_id = item_list.id
+                permissions.append(permission.create_item_list())
+            item_list.permissions = permissions
 
         if self.items:
             items = []
@@ -201,5 +219,6 @@ class ItemList:
             private=rec.private,
             items=ListItem.find_list_items(rec.id, checked=False),
             items_checked=ListItem.find_list_items(rec.id, checked=True),
+            permissions=Permission.find_note_all_permissions(rec.id),
             create_time=rec.create_time,
         )
