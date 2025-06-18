@@ -8,12 +8,12 @@ pip install .
 
 ### Production
 ```bash
-pip install .[prod]
+pip install '.[prod]'
 ```
 
 ### Development
 ```bash
-pip install .[dev]
+pip install '.[dev]'
 ```
 
 ## Testing
