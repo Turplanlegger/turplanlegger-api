@@ -151,23 +151,32 @@ def rename_item_list(item_list_id):
 @api.route('/item_lists/<item_list_id>/toggle_check', methods=['PATCH'])
 @auth
 def toggle_list_item_check(item_list_id):
-    if not request.json.get('items', []):
-        raise ApiProblem('Failed to get items', 'Item(s) must be supplied as a JSON list', 400)
-
     item_list = ItemList.find_item_list(item_list_id)
-
     if not item_list:
         raise ApiProblem('Item list not found', 'The requested item list was not found', 404)
 
-    list_items = [item for item in item_list.items if item.id in request.json.get('items', [])]
-    list_items_checked = [item for item in item_list.items_checked if item.id in request.json.get('items', [])]
+    perms = Permission.verify(item_list.owner, item_list.permissions, g.user.id, AccessLevel.MODIFY)
+    if item_list.private is False:
+        if perms is not PermissionResult.ALLOWED:
+            raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the item list', 403)
+    else:
+        if perms is PermissionResult.NOT_FOUND:
+            raise ApiProblem('Item list not found', 'The requested item list was not found', 404)
+        if perms is PermissionResult.INSUFFICIENT_PERMISSIONS:
+            raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the item list', 403)
+
+    if not request.json.get('items', []):
+        raise ApiProblem('Failed to get items', 'Item(s) must be supplied as a JSON list', 400)
+
+    list_items = tuple(item for item in item_list.items if item.id in request.json.get('items', []))
+    list_items_checked = tuple(item for item in item_list.items_checked if item.id in request.json.get('items_checked', []))
 
     if not list_items and not list_items_checked:
         raise ApiProblem('Item not found in item list', f'An item was not found in item list id: {item_list.id}', 400)
 
     try:
-        list_items = [item.toggle_check() for item in list_items]
-        list_items_checked = [item.toggle_check() for item in list_items_checked]
+        list_items = tuple(item.toggle_check() for item in list_items)
+        list_items_checked = tuple(item.toggle_check() for item in list_items_checked)
     except Exception as e:
         raise ApiProblem('Failed to toggle item', str(e), 500)
 
