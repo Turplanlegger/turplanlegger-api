@@ -33,7 +33,7 @@ class ItemList:
         items (list): List of items that are unchecked
                       Default: empty list
         items_checked (list): list of items that are checked
-        permissions (list): List of permissions related to the note
+        permissions (list): List of permissions related to the item list
         create_time (datetime): Time of creation,
                                 Default: datetime.now()
     """
@@ -219,6 +219,6 @@ class ItemList:
             private=rec.private,
             items=ListItem.find_list_items(rec.id, checked=False),
             items_checked=ListItem.find_list_items(rec.id, checked=True),
-            permissions=Permission.find_note_all_permissions(rec.id),
+            permissions=Permission.find_item_list_all_permissions(rec.id),
             create_time=rec.create_time,
         )

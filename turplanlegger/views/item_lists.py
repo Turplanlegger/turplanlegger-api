@@ -2,8 +2,10 @@ from flask import g, jsonify, request
 
 from turplanlegger.auth.decorators import auth
 from turplanlegger.exceptions import ApiProblem
+from turplanlegger.models.access_level import AccessLevel
 from turplanlegger.models.item_lists import ItemList
 from turplanlegger.models.list_items import ListItem
+from turplanlegger.models.permission import Permission, PermissionResult
 
 from . import api
 
@@ -13,7 +15,10 @@ from . import api
 def get_item_list(item_list_id):
     item_list = ItemList.find_item_list(item_list_id)
 
-    if item_list:
+    if (
+        item_list
+        and Permission.verify(item_list.owner, item_list.permissions, g.user.id, AccessLevel.READ) is PermissionResult.ALLOWED
+    ):
         return jsonify(status='ok', count=1, item_list=item_list.serialize)
     else:
         raise ApiProblem('Item list not found', 'The requested item list was not found', 404)
