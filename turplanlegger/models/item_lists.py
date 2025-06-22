@@ -202,6 +202,10 @@ class ItemList:
     def add_permissions(permissions: tuple[Permission]) -> tuple[Permission]:
         return tuple(perm.create_item_list() for perm in permissions)
 
+    @staticmethod
+    def delete_permission(permission: Permission) -> None:
+        return permission.delete_item_list()
+
     @classmethod
     def get_item_list(cls, rec: NamedTuple) -> 'ItemList':
         """Converts a database record to a ItemList object
