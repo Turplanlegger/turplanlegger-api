@@ -313,3 +313,42 @@ def delete_item_list_permissions(item_list_id, user_id):
         raise ApiProblem('Failed to delete permissions', str(e), 500)
 
     return ('', 204)
+
+@api.route('/item_lists/<item_list_id>/permissions/<user_id>', methods=['PATCH'])
+@auth
+def change_item_list_permissions(item_list_id, user_id):
+    item_list = ItemList.find_item_list(item_list_id)
+    if not item_list:
+        raise ApiProblem('Item list not found', 'The requested item_list was not found', 404)
+
+    perms = Permission.verify(item_list.owner, item_list.permissions, g.user.id, AccessLevel.READ)
+    if item_list.private is True and perms is PermissionResult.NOT_FOUND:
+        raise ApiProblem('Item list not found', 'The requested item list was not found', 404)
+
+    if item_list.owner != g.user.id:
+        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to change permissions', 403)
+
+    user_id = UUID(user_id)
+    permission = next((perm for perm in item_list.permissions if perm.subject_id == user_id), None)
+    if permission is None:
+        raise ApiProblem('Failed to update permissions', 'User not found in permissions', 400)
+
+    access_level_in = request.json.get('access_level', None)
+
+    if access_level_in is None:
+        raise ApiProblem('Bad Request', 'You must supply access_level as an string', 400)
+    try:
+        access_level = AccessLevel(access_level_in)
+    except ValueError:
+        raise ApiProblem('Failed to update permissions', 'Ensure access level is one of READ, MODIFY, OR DELETE', 400)
+
+    permission.access_level = access_level
+
+    try:
+        permission = item_list.update_permission(permission)
+    except ValueError as e:
+        raise ApiProblem('Failed to update permissions', str(e), 400)
+    except Exception as e:
+        raise ApiProblem('Failed to update permissions', str(e), 500)
+
+    return jsonify(status='ok', permission=permission.serialize)
