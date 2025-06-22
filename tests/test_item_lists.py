@@ -311,7 +311,7 @@ class ItemListsTestCase(unittest.TestCase):
 
         response = self.client.patch(
             f'/item_lists/{list_id}/toggle_check',
-            data=json.dumps({'items': toggle_list_items}),
+            data=json.dumps({'toggle_items': toggle_list_items}),
             headers=self.headers_json,
         )
         self.assertEqual(response.status_code, 200)
@@ -321,7 +321,12 @@ class ItemListsTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(len(data['item_list']['items']), 3)
+        self.assertEqual(data['item_list']['items'][0]['content'], self.item_list['items'][1]['content'])
+        self.assertEqual(data['item_list']['items'][1]['content'], self.item_list['items'][2]['content'])
+        self.assertEqual(data['item_list']['items'][2]['content'], self.item_list['items_checked'][0]['content'])
         self.assertEqual(len(data['item_list']['items_checked']), 2)
+        self.assertEqual(data['item_list']['items_checked'][0]['content'], self.item_list['items_checked'][1]['content'])
+        self.assertEqual(data['item_list']['items_checked'][1]['content'], self.item_list['items'][0]['content'])
 
     def test_get_my_list(self):
         response = self.client.post('/item_lists', data=json.dumps(self.item_list), headers=self.headers_json)
