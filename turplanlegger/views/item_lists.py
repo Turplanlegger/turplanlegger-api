@@ -191,6 +191,13 @@ def change_item_list_owner(item_list_id):
     if not item_list:
         raise ApiProblem('Item list not found', 'The requested item list was not found', 404)
 
+    perms = Permission.verify(item_list.owner, item_list.permissions, g.user.id, AccessLevel.READ)
+    if item_list.private is True and perms is PermissionResult.NOT_FOUND:
+        raise ApiProblem('Item list not found', 'The requested item list was not found', 404)
+
+    if item_list.owner != g.user.id:
+        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to change owner of the item list', 403)
+
     if item_list.owner == request.json.get('owner', None):
         raise ApiProblem('Failed to change owner of item list', 'New owner is the same as old', 400)
     item_list.owner = request.json.get('owner', None)

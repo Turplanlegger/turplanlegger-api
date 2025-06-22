@@ -729,3 +729,174 @@ class ItemListsPermissionTestCase(unittest.TestCase):
 
         self.assertEqual(len(data['item_list']['items']), 1)
         self.assertEqual(len(data['item_list']['items_checked']), 4)
+
+    def test_change_owner(self):
+        response = self.client.post('/item_lists', data=json.dumps(self.item_list_read), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        item_list_id = json.loads(response.data.decode('utf-8'))['id']
+
+        # Ok
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 200)
+        # Ok
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+        # Not ok
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user2
+        )
+        self.assertEqual(response.status_code, 403)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Insufficient permissions')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to change owner of the item list')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/item_lists/{item_list_id}/owner')
+        # Not ok
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user3)
+        self.assertEqual(response.status_code, 404)
+        # Not ok
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user3
+        )
+        self.assertEqual(response.status_code, 404)
+
+        # Change owner
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user1
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Not ok
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 404)
+        # Ok
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(len(data['item_list']['permissions']), 1)
+        self.assertEqual(data['item_list']['permissions'][0]['access_level'], 'READ')
+        self.assertEqual(data['item_list']['permissions'][0]['object_id'], data['item_list']['id'])
+        self.assertEqual(data['item_list']['permissions'][0]['subject_id'], str(self.user2.id))
+        # Not ok
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 404)
+        # Not ok
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user3)
+        self.assertEqual(response.status_code, 404)
+        # Not ok
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user3
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_change_item_list_owner_modify(self):
+        response = self.client.post('/item_lists', data=json.dumps(self.item_list_modify), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        item_list_id = json.loads(response.data.decode('utf-8'))['id']
+
+        # Ok
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 200)
+        # Ok
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+        # Not ok
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user2
+        )
+        self.assertEqual(response.status_code, 403)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Insufficient permissions')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to change owner of the item list')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/item_lists/{item_list_id}/owner')
+        # Not ok
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user3)
+        self.assertEqual(response.status_code, 404)
+        # Not ok
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user3
+        )
+        self.assertEqual(response.status_code, 404)
+
+        # Change owner
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user1
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Not ok
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 404)
+        # Ok
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(len(data['item_list']['permissions']), 1)
+        self.assertEqual(data['item_list']['permissions'][0]['access_level'], 'MODIFY')
+        self.assertEqual(data['item_list']['permissions'][0]['object_id'], data['item_list']['id'])
+        self.assertEqual(data['item_list']['permissions'][0]['subject_id'], str(self.user2.id))
+        # Not ok
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user3)
+        self.assertEqual(response.status_code, 404)
+        # Not ok
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user3
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_change_item_list_owner_delete(self):
+        response = self.client.post('/item_lists', data=json.dumps(self.item_list_delete), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        item_list_id = json.loads(response.data.decode('utf-8'))['id']
+
+        # Ok
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 200)
+        # Ok
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+        # Not ok
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user2
+        )
+        self.assertEqual(response.status_code, 403)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Insufficient permissions')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to change owner of the item list')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/item_lists/{item_list_id}/owner')
+        # Not ok
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user3)
+        self.assertEqual(response.status_code, 404)
+        # Not ok
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user3
+        )
+        self.assertEqual(response.status_code, 404)
+
+        # Change owner
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user1
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Not ok
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 404)
+        # Ok
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(len(data['item_list']['permissions']), 1)
+        self.assertEqual(data['item_list']['permissions'][0]['access_level'], 'DELETE')
+        self.assertEqual(data['item_list']['permissions'][0]['object_id'], data['item_list']['id'])
+        self.assertEqual(data['item_list']['permissions'][0]['subject_id'], str(self.user2.id))
+        # Not ok
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user3)
+        self.assertEqual(response.status_code, 404)
+        # Not ok
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user3
+        )
+        self.assertEqual(response.status_code, 404)
