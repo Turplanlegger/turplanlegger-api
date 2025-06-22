@@ -126,7 +126,7 @@ class ItemListsPermissionTestCase(unittest.TestCase):
                 {'content': 'Added item one'},
                 {'content': 'Added item two'},
             ),
-            'items_checked': tuple({'content': 'Added item three'}),
+            'items_checked': ({'content': 'Added item three'},),
         }
 
         # User 1
@@ -516,4 +516,56 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(len(data['item_list']['items']), 5)
-        self.assertEqual(len(data['item_list']['items_checked']), )
+        self.assertEqual(len(data['item_list']['items_checked']), 3)
+
+    def test_rename_item_list(self):
+        response = self.client.post('/item_lists', data=json.dumps(self.item_list_modify), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+        item_list_id = data['id']
+
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/rename', data=json.dumps({"name": "new name"}), headers=self.headers_json_user1
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Ok
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/rename', data=json.dumps({"name": "new name2"}), headers=self.headers_json_user2
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Not ok
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/rename', data=json.dumps({"name": "new name3"}), headers=self.headers_json_user3
+        )
+        self.assertEqual(response.status_code, 404)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['title'], 'Item list not found')
+        self.assertEqual(data['detail'], 'The requested item list was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/item_lists/{item_list_id}/rename')
+
+    def test_rename_item_list_wrong_perms(self):
+        response = self.client.post('/item_lists', data=json.dumps(self.item_list_read), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+        item_list_id = data['id']
+
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/rename', data=json.dumps({"name": "new name"}), headers=self.headers_json_user1
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Not ok
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/rename', data=json.dumps({"name": "new name2"}), headers=self.headers_json_user2
+        )
+        self.assertEqual(response.status_code, 403)
+
+        # Not ok
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/rename', data=json.dumps({"name": "new name3"}), headers=self.headers_json_user3
+        )
+        self.assertEqual(response.status_code, 404)
