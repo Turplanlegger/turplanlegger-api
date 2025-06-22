@@ -35,6 +35,16 @@ def delete_item_list(item_list_id):
     if not item_list:
         raise ApiProblem('Item list not found', 'The requested item list was not found', 404)
 
+    perms = Permission.verify(item_list.owner, item_list.permissions, g.user.id, AccessLevel.DELETE)
+    if item_list.private is False:
+        if perms is not PermissionResult.ALLOWED:
+            raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to delete the item_list', 403)
+    else:
+        if perms is PermissionResult.NOT_FOUND:
+            raise ApiProblem('Item list not found', 'The requested item list was not found', 404)
+        if perms is PermissionResult.INSUFFICIENT_PERMISSIONS:
+            raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to delete the item_list', 403)
+
     try:
         item_list.delete()
     except Exception as e:
@@ -69,7 +79,7 @@ def add_item_list_items(item_list_id):
 
     if not item_list:
         raise ApiProblem('Item list not found', 'The requested item list was not found', 404)
-    
+
     perms = Permission.verify(item_list.owner, item_list.permissions, g.user.id, AccessLevel.MODIFY)
     if item_list.private is False:
         if perms is not PermissionResult.ALLOWED:
