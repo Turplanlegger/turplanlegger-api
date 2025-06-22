@@ -290,9 +290,12 @@ class ItemListsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         response = self.client.get(f'/item_lists/{list_id}', headers=self.headers)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 404)
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['item_list']['owner'], str(self.user2.id))
+        self.assertEqual(data['title'], 'Item list not found')
+        self.assertEqual(data['detail'], 'The requested item list was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/item_lists/{list_id}')
 
     def test_toggle_check(self):
         response = self.client.post('/item_lists', data=json.dumps(self.item_list), headers=self.headers_json)
