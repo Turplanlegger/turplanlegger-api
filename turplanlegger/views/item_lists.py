@@ -233,3 +233,52 @@ def get_public_item_lists():
         return jsonify(status='ok', count=len(item_lists), item_list=[item_list.serialize for item_list in item_lists])
     else:
         raise ApiProblem('Item lists not found', 'No public item lists were found', 404)
+
+@api.route('/item_lists/<item_list_id>/permissions', methods=['PATCH'])
+@auth
+def add_item_list_permissions(item_list_id):
+    item_list = ItemList.find_item_list(item_list_id)
+    if not item_list:
+        raise ApiProblem('Item list not found', 'The requested item list was not found', 404)
+
+    perms = Permission.verify(item_list.owner, item_list.permissions, g.user.id, AccessLevel.READ)
+    if item_list.private is True and perms is PermissionResult.NOT_FOUND:
+        raise ApiProblem('Note not found', 'The requested item_list was not found', 404)
+
+    if item_list.owner != g.user.id:
+        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to add item list permissions', 403)
+
+    permissions_input = request.json.get('permissions', [])
+
+    if not isinstance(permissions_input, list) or not permissions_input:
+        raise ApiProblem('Bad Request', 'You must supply a non-empty "permissions" array', 400)
+
+    new_permissions = []
+    for perm in permissions_input:
+        if perm.get('object_id', None) is None:
+            perm['object_id'] = item_list.id
+            new_permissions.append(perm)
+            continue
+        if perm.get('object_id', None) != item_list.id:
+            continue
+
+    try:
+        permissions = tuple(Permission.parse(permission) for permission in new_permissions)
+    except ValueError:
+        raise ApiProblem('Failed to add new permissions', 'No new permissions were parsed', 400)
+
+    for perm in permissions:
+        if perm in item_list.permissions:
+            raise ApiProblem('Failed to add permissions', 'The permission already exists', 409)
+
+    try:
+        new_permissions = item_list.add_permissions(permissions)
+    except ValueError as e:
+        raise ApiProblem('Failed to add new permissions', str(e), 400)
+    except Exception as e:
+        raise ApiProblem('Failed to add new permissions', str(e), 500)
+
+    if len(new_permissions) > 0:
+        return jsonify(status='ok', permissions=tuple(perm.serialize for perm in new_permissions))
+    else:
+        raise ApiProblem('Failed to add new permissions', 'No new permissions were parsed', 400)
