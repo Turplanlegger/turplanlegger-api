@@ -99,6 +99,9 @@ def add_item_list_items(item_list_id):
         )
     except (ValueError, TypeError) as e:
         raise ApiProblem('Failed to parse items', str(e), 400)
+    except Exception:
+        # We should log this
+        raise ApiProblem('Failed to parse items', 'Unknown error', 500)
 
     try:
         items = tuple(item.create() for item in items)
