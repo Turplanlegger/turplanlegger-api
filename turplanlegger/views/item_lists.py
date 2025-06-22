@@ -1,4 +1,5 @@
 from uuid import UUID
+
 from flask import g, jsonify, request
 
 from turplanlegger.auth.decorators import auth
@@ -16,12 +17,10 @@ from . import api
 def get_item_list(item_list_id):
     item_list = ItemList.find_item_list(item_list_id)
 
-    if (
-        item_list
-        and (
-            item_list.private is False
-            or Permission.verify(item_list.owner, item_list.permissions, g.user.id, AccessLevel.READ) is PermissionResult.ALLOWED
-        )
+    if item_list and (
+        item_list.private is False
+        or Permission.verify(item_list.owner, item_list.permissions, g.user.id, AccessLevel.READ)
+        is PermissionResult.ALLOWED
     ):
         return jsonify(status='ok', count=1, item_list=item_list.serialize)
     else:
@@ -170,7 +169,9 @@ def toggle_list_item_check(item_list_id):
         raise ApiProblem('Failed to get items', 'Item(s) must be supplied as a JSON list', 400)
 
     list_items = tuple(item for item in item_list.items if item.id in request.json.get('items', []))
-    list_items_checked = tuple(item for item in item_list.items_checked if item.id in request.json.get('items_checked', []))
+    list_items_checked = tuple(
+        item for item in item_list.items_checked if item.id in request.json.get('items_checked', [])
+    )
 
     if not list_items and not list_items_checked:
         raise ApiProblem('Item not found in item list', f'An item was not found in item list id: {item_list.id}', 400)
@@ -235,6 +236,7 @@ def get_public_item_lists():
     else:
         raise ApiProblem('Item lists not found', 'No public item lists were found', 404)
 
+
 @api.route('/item_lists/<item_list_id>/permissions', methods=['PATCH'])
 @auth
 def add_item_list_permissions(item_list_id):
@@ -284,6 +286,7 @@ def add_item_list_permissions(item_list_id):
     else:
         raise ApiProblem('Failed to add new permissions', 'No new permissions were parsed', 400)
 
+
 @api.route('/item_lists/<item_list_id>/permissions/<user_id>', methods=['DELETE'])
 @auth
 def delete_item_list_permissions(item_list_id, user_id):
@@ -313,6 +316,7 @@ def delete_item_list_permissions(item_list_id, user_id):
         raise ApiProblem('Failed to delete permissions', str(e), 500)
 
     return ('', 204)
+
 
 @api.route('/item_lists/<item_list_id>/permissions/<user_id>', methods=['PATCH'])
 @auth

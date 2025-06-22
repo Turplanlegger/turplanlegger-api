@@ -229,7 +229,10 @@ class Database:
 
     # Item list permissions
     def get_item_list_subject_permissions(self, object_id: int, subject_id: UUID):
-        select = 'SELECT access_level FROM item_list_permissions WHERE object_id = %(object_id)s AND subject_id = %(subject_id)s'
+        select = """
+            SELECT access_level FROM item_list_permissions
+            WHERE object_id = %(object_id)s AND subject_id = %(subject_id)s
+        """
         return self._fetchone(select, {'object_id': object_id, 'owner_id': subject_id})
 
     def get_item_list_all_permissions(self, object_id: int):
