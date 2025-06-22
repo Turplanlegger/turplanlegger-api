@@ -672,7 +672,7 @@ class ItemListsPermissionTestCase(unittest.TestCase):
 
         response = self.client.patch(
             f'/item_lists/{item_list_id}/toggle_check',
-            data=json.dumps({'items': (item_list['items'][0]['id'],)}),
+            data=json.dumps({'toggle_items': (item_list['items'][0]['id'],)}),
             headers=self.headers_json_user1,
         )
         data = json.loads(response.data.decode('utf-8'))
@@ -687,7 +687,7 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         # Ok
         response = self.client.patch(
             f'/item_lists/{item_list_id}/toggle_check',
-            data=json.dumps({'items': (item_list['items'][1]['id'],)}),
+            data=json.dumps({'toggle_items': (item_list['items'][1]['id'],)}),
             headers=self.headers_json_user2,
         )
         self.assertEqual(response.status_code, 200)
@@ -701,7 +701,7 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         # Not ok
         response = self.client.patch(
             f'/item_lists/{item_list_id}/toggle_check',
-            data=json.dumps({'items': (item_list['items'][2]['id'],)}),
+            data=json.dumps({'toggle_items': (item_list['items'][2]['id'],)}),
             headers=self.headers_json_user3,
         )
         self.assertEqual(response.status_code, 404)
@@ -729,7 +729,7 @@ class ItemListsPermissionTestCase(unittest.TestCase):
 
         response = self.client.patch(
             f'/item_lists/{item_list_id}/toggle_check',
-            data=json.dumps({'items': (item_list['items'][0]['id'],)}),
+            data=json.dumps({'toggle_items': (item_list['items'][0]['id'],)}),
             headers=self.headers_json_user1,
         )
         data = json.loads(response.data.decode('utf-8'))
@@ -744,7 +744,7 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         # Ok
         response = self.client.patch(
             f'/item_lists/{item_list_id}/toggle_check',
-            data=json.dumps({'items': (item_list['items'][1]['id'],)}),
+            data=json.dumps({'toggle_items': (item_list['items'][1]['id'],)}),
             headers=self.headers_json_user2,
         )
         self.assertEqual(response.status_code, 200)
@@ -758,7 +758,7 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         # Not ok
         response = self.client.patch(
             f'/item_lists/{item_list_id}/toggle_check',
-            data=json.dumps({'items': (item_list['items'][2]['id'],)}),
+            data=json.dumps({'toggle_items': (item_list['items'][2]['id'],)}),
             headers=self.headers_json_user3,
         )
         self.assertEqual(response.status_code, 403)
