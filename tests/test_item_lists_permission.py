@@ -900,3 +900,117 @@ class ItemListsPermissionTestCase(unittest.TestCase):
             f'/item_lists/{item_list_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user3
         )
         self.assertEqual(response.status_code, 404)
+
+    def test_add_permissions(self):
+        response = self.client.post('/item_lists', data=json.dumps(self.item_list_read), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        item_list_id = json.loads(response.data.decode('utf-8'))['id']
+
+        # Not ok
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/permissions',
+            data=json.dumps(
+                {
+                    'permissions': [
+                        {
+                            'subject_id': str(self.user3.id),
+                            'access_level': 'READ',
+                        },
+                    ]
+                }
+            ),
+            headers=self.headers_json_user2,
+        )
+
+        self.assertEqual(response.status_code, 403)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Insufficient permissions')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to add item list permissions')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/item_lists/{item_list_id}/permissions')
+
+        for user in (self.headers_json_user1, self.headers_json_user2):
+            response = self.client.get(f'/item_lists/{item_list_id}', headers=user)
+            self.assertEqual(response.status_code, 200)
+            data = json.loads(response.data.decode('utf-8'))
+            self.assertEqual(data['item_list']['owner'], str(self.user1.id))
+            self.assertEqual(data['item_list']['name'], self.item_list_read['name'])
+            self.assertEqual(len(data['item_list']['permissions']), 1)
+            self.assertEqual(data['item_list']['permissions'][0]['access_level'], 'READ')
+            self.assertEqual(data['item_list']['permissions'][0]['object_id'], item_list_id)
+            self.assertEqual(data['item_list']['permissions'][0]['subject_id'], str(self.user2.id))
+
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_json_user3)
+        self.assertEqual(response.status_code, 404)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['title'], 'Item list not found')
+        self.assertEqual(data['detail'], 'The requested item list was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/item_lists/{item_list_id}')
+
+        # Ok
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/permissions',
+            data=json.dumps(
+                {
+                    'permissions': [
+                        {
+                            'subject_id': str(self.user3.id),
+                            'access_level': 'READ',
+                        },
+                    ]
+                }
+            ),
+            headers=self.headers_json_user1,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(len(data['permissions']), 1)
+        self.assertEqual(data['permissions'][0]['access_level'], 'READ')
+        self.assertEqual(data['permissions'][0]['object_id'], item_list_id)
+        self.assertEqual(data['permissions'][0]['subject_id'], str(self.user3.id))
+
+        for user in (self.headers_json_user1, self.headers_json_user2, self.headers_json_user3):
+            response = self.client.get(f'/item_lists/{item_list_id}', headers=user)
+            self.assertEqual(response.status_code, 200)
+            data = json.loads(response.data.decode('utf-8'))
+            self.assertEqual(data['item_list']['owner'], str(self.user1.id))
+            self.assertEqual(data['item_list']['name'], self.item_list_read['name'])
+            self.assertEqual(len(data['item_list']['permissions']), 2)
+            self.assertEqual(data['item_list']['permissions'][0]['access_level'], 'READ')
+            self.assertEqual(data['item_list']['permissions'][0]['object_id'], item_list_id)
+            self.assertEqual(data['item_list']['permissions'][0]['subject_id'], str(self.user2.id))
+            self.assertEqual(data['item_list']['permissions'][1]['access_level'], 'READ')
+            self.assertEqual(data['item_list']['permissions'][1]['object_id'], item_list_id)
+            self.assertEqual(data['item_list']['permissions'][1]['subject_id'], str(self.user3.id))
+
+    def test_add_existing_permissions(self):
+        response = self.client.post('/item_lists', data=json.dumps(self.item_list_read), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        item_list_id = json.loads(response.data.decode('utf-8'))['id']
+
+        # Not ok
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/permissions',
+            data=json.dumps(
+                {
+                    'permissions': [
+                        {
+                            'subject_id': str(self.user2.id),
+                            'access_level': 'READ',
+                        },
+                    ]
+                }
+            ),
+            headers=self.headers_json_user1,
+        )
+
+        self.assertEqual(response.status_code, 409)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['title'], 'Failed to add permissions')
+        self.assertEqual(data['detail'], 'The permission already exists')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/item_lists/{item_list_id}/permissions')

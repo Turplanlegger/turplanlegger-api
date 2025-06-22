@@ -198,6 +198,10 @@ class ItemList:
         """Changes owner of the ItemList"""
         return ItemList.get_item_list(db.change_item_list_owner(self.id, self.owner))
 
+    @staticmethod
+    def add_permissions(permissions: tuple[Permission]) -> tuple[Permission]:
+        return tuple(perm.create_item_list() for perm in permissions)
+
     @classmethod
     def get_item_list(cls, rec: NamedTuple) -> 'ItemList':
         """Converts a database record to a ItemList object

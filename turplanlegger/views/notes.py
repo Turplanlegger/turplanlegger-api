@@ -153,7 +153,7 @@ def get_my_notes():
 
 @api.route('/notes/<note_id>/permissions', methods=['PATCH'])
 @auth
-def add_permissions(note_id):
+def add_note_permissions(note_id):
     note = Note.find_note(note_id)
     if not note:
         raise ApiProblem('Note not found', 'The requested note was not found', 404)

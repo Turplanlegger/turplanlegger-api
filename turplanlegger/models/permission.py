@@ -114,7 +114,7 @@ class Permission:
         """Removes an note Permission instance in the database"""
         return self.get_permission(db.delete_item_list_permissions(self.object_id, self.subject_id))
 
-    def update_item_list(self) -> None:
+    def update_item_list(self) -> 'Permission':
         """Updates a Item List Permission instance in the database"""
         return self.get_permission(db.update_item_list_permission(self))
 
