@@ -1112,3 +1112,79 @@ class ItemListsPermissionTestCase(unittest.TestCase):
             headers=self.headers_json_user2,
         )
         self.assertEqual(response.status_code, 404)
+
+    def test_update_permissions(self):
+        response = self.client.post('/item_lists', data=json.dumps(self.item_list_read), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        item_list_id = json.loads(response.data.decode('utf-8'))['id']
+
+        # Not ok
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/permissions/{str(self.user2.id)}',
+            data=json.dumps({'access_level': 'MODIFY'}),
+            headers=self.headers_json_user2,
+        )
+
+        self.assertEqual(response.status_code, 403)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Insufficient permissions')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to change permissions')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/item_lists/{item_list_id}/permissions/{str(self.user2.id)}')
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/add', data=json.dumps(self.item_to_add), headers=self.headers_json_user2
+        )
+        self.assertEqual(response.status_code, 403)
+
+        # Ok
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/permissions/{str(self.user2.id)}',
+            data=json.dumps({'access_level': 'MODIFY'}),
+            headers=self.headers_json_user1,
+        )
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['permission']['access_level'], 'MODIFY')
+        self.assertEqual(data['permission']['object_id'], item_list_id)
+        self.assertEqual(data['permission']['subject_id'], str(self.user2.id))
+
+        response = self.client.get(
+            f'/item_lists/{item_list_id}',
+            headers=self.headers_json_user2,
+        )
+        self.assertEqual(response.status_code, 200)
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/add', data=json.dumps(self.item_to_add), headers=self.headers_json_user2
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Not ok - non-existing access level
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/permissions/{str(self.user2.id)}',
+            data=json.dumps({'access_level': 'DILIETE'}),
+            headers=self.headers_json_user1,
+        )
+
+        self.assertEqual(response.status_code, 400)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Failed to update permissions')
+        self.assertEqual(data['detail'], 'Ensure access level is one of READ, MODIFY, OR DELETE')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/item_lists/{item_list_id}/permissions/{str(self.user2.id)}')
+
+        # Ok
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/permissions/{str(self.user2.id)}',
+            data=json.dumps({'access_level': 'DELETE'}),
+            headers=self.headers_json_user1,
+        )
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['permission']['access_level'], 'DELETE')
+        self.assertEqual(data['permission']['object_id'], item_list_id)
+        self.assertEqual(data['permission']['subject_id'], str(self.user2.id))
+
+        response = self.client.delete(f'/item_lists/{item_list_id}', headers=self.headers_json_user2)
+        self.assertEqual(response.status_code, 200)
+        response = self.client.delete(f'/item_lists/{item_list_id}', headers=self.headers_json_user2)
+        self.assertEqual(response.status_code, 404)
