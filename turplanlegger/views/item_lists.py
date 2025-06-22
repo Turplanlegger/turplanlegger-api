@@ -1,4 +1,5 @@
 from uuid import UUID
+
 from flask import g, jsonify, request
 
 from turplanlegger.auth.decorators import auth
@@ -165,7 +166,9 @@ def toggle_list_item_check(item_list_id):
             raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the item list', 403)
 
     if not request.json.get('toggle_items', []):
-        raise ApiProblem('Failed to get items', 'Item(s) IDs must be supplied as a JSON list of ints in the key \'toggle_items\'', 400)
+        raise ApiProblem(
+            'Failed to get items', "Item(s) IDs must be supplied as a JSON list of ints in the key 'toggle_items'", 400
+        )
 
     toggle_items = tuple(item for item in item_list.items if item.id in request.json.get('toggle_items', [])) + tuple(
         item for item in item_list.items_checked if item.id in request.json.get('toggle_items', [])

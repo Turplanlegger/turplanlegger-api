@@ -325,7 +325,9 @@ class ItemListsTestCase(unittest.TestCase):
         self.assertEqual(data['item_list']['items'][1]['content'], self.item_list['items'][2]['content'])
         self.assertEqual(data['item_list']['items'][2]['content'], self.item_list['items_checked'][0]['content'])
         self.assertEqual(len(data['item_list']['items_checked']), 2)
-        self.assertEqual(data['item_list']['items_checked'][0]['content'], self.item_list['items_checked'][1]['content'])
+        self.assertEqual(
+            data['item_list']['items_checked'][0]['content'], self.item_list['items_checked'][1]['content']
+        )
         self.assertEqual(data['item_list']['items_checked'][1]['content'], self.item_list['items'][0]['content'])
 
     def test_get_my_list(self):
