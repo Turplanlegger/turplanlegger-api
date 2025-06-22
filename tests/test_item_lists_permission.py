@@ -190,7 +190,7 @@ class ItemListsPermissionTestCase(unittest.TestCase):
             self.item_list_delete,
             self.item_list_public_read,
             self.item_list_public_modify,
-            self.item_list_public_delete
+            self.item_list_public_delete,
         ):
             response = self.client.post('/item_lists', data=json.dumps(item_list), headers=self.headers_json_user1)
             self.assertEqual(response.status_code, 201)
@@ -201,13 +201,16 @@ class ItemListsPermissionTestCase(unittest.TestCase):
             self.assertEqual(data['item_list']['private'], item_list.get('private'))
             self.assertEqual(data['item_list']['owner'], str(self.user1.id))
             self.assertEqual(len(data['item_list']['permissions']), 1)
-            self.assertEqual(data['item_list']['permissions'][0]['access_level'], item_list.get('permissions')[0].get('access_level'))
+            self.assertEqual(
+                data['item_list']['permissions'][0]['access_level'], item_list.get('permissions')[0].get('access_level')
+            )
             self.assertEqual(data['item_list']['permissions'][0]['object_id'], data['id'])
             self.assertEqual(data['item_list']['permissions'][0]['subject_id'], str(self.user2.id))
 
-
     def test_get_item_list_private(self):
-        response = self.client.post('/item_lists', data=json.dumps(self.item_list_read), headers=self.headers_json_user1)
+        response = self.client.post(
+            '/item_lists', data=json.dumps(self.item_list_read), headers=self.headers_json_user1
+        )
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
         item_list_id = data['id']
@@ -235,7 +238,9 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         self.assertEqual(data['instance'], f'http://localhost/item_lists/{item_list_id}')
 
     def test_get_item_list_public(self):
-        response = self.client.post('/item_lists', data=json.dumps(self.item_list_public_read), headers=self.headers_json_user1)
+        response = self.client.post(
+            '/item_lists', data=json.dumps(self.item_list_public_read), headers=self.headers_json_user1
+        )
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
         item_list_id = data['id']
@@ -261,7 +266,9 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         self.assertEqual(data['item_list']['permissions'][0]['subject_id'], str(self.user2.id))
 
     def test_add_list_item(self):
-        response = self.client.post('/item_lists', data=json.dumps(self.item_list_modify), headers=self.headers_json_user1)
+        response = self.client.post(
+            '/item_lists', data=json.dumps(self.item_list_modify), headers=self.headers_json_user1
+        )
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
         item_list_id = data['id']
@@ -325,7 +332,9 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         self.assertEqual(len(data['item_list']['items_checked']), 4)
 
     def test_add_list_item_public(self):
-        response = self.client.post('/item_lists', data=json.dumps(self.item_list_public_modify), headers=self.headers_json_user1)
+        response = self.client.post(
+            '/item_lists', data=json.dumps(self.item_list_public_modify), headers=self.headers_json_user1
+        )
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
         item_list_id = data['id']
@@ -389,7 +398,9 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         self.assertEqual(len(data['item_list']['items_checked']), 4)
 
     def test_add_list_item_wrong_perms(self):
-        response = self.client.post('/item_lists', data=json.dumps(self.item_list_read), headers=self.headers_json_user1)
+        response = self.client.post(
+            '/item_lists', data=json.dumps(self.item_list_read), headers=self.headers_json_user1
+        )
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
         item_list_id = data['id']
@@ -454,7 +465,9 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         self.assertEqual(len(data['item_list']['items_checked']), 3)
 
     def test_add_list_item_public_wrong_perms(self):
-        response = self.client.post('/item_lists', data=json.dumps(self.item_list_public_read), headers=self.headers_json_user1)
+        response = self.client.post(
+            '/item_lists', data=json.dumps(self.item_list_public_read), headers=self.headers_json_user1
+        )
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
         item_list_id = data['id']
@@ -519,25 +532,31 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         self.assertEqual(len(data['item_list']['items_checked']), 3)
 
     def test_rename_item_list(self):
-        response = self.client.post('/item_lists', data=json.dumps(self.item_list_modify), headers=self.headers_json_user1)
+        response = self.client.post(
+            '/item_lists', data=json.dumps(self.item_list_modify), headers=self.headers_json_user1
+        )
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
         item_list_id = data['id']
 
         response = self.client.patch(
-            f'/item_lists/{item_list_id}/rename', data=json.dumps({"name": "new name"}), headers=self.headers_json_user1
+            f'/item_lists/{item_list_id}/rename', data=json.dumps({'name': 'new name'}), headers=self.headers_json_user1
         )
         self.assertEqual(response.status_code, 200)
 
         # Ok
         response = self.client.patch(
-            f'/item_lists/{item_list_id}/rename', data=json.dumps({"name": "new name2"}), headers=self.headers_json_user2
+            f'/item_lists/{item_list_id}/rename',
+            data=json.dumps({'name': 'new name2'}),
+            headers=self.headers_json_user2,
         )
         self.assertEqual(response.status_code, 200)
 
         # Not ok
         response = self.client.patch(
-            f'/item_lists/{item_list_id}/rename', data=json.dumps({"name": "new name3"}), headers=self.headers_json_user3
+            f'/item_lists/{item_list_id}/rename',
+            data=json.dumps({'name': 'new name3'}),
+            headers=self.headers_json_user3,
         )
         self.assertEqual(response.status_code, 404)
         data = json.loads(response.data.decode('utf-8'))
@@ -548,30 +567,38 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         self.assertEqual(data['instance'], f'http://localhost/item_lists/{item_list_id}/rename')
 
     def test_rename_item_list_wrong_perms(self):
-        response = self.client.post('/item_lists', data=json.dumps(self.item_list_read), headers=self.headers_json_user1)
+        response = self.client.post(
+            '/item_lists', data=json.dumps(self.item_list_read), headers=self.headers_json_user1
+        )
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
         item_list_id = data['id']
 
         response = self.client.patch(
-            f'/item_lists/{item_list_id}/rename', data=json.dumps({"name": "new name"}), headers=self.headers_json_user1
+            f'/item_lists/{item_list_id}/rename', data=json.dumps({'name': 'new name'}), headers=self.headers_json_user1
         )
         self.assertEqual(response.status_code, 200)
 
         # Not ok
         response = self.client.patch(
-            f'/item_lists/{item_list_id}/rename', data=json.dumps({"name": "new name2"}), headers=self.headers_json_user2
+            f'/item_lists/{item_list_id}/rename',
+            data=json.dumps({'name': 'new name2'}),
+            headers=self.headers_json_user2,
         )
         self.assertEqual(response.status_code, 403)
 
         # Not ok
         response = self.client.patch(
-            f'/item_lists/{item_list_id}/rename', data=json.dumps({"name": "new name3"}), headers=self.headers_json_user3
+            f'/item_lists/{item_list_id}/rename',
+            data=json.dumps({'name': 'new name3'}),
+            headers=self.headers_json_user3,
         )
         self.assertEqual(response.status_code, 404)
 
     def test_delete_item_list(self):
-        response = self.client.post('/item_lists', data=json.dumps(self.item_list_delete), headers=self.headers_json_user1)
+        response = self.client.post(
+            '/item_lists', data=json.dumps(self.item_list_delete), headers=self.headers_json_user1
+        )
         self.assertEqual(response.status_code, 201)
         item_list_id = json.loads(response.data.decode('utf-8'))['id']
 
@@ -591,9 +618,10 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_json_user2)
         self.assertEqual(response.status_code, 404)
 
-
     def test_delete_item_list_public(self):
-        response = self.client.post('/item_lists', data=json.dumps(self.item_list_public_delete), headers=self.headers_json_user1)
+        response = self.client.post(
+            '/item_lists', data=json.dumps(self.item_list_public_delete), headers=self.headers_json_user1
+        )
         self.assertEqual(response.status_code, 201)
         item_list_id = json.loads(response.data.decode('utf-8'))['id']
 
@@ -614,7 +642,9 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_delete_item_list_read_fail(self):
-        response = self.client.post('/item_lists', data=json.dumps(self.item_list_read), headers=self.headers_json_user1)
+        response = self.client.post(
+            '/item_lists', data=json.dumps(self.item_list_read), headers=self.headers_json_user1
+        )
         self.assertEqual(response.status_code, 201)
         item_list_id = json.loads(response.data.decode('utf-8'))['id']
 
@@ -633,13 +663,17 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_toggle_items(self):
-        response = self.client.post('/item_lists', data=json.dumps(self.item_list_modify), headers=self.headers_json_user1)
+        response = self.client.post(
+            '/item_lists', data=json.dumps(self.item_list_modify), headers=self.headers_json_user1
+        )
         self.assertEqual(response.status_code, 201)
         item_list = json.loads(response.data.decode('utf-8'))['item_list']
         item_list_id = item_list['id']
 
         response = self.client.patch(
-            f'/item_lists/{item_list_id}/toggle_check', data=json.dumps({'items': (item_list['items'][0]['id'],)}), headers=self.headers_json_user1
+            f'/item_lists/{item_list_id}/toggle_check',
+            data=json.dumps({'items': (item_list['items'][0]['id'],)}),
+            headers=self.headers_json_user1,
         )
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(response.status_code, 200)
@@ -652,7 +686,9 @@ class ItemListsPermissionTestCase(unittest.TestCase):
 
         # Ok
         response = self.client.patch(
-            f'/item_lists/{item_list_id}/toggle_check', data=json.dumps({'items': (item_list['items'][1]['id'],)}), headers=self.headers_json_user2
+            f'/item_lists/{item_list_id}/toggle_check',
+            data=json.dumps({'items': (item_list['items'][1]['id'],)}),
+            headers=self.headers_json_user2,
         )
         self.assertEqual(response.status_code, 200)
         response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user2)
@@ -664,7 +700,9 @@ class ItemListsPermissionTestCase(unittest.TestCase):
 
         # Not ok
         response = self.client.patch(
-            f'/item_lists/{item_list_id}/toggle_check', data=json.dumps({'items': (item_list['items'][2]['id'],)}), headers=self.headers_json_user3
+            f'/item_lists/{item_list_id}/toggle_check',
+            data=json.dumps({'items': (item_list['items'][2]['id'],)}),
+            headers=self.headers_json_user3,
         )
         self.assertEqual(response.status_code, 404)
         data = json.loads(response.data.decode('utf-8'))
@@ -682,13 +720,17 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         self.assertEqual(len(data['item_list']['items_checked']), 4)
 
     def test_toggle_items_public(self):
-        response = self.client.post('/item_lists', data=json.dumps(self.item_list_public_modify), headers=self.headers_json_user1)
+        response = self.client.post(
+            '/item_lists', data=json.dumps(self.item_list_public_modify), headers=self.headers_json_user1
+        )
         self.assertEqual(response.status_code, 201)
         item_list = json.loads(response.data.decode('utf-8'))['item_list']
         item_list_id = item_list['id']
 
         response = self.client.patch(
-            f'/item_lists/{item_list_id}/toggle_check', data=json.dumps({'items': (item_list['items'][0]['id'],)}), headers=self.headers_json_user1
+            f'/item_lists/{item_list_id}/toggle_check',
+            data=json.dumps({'items': (item_list['items'][0]['id'],)}),
+            headers=self.headers_json_user1,
         )
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(response.status_code, 200)
@@ -701,7 +743,9 @@ class ItemListsPermissionTestCase(unittest.TestCase):
 
         # Ok
         response = self.client.patch(
-            f'/item_lists/{item_list_id}/toggle_check', data=json.dumps({'items': (item_list['items'][1]['id'],)}), headers=self.headers_json_user2
+            f'/item_lists/{item_list_id}/toggle_check',
+            data=json.dumps({'items': (item_list['items'][1]['id'],)}),
+            headers=self.headers_json_user2,
         )
         self.assertEqual(response.status_code, 200)
         response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user2)
@@ -713,7 +757,9 @@ class ItemListsPermissionTestCase(unittest.TestCase):
 
         # Not ok
         response = self.client.patch(
-            f'/item_lists/{item_list_id}/toggle_check', data=json.dumps({'items': (item_list['items'][2]['id'],)}), headers=self.headers_json_user3
+            f'/item_lists/{item_list_id}/toggle_check',
+            data=json.dumps({'items': (item_list['items'][2]['id'],)}),
+            headers=self.headers_json_user3,
         )
         self.assertEqual(response.status_code, 403)
         data = json.loads(response.data.decode('utf-8'))
@@ -731,7 +777,9 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         self.assertEqual(len(data['item_list']['items_checked']), 4)
 
     def test_change_owner(self):
-        response = self.client.post('/item_lists', data=json.dumps(self.item_list_read), headers=self.headers_json_user1)
+        response = self.client.post(
+            '/item_lists', data=json.dumps(self.item_list_read), headers=self.headers_json_user1
+        )
         self.assertEqual(response.status_code, 201)
         item_list_id = json.loads(response.data.decode('utf-8'))['id']
 
@@ -743,7 +791,9 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         # Not ok
         response = self.client.patch(
-            f'/item_lists/{item_list_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user2
+            f'/item_lists/{item_list_id}/owner',
+            data=json.dumps({'owner': str(self.user2.id)}),
+            headers=self.headers_json_user2,
         )
         self.assertEqual(response.status_code, 403)
         data = json.loads(response.data.decode('utf-8'))
@@ -756,13 +806,17 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         # Not ok
         response = self.client.patch(
-            f'/item_lists/{item_list_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user3
+            f'/item_lists/{item_list_id}/owner',
+            data=json.dumps({'owner': str(self.user2.id)}),
+            headers=self.headers_json_user3,
         )
         self.assertEqual(response.status_code, 404)
 
         # Change owner
         response = self.client.patch(
-            f'/item_lists/{item_list_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user1
+            f'/item_lists/{item_list_id}/owner',
+            data=json.dumps({'owner': str(self.user2.id)}),
+            headers=self.headers_json_user1,
         )
         self.assertEqual(response.status_code, 200)
 
@@ -785,12 +839,16 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         # Not ok
         response = self.client.patch(
-            f'/item_lists/{item_list_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user3
+            f'/item_lists/{item_list_id}/owner',
+            data=json.dumps({'owner': str(self.user2.id)}),
+            headers=self.headers_json_user3,
         )
         self.assertEqual(response.status_code, 404)
 
     def test_change_item_list_owner_modify(self):
-        response = self.client.post('/item_lists', data=json.dumps(self.item_list_modify), headers=self.headers_json_user1)
+        response = self.client.post(
+            '/item_lists', data=json.dumps(self.item_list_modify), headers=self.headers_json_user1
+        )
         self.assertEqual(response.status_code, 201)
         item_list_id = json.loads(response.data.decode('utf-8'))['id']
 
@@ -802,7 +860,9 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         # Not ok
         response = self.client.patch(
-            f'/item_lists/{item_list_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user2
+            f'/item_lists/{item_list_id}/owner',
+            data=json.dumps({'owner': str(self.user2.id)}),
+            headers=self.headers_json_user2,
         )
         self.assertEqual(response.status_code, 403)
         data = json.loads(response.data.decode('utf-8'))
@@ -815,13 +875,17 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         # Not ok
         response = self.client.patch(
-            f'/item_lists/{item_list_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user3
+            f'/item_lists/{item_list_id}/owner',
+            data=json.dumps({'owner': str(self.user2.id)}),
+            headers=self.headers_json_user3,
         )
         self.assertEqual(response.status_code, 404)
 
         # Change owner
         response = self.client.patch(
-            f'/item_lists/{item_list_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user1
+            f'/item_lists/{item_list_id}/owner',
+            data=json.dumps({'owner': str(self.user2.id)}),
+            headers=self.headers_json_user1,
         )
         self.assertEqual(response.status_code, 200)
 
@@ -841,12 +905,16 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         # Not ok
         response = self.client.patch(
-            f'/item_lists/{item_list_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user3
+            f'/item_lists/{item_list_id}/owner',
+            data=json.dumps({'owner': str(self.user2.id)}),
+            headers=self.headers_json_user3,
         )
         self.assertEqual(response.status_code, 404)
 
     def test_change_item_list_owner_delete(self):
-        response = self.client.post('/item_lists', data=json.dumps(self.item_list_delete), headers=self.headers_json_user1)
+        response = self.client.post(
+            '/item_lists', data=json.dumps(self.item_list_delete), headers=self.headers_json_user1
+        )
         self.assertEqual(response.status_code, 201)
         item_list_id = json.loads(response.data.decode('utf-8'))['id']
 
@@ -858,7 +926,9 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         # Not ok
         response = self.client.patch(
-            f'/item_lists/{item_list_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user2
+            f'/item_lists/{item_list_id}/owner',
+            data=json.dumps({'owner': str(self.user2.id)}),
+            headers=self.headers_json_user2,
         )
         self.assertEqual(response.status_code, 403)
         data = json.loads(response.data.decode('utf-8'))
@@ -871,13 +941,17 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         # Not ok
         response = self.client.patch(
-            f'/item_lists/{item_list_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user3
+            f'/item_lists/{item_list_id}/owner',
+            data=json.dumps({'owner': str(self.user2.id)}),
+            headers=self.headers_json_user3,
         )
         self.assertEqual(response.status_code, 404)
 
         # Change owner
         response = self.client.patch(
-            f'/item_lists/{item_list_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user1
+            f'/item_lists/{item_list_id}/owner',
+            data=json.dumps({'owner': str(self.user2.id)}),
+            headers=self.headers_json_user1,
         )
         self.assertEqual(response.status_code, 200)
 
@@ -897,12 +971,16 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         # Not ok
         response = self.client.patch(
-            f'/item_lists/{item_list_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user3
+            f'/item_lists/{item_list_id}/owner',
+            data=json.dumps({'owner': str(self.user2.id)}),
+            headers=self.headers_json_user3,
         )
         self.assertEqual(response.status_code, 404)
 
     def test_add_permissions(self):
-        response = self.client.post('/item_lists', data=json.dumps(self.item_list_read), headers=self.headers_json_user1)
+        response = self.client.post(
+            '/item_lists', data=json.dumps(self.item_list_read), headers=self.headers_json_user1
+        )
         self.assertEqual(response.status_code, 201)
         item_list_id = json.loads(response.data.decode('utf-8'))['id']
 
@@ -987,7 +1065,9 @@ class ItemListsPermissionTestCase(unittest.TestCase):
             self.assertEqual(data['item_list']['permissions'][1]['subject_id'], str(self.user3.id))
 
     def test_add_existing_permissions(self):
-        response = self.client.post('/item_lists', data=json.dumps(self.item_list_read), headers=self.headers_json_user1)
+        response = self.client.post(
+            '/item_lists', data=json.dumps(self.item_list_read), headers=self.headers_json_user1
+        )
         self.assertEqual(response.status_code, 201)
         item_list_id = json.loads(response.data.decode('utf-8'))['id']
 
@@ -1016,7 +1096,9 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         self.assertEqual(data['instance'], f'http://localhost/item_lists/{item_list_id}/permissions')
 
     def test_delete_permissions(self):
-        response = self.client.post('/item_lists', data=json.dumps(self.item_list_read), headers=self.headers_json_user1)
+        response = self.client.post(
+            '/item_lists', data=json.dumps(self.item_list_read), headers=self.headers_json_user1
+        )
         self.assertEqual(response.status_code, 201)
         item_list_id = json.loads(response.data.decode('utf-8'))['id']
 
@@ -1071,7 +1153,9 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         self.assertEqual(data['title'], 'Insufficient permissions')
         self.assertEqual(data['detail'], 'Not sufficient permissions to remove item list permissions')
         self.assertEqual(data['type'], 'about:blank')
-        self.assertEqual(data['instance'], f'http://localhost/item_lists/{item_list_id}/permissions/{str(self.user2.id)}')
+        self.assertEqual(
+            data['instance'], f'http://localhost/item_lists/{item_list_id}/permissions/{str(self.user2.id)}'
+        )
 
         response = self.client.get(
             f'/item_lists/{item_list_id}',
@@ -1106,7 +1190,9 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         self.assertEqual(data['title'], 'Failed to delete permissions')
         self.assertEqual(data['detail'], 'User not found in permissions')
         self.assertEqual(data['type'], 'about:blank')
-        self.assertEqual(data['instance'], f'http://localhost/item_lists/{item_list_id}/permissions/{str(self.user2.id)}')
+        self.assertEqual(
+            data['instance'], f'http://localhost/item_lists/{item_list_id}/permissions/{str(self.user2.id)}'
+        )
         response = self.client.get(
             f'/item_lists/{item_list_id}',
             headers=self.headers_json_user2,
@@ -1114,7 +1200,9 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_update_permissions(self):
-        response = self.client.post('/item_lists', data=json.dumps(self.item_list_read), headers=self.headers_json_user1)
+        response = self.client.post(
+            '/item_lists', data=json.dumps(self.item_list_read), headers=self.headers_json_user1
+        )
         self.assertEqual(response.status_code, 201)
         item_list_id = json.loads(response.data.decode('utf-8'))['id']
 
@@ -1130,7 +1218,9 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         self.assertEqual(data['title'], 'Insufficient permissions')
         self.assertEqual(data['detail'], 'Not sufficient permissions to change permissions')
         self.assertEqual(data['type'], 'about:blank')
-        self.assertEqual(data['instance'], f'http://localhost/item_lists/{item_list_id}/permissions/{str(self.user2.id)}')
+        self.assertEqual(
+            data['instance'], f'http://localhost/item_lists/{item_list_id}/permissions/{str(self.user2.id)}'
+        )
         response = self.client.patch(
             f'/item_lists/{item_list_id}/add', data=json.dumps(self.item_to_add), headers=self.headers_json_user2
         )
@@ -1170,7 +1260,9 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         self.assertEqual(data['title'], 'Failed to update permissions')
         self.assertEqual(data['detail'], 'Ensure access level is one of READ, MODIFY, OR DELETE')
         self.assertEqual(data['type'], 'about:blank')
-        self.assertEqual(data['instance'], f'http://localhost/item_lists/{item_list_id}/permissions/{str(self.user2.id)}')
+        self.assertEqual(
+            data['instance'], f'http://localhost/item_lists/{item_list_id}/permissions/{str(self.user2.id)}'
+        )
 
         # Ok
         response = self.client.patch(
