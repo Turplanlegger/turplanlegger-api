@@ -69,30 +69,40 @@ def add_item_list_items(item_list_id):
 
     if not item_list:
         raise ApiProblem('Item list not found', 'The requested item list was not found', 404)
+    
+    perms = Permission.verify(item_list.owner, item_list.permissions, g.user.id, AccessLevel.MODIFY)
+    if item_list.private is False:
+        if perms is not PermissionResult.ALLOWED:
+            raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the item_list', 403)
+    else:
+        if perms is PermissionResult.NOT_FOUND:
+            raise ApiProblem('Item list not found', 'The requested item list was not found', 404)
+        if perms is PermissionResult.INSUFFICIENT_PERMISSIONS:
+            raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the item_list', 403)
 
     items, items_checked = request.json.get('items', []), request.json.get('items_checked', [])
     if not items or not items_checked:
         raise ApiProblem('Item list empty', 'must supply items or items_checked to add as JSON list', 400)
 
     try:
-        items = [
+        items = tuple(
             ListItem.parse(
                 {'owner': g.user.id, 'item_list': item_list.id, 'checked': False, 'content': item.get('content')}
             )
             for item in items
-        ]
-        items_checked = [
+        )
+        items_checked = tuple(
             ListItem.parse(
                 {'owner': g.user.id, 'item_list': item_list.id, 'checked': True, 'content': item.get('content')}
             )
             for item in items_checked
-        ]
+        )
     except (ValueError, TypeError) as e:
         raise ApiProblem('Failed to parse items', str(e), 400)
 
     try:
-        items = [item.create() for item in items]
-        items_checked = [item.create() for item in items_checked]
+        items = tuple(item.create() for item in items)
+        items_checked = tuple(item.create() for item in items_checked)
     except Exception as e:
         raise ApiProblem('Failed to create item', str(e), 500)
 

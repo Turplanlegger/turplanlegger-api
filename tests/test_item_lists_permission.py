@@ -121,6 +121,14 @@ class ItemListsPermissionTestCase(unittest.TestCase):
             ],
         }
 
+        cls.item_to_add = {
+            'items': (
+                {'content': 'Added item one'},
+                {'content': 'Added item two'},
+            ),
+            'items_checked': tuple({'content': 'Added item three'}),
+        }
+
         # User 1
         response = cls.client.post(
             '/login',
@@ -251,3 +259,261 @@ class ItemListsPermissionTestCase(unittest.TestCase):
 
         self.assertEqual(len(data['item_list']['permissions']), 1)
         self.assertEqual(data['item_list']['permissions'][0]['subject_id'], str(self.user2.id))
+
+    def test_add_list_item(self):
+        response = self.client.post('/item_lists', data=json.dumps(self.item_list_modify), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+        item_list_id = data['id']
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(len(data['item_list']['permissions']), 1)
+        self.assertEqual(data['item_list']['permissions'][0]['subject_id'], str(self.user2.id))
+
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/add', data=json.dumps(self.item_to_add), headers=self.headers_json_user1
+        )
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['status'], 'ok')
+        self.assertEqual(data['count_items'], 2)
+        self.assertEqual(data['count_items_checked'], 1)
+
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(len(data['item_list']['items']), 5)
+        self.assertEqual(len(data['item_list']['items_checked']), 3)
+
+        # Ok
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/add', data=json.dumps(self.item_to_add), headers=self.headers_json_user2
+        )
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['status'], 'ok')
+        self.assertEqual(data['count_items'], 2)
+        self.assertEqual(data['count_items_checked'], 1)
+
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(len(data['item_list']['items']), 7)
+        self.assertEqual(len(data['item_list']['items_checked']), 4)
+
+        # Not ok
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/add', data=json.dumps(self.item_to_add), headers=self.headers_json_user3
+        )
+        self.assertEqual(response.status_code, 404)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['title'], 'Item list not found')
+        self.assertEqual(data['detail'], 'The requested item list was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/item_lists/{item_list_id}/add')
+
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(len(data['item_list']['items']), 7)
+        self.assertEqual(len(data['item_list']['items_checked']), 4)
+
+    def test_add_list_item_public(self):
+        response = self.client.post('/item_lists', data=json.dumps(self.item_list_public_modify), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+        item_list_id = data['id']
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(len(data['item_list']['permissions']), 1)
+        self.assertEqual(data['item_list']['permissions'][0]['subject_id'], str(self.user2.id))
+
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/add', data=json.dumps(self.item_to_add), headers=self.headers_json_user1
+        )
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['status'], 'ok')
+        self.assertEqual(data['count_items'], 2)
+        self.assertEqual(data['count_items_checked'], 1)
+
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(len(data['item_list']['items']), 5)
+        self.assertEqual(len(data['item_list']['items_checked']), 3)
+
+        # Ok
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/add', data=json.dumps(self.item_to_add), headers=self.headers_json_user2
+        )
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['status'], 'ok')
+        self.assertEqual(data['count_items'], 2)
+        self.assertEqual(data['count_items_checked'], 1)
+
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(len(data['item_list']['items']), 7)
+        self.assertEqual(len(data['item_list']['items_checked']), 4)
+
+        # Not ok
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/add', data=json.dumps(self.item_to_add), headers=self.headers_json_user3
+        )
+        self.assertEqual(response.status_code, 403)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['title'], 'Insufficient permissions')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to modify the item_list')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/item_lists/{item_list_id}/add')
+
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(len(data['item_list']['items']), 7)
+        self.assertEqual(len(data['item_list']['items_checked']), 4)
+
+    def test_add_list_item_wrong_perms(self):
+        response = self.client.post('/item_lists', data=json.dumps(self.item_list_read), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+        item_list_id = data['id']
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(len(data['item_list']['permissions']), 1)
+        self.assertEqual(data['item_list']['permissions'][0]['subject_id'], str(self.user2.id))
+
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/add', data=json.dumps(self.item_to_add), headers=self.headers_json_user1
+        )
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['status'], 'ok')
+        self.assertEqual(data['count_items'], 2)
+        self.assertEqual(data['count_items_checked'], 1)
+
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(len(data['item_list']['items']), 5)
+        self.assertEqual(len(data['item_list']['items_checked']), 3)
+
+        # Not ok
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/add', data=json.dumps(self.item_to_add), headers=self.headers_json_user2
+        )
+        self.assertEqual(response.status_code, 403)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['title'], 'Insufficient permissions')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to modify the item_list')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/item_lists/{item_list_id}/add')
+
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(len(data['item_list']['items']), 5)
+        self.assertEqual(len(data['item_list']['items_checked']), 3)
+
+        # Not ok
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/add', data=json.dumps(self.item_to_add), headers=self.headers_json_user3
+        )
+        self.assertEqual(response.status_code, 404)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['title'], 'Item list not found')
+        self.assertEqual(data['detail'], 'The requested item list was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/item_lists/{item_list_id}/add')
+
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(len(data['item_list']['items']), 5)
+        self.assertEqual(len(data['item_list']['items_checked']), 3)
+
+    def test_add_list_item_public_wrong_perms(self):
+        response = self.client.post('/item_lists', data=json.dumps(self.item_list_public_read), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+        item_list_id = data['id']
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(len(data['item_list']['permissions']), 1)
+        self.assertEqual(data['item_list']['permissions'][0]['subject_id'], str(self.user2.id))
+
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/add', data=json.dumps(self.item_to_add), headers=self.headers_json_user1
+        )
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['status'], 'ok')
+        self.assertEqual(data['count_items'], 2)
+        self.assertEqual(data['count_items_checked'], 1)
+
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(len(data['item_list']['items']), 5)
+        self.assertEqual(len(data['item_list']['items_checked']), 3)
+
+        # Not ok
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/add', data=json.dumps(self.item_to_add), headers=self.headers_json_user2
+        )
+        self.assertEqual(response.status_code, 403)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['title'], 'Insufficient permissions')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to modify the item_list')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/item_lists/{item_list_id}/add')
+
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(len(data['item_list']['items']), 5)
+        self.assertEqual(len(data['item_list']['items_checked']), 3)
+
+        # Not ok
+        response = self.client.patch(
+            f'/item_lists/{item_list_id}/add', data=json.dumps(self.item_to_add), headers=self.headers_json_user3
+        )
+        self.assertEqual(response.status_code, 403)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['title'], 'Insufficient permissions')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to modify the item_list')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/item_lists/{item_list_id}/add')
+
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(len(data['item_list']['items']), 5)
+        self.assertEqual(len(data['item_list']['items_checked']), )
