@@ -17,7 +17,10 @@ def get_item_list(item_list_id):
 
     if (
         item_list
-        and Permission.verify(item_list.owner, item_list.permissions, g.user.id, AccessLevel.READ) is PermissionResult.ALLOWED
+        and (
+            item_list.private is False
+            or Permission.verify(item_list.owner, item_list.permissions, g.user.id, AccessLevel.READ) is PermissionResult.ALLOWED
+        )
     ):
         return jsonify(status='ok', count=1, item_list=item_list.serialize)
     else:

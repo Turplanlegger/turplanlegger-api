@@ -205,7 +205,6 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         item_list_id = data['id']
 
         self.assertEqual(response.status_code, 201)
-        pprint(data)
         self.assertEqual(len(data['item_list']['permissions']), 1)
         self.assertEqual(data['item_list']['permissions'][0]['subject_id'], str(self.user2.id))
 
@@ -226,3 +225,29 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         self.assertEqual(data['detail'], 'The requested item list was not found')
         self.assertEqual(data['type'], 'about:blank')
         self.assertEqual(data['instance'], f'http://localhost/item_lists/{item_list_id}')
+
+    def test_get_item_list_public(self):
+        response = self.client.post('/item_lists', data=json.dumps(self.item_list_public_read), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+        item_list_id = data['id']
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(len(data['item_list']['permissions']), 1)
+        self.assertEqual(data['item_list']['permissions'][0]['subject_id'], str(self.user2.id))
+
+        # User 2 - ok
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(len(data['item_list']['permissions']), 1)
+        self.assertEqual(data['item_list']['permissions'][0]['subject_id'], str(self.user2.id))
+
+        # User 3 - not ok
+        response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user3)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(len(data['item_list']['permissions']), 1)
+        self.assertEqual(data['item_list']['permissions'][0]['subject_id'], str(self.user2.id))
