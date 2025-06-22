@@ -377,7 +377,7 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(data['title'], 'Insufficient permissions')
-        self.assertEqual(data['detail'], 'Not sufficient permissions to modify the item_list')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to modify the item list')
         self.assertEqual(data['type'], 'about:blank')
         self.assertEqual(data['instance'], f'http://localhost/item_lists/{item_list_id}/add')
 
@@ -423,7 +423,7 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(data['title'], 'Insufficient permissions')
-        self.assertEqual(data['detail'], 'Not sufficient permissions to modify the item_list')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to modify the item list')
         self.assertEqual(data['type'], 'about:blank')
         self.assertEqual(data['instance'], f'http://localhost/item_lists/{item_list_id}/add')
 
@@ -488,7 +488,7 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(data['title'], 'Insufficient permissions')
-        self.assertEqual(data['detail'], 'Not sufficient permissions to modify the item_list')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to modify the item list')
         self.assertEqual(data['type'], 'about:blank')
         self.assertEqual(data['instance'], f'http://localhost/item_lists/{item_list_id}/add')
 
@@ -507,7 +507,7 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(data['title'], 'Insufficient permissions')
-        self.assertEqual(data['detail'], 'Not sufficient permissions to modify the item_list')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to modify the item list')
         self.assertEqual(data['type'], 'about:blank')
         self.assertEqual(data['instance'], f'http://localhost/item_lists/{item_list_id}/add')
 
@@ -603,7 +603,7 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(data['title'], 'Insufficient permissions')
-        self.assertEqual(data['detail'], 'Not sufficient permissions to delete the item_list')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to delete the item list')
         self.assertEqual(data['type'], 'about:blank')
         self.assertEqual(data['instance'], f'http://localhost/item_lists/{item_list_id}')
 
@@ -624,7 +624,7 @@ class ItemListsPermissionTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(data['title'], 'Insufficient permissions')
-        self.assertEqual(data['detail'], 'Not sufficient permissions to delete the item_list')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to delete the item list')
         self.assertEqual(data['type'], 'about:blank')
         self.assertEqual(data['instance'], f'http://localhost/item_lists/{item_list_id}')
 
