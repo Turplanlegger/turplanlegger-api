@@ -1,5 +1,4 @@
 from uuid import UUID
-
 from flask import g, jsonify, request
 
 from turplanlegger.auth.decorators import auth
@@ -165,20 +164,18 @@ def toggle_list_item_check(item_list_id):
         if perms is PermissionResult.INSUFFICIENT_PERMISSIONS:
             raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the item list', 403)
 
-    if not request.json.get('items', []):
-        raise ApiProblem('Failed to get items', 'Item(s) must be supplied as a JSON list', 400)
+    if not request.json.get('toggle_items', []):
+        raise ApiProblem('Failed to get items', 'Item(s) IDs must be supplied as a JSON list of ints in the key \'toggle_items\'', 400)
 
-    list_items = tuple(item for item in item_list.items if item.id in request.json.get('items', []))
-    list_items_checked = tuple(
-        item for item in item_list.items_checked if item.id in request.json.get('items_checked', [])
+    toggle_items = tuple(item for item in item_list.items if item.id in request.json.get('toggle_items', [])) + tuple(
+        item for item in item_list.items_checked if item.id in request.json.get('toggle_items', [])
     )
 
-    if not list_items and not list_items_checked:
-        raise ApiProblem('Item not found in item list', f'An item was not found in item list id: {item_list.id}', 400)
+    if not toggle_items:
+        raise ApiProblem('Failed to toggle item lisitems', 'No items were successfully parsed', 400)
 
     try:
-        list_items = tuple(item.toggle_check() for item in list_items)
-        list_items_checked = tuple(item.toggle_check() for item in list_items_checked)
+        tuple(item.toggle_check() for item in toggle_items)
     except Exception as e:
         raise ApiProblem('Failed to toggle item', str(e), 500)
 
