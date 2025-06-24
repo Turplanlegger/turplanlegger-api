@@ -153,7 +153,7 @@ def get_my_notes():
 
 @api.route('/notes/<note_id>/permissions', methods=['PATCH'])
 @auth
-def add_permissions(note_id):
+def add_note_permissions(note_id):
     note = Note.find_note(note_id)
     if not note:
         raise ApiProblem('Note not found', 'The requested note was not found', 404)
@@ -203,7 +203,7 @@ def add_permissions(note_id):
 
 @api.route('/notes/<note_id>/permissions/<user_id>', methods=['DELETE'])
 @auth
-def delete_permissions(note_id, user_id):
+def delete_note_permissions(note_id, user_id):
     note = Note.find_note(note_id)
     if not note:
         raise ApiProblem('Note not found', 'The requested note was not found', 404)
@@ -234,7 +234,7 @@ def delete_permissions(note_id, user_id):
 
 @api.route('/notes/<note_id>/permissions/<user_id>', methods=['PATCH'])
 @auth
-def change_permissions(note_id, user_id):
+def change_note_permissions(note_id, user_id):
     note = Note.find_note(note_id)
     if not note:
         raise ApiProblem('Note not found', 'The requested note was not found', 404)
