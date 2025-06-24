@@ -7,7 +7,7 @@ from turplanlegger.auth.utils import hash_password
 from turplanlegger.models.user import User
 
 
-class NotesTestCase(unittest.TestCase):
+class NotesPermissionTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         config = {
