@@ -39,7 +39,7 @@ dependencies = [
 dev = [
     "hatch==1.14.1",
     "pytest==8.4.1",
-    "pytest-cov==6.2.1",
+    "pytest-cov==6.3.0",
     "ruff==v0.12.11",
     "wheel==0.45.1"
 ]
