@@ -5,6 +5,7 @@ from uuid import UUID
 from flask import g
 
 from turplanlegger.app import db
+from turplanlegger.models.permission import Permission
 
 JSON = Dict[str, any]
 
@@ -22,9 +23,11 @@ class Route:
     Attributes:
         id (int): Optional, the ID of the object
         owner (UUID): The UUID4 of the owner of the object
+        comment (str): Optional route comment
         route (Dict[str, any]): JSON containing geometry
                                 that makes up the path/route
         route_history (list): List of routes that makes up history
+        permissions (list): List of permissions related to the route
         create_time (datetime): Time of creation,
                                 Default: datetime.now()
     """
@@ -43,14 +46,16 @@ class Route:
         self.name = kwargs.get('name', None)
         self.comment = kwargs.get('comment', None)
         self.route_history = kwargs.get('route_history', [])
+        self.permissions = kwargs.get('permissions', None)
         self.create_time = kwargs.get('create_time', None) or datetime.now()
 
     def __repr__(self):
         return (
             f"Route(id='{self.id}', owner='{self.owner}', "
             f"name='{self.name}, comment='{self.comment}, "
-            f'route={self.route}, route_history={self.route_history}, '
-            f'create_time={self.create_time})'
+            f"permissions={self.permissions}), "
+            f"route={self.route}, route_history={self.route_history}, "
+            f"create_time={self.create_time})"
         )
 
     @classmethod
@@ -63,6 +68,12 @@ class Route:
         Returns:
             A Route object
         """
+
+        permissions = json.get('permissions', [])
+        if not isinstance(permissions, list):
+            raise TypeError('permissions has to be a list of permission objects')
+        permissions[:] = [Permission.parse(permission) for permission in permissions]
+
         return Route(
             id=json.get('id', None),
             owner=g.user.id,
@@ -70,6 +81,7 @@ class Route:
             route_history=json.get('route_history', []),
             name=json.get('name', None),
             comment=json.get('comment', None),
+            permissions=permissions,
         )
 
     @property
@@ -83,11 +95,19 @@ class Route:
             'create_time': self.create_time,
             'name': self.name,
             'comment': self.comment,
+            'permissions': [permission.serialize for permission in self.permissions],
         }
 
     def create(self) -> 'Route':
         """Creates the Route object in the database"""
-        return self.get_route(db.create_route(self.route, self.owner, self.name, self.comment))
+        route = self.get_route(db.create_route(self.route, self.owner, self.name, self.comment))
+        if self.permissions:
+            permissions = []
+            for permission in self.permissions:
+                permission.object_id = route.id
+                permissions.append(permission.create_route())
+            route.permissions = permissions
+        return route
 
     def delete(self) -> bool:
         """Deletes the Route object from the database
@@ -135,6 +155,18 @@ class Route:
         # Return a boolean, don't get the list unless it's used
         return Route.get_route(db.change_route_owner(self.id, owner))
 
+    @staticmethod
+    def add_permissions(permissions: tuple[Permission]) -> tuple[Permission]:
+        return tuple(perm.create_route() for perm in permissions)
+
+    @staticmethod
+    def delete_permission(permission: Permission) -> None:
+        return permission.delete_route()
+
+    @staticmethod
+    def update_permission(permission: Permission) -> None:
+        return permission.update_route()
+
     @classmethod
     def get_route(cls, rec: NamedTuple) -> 'Route':
         """Converts a database record to an Route object
@@ -153,6 +185,7 @@ class Route:
             owner=rec.owner,
             route=rec.route,
             route_history=rec.route_history,
+            permissions=Permission.find_route_all_permissions(rec.id),
             name=rec.name,
             comment=rec.comment,
             create_time=rec.create_time,
