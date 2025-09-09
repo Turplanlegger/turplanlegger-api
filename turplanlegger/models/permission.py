@@ -101,6 +101,22 @@ class Permission:
         """Updates a note Permission instance in the database"""
         return self.get_permission(db.update_note_permission(self))
 
+    # Route
+    def create_route(self) -> 'Permission':
+        return self.get_permission(db.create_route_permissions(self))
+
+    def find_route_all_permissions(route_id: int) -> 'Permission':
+        return tuple(Permission.get_permission(permission) for permission in db.get_route_all_permissions(route_id))
+
+    def delete_route(self) -> None:
+        """Removes a route Permission instance in the database"""
+        db.delete_route_permissions(self.object_id, self.subject_id)
+        return None
+
+    def update_route(self) -> 'Permission':
+        """Updates a route Permission instance in the database"""
+        return self.get_permission(db.update_route_permission(self))
+
     # Item list
     @staticmethod
     def find_item_list_all_permissions(note_id: int) -> 'Permission':
