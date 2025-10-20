@@ -174,3 +174,38 @@ class RoutesPermissionTestCase(unittest.TestCase):
         self.assertEqual(data['permissions'][0]['access_level'], 'READ')
         self.assertEqual(data['permissions'][0]['object_id'], data['id'])
         self.assertEqual(data['permissions'][0]['subject_id'], str(self.user2.id))
+
+
+    def test_get_route(self):
+        response = self.client.post('/routes', data=json.dumps(self.route), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+        route_id = data['id']
+
+        self.assertEqual(len(data['permissions']), 1)
+        self.assertEqual(data['permissions'][0]['subject_id'], str(self.user2.id))
+
+        # User 1
+        response = self.client.get(f'/routes/{route_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(len(data['permissions']), 1)
+        self.assertEqual(data['permissions'][0]['subject_id'], str(self.user2.id))
+
+        # User 2 - ok
+        response = self.client.get(f'/routes/{route_id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(len(data['note']['permissions']), 1)
+        self.assertEqual(data['note']['permissions'][0]['subject_id'], str(self.user2.id))
+
+        # User 3 - not ok
+        response = self.client.get(f'/routes/{route_id}', headers=self.headers_user3)
+        self.assertEqual(response.status_code, 404)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['title'], 'Route not found')
+        self.assertEqual(data['detail'], 'The requested route was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/routes/{route_id}')
+
