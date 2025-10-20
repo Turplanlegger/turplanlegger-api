@@ -209,3 +209,53 @@ class RoutesPermissionTestCase(unittest.TestCase):
         self.assertEqual(data['type'], 'about:blank')
         self.assertEqual(data['instance'], f'http://localhost/routes/{route_id}')
 
+    def test_change_route_owner(self):
+        response = self.client.post('/routes', data=json.dumps(self.route), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+        route_id = data['id']
+
+        # Ok
+        response = self.client.get(f'/routes/{route_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 200)
+        # Ok
+        response = self.client.get(f'/routes/{route_id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+        # Not ok
+        response = self.client.get(f'/routes/{route_id}', headers=self.headers_user3)
+        self.assertEqual(response.status_code, 404)
+        # Not ok
+        response = self.client.patch(
+            f'/routes/{route_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user2
+        )
+        self.assertEqual(response.status_code, 403)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Insufficient permissions')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to change owner the route')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/routes/{route_id}/owner')
+
+        # Change owner
+        response = self.client.patch(
+            f'/routes/{route_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user1
+        )
+        self.assertEqual(response.status_code, 200)
+        # Not ok
+        response = self.client.get(f'/routes/{route_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 404)
+        # Ok
+        response = self.client.get(f'/routes/{route_id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(len(data['note']['permissions']), 1)
+        self.assertEqual(data['note']['permissions'][0]['access_level'], 'MODIFY')
+        self.assertEqual(data['note']['permissions'][0]['object_id'], data['note']['id'])
+        self.assertEqual(data['note']['permissions'][0]['subject_id'], str(self.user2.id))
+        # Not ok
+        response = self.client.get(f'/routes/{route_id}', headers=self.headers_user3)
+        self.assertEqual(response.status_code, 404)
+        # Not ok
+        response = self.client.patch(
+            f'/routes/{route_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user3
+        )
+        self.assertEqual(response.status_code, 404)

@@ -69,6 +69,13 @@ def change_route_owner(route_id):
     if not route:
         raise ApiProblem('Route not found', 'The requested route was not found', 404)
 
+    perms = Permission.verify(route.owner, route.permissions, g.user.id, AccessLevel.READ)
+    if perms is PermissionResult.NOT_FOUND:
+        raise ApiProblem('Route not found', 'The requested route was not found', 404)
+
+    if route.owner != g.user.id:
+        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to change owner the route', 403)
+
     owner = request.json.get('owner', None)
 
     if not owner:
