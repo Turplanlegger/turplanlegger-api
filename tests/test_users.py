@@ -89,11 +89,7 @@ class UsersTestCase(unittest.TestCase):
             'last_name': 'Smart',
             'email': 'petter@smart.com',
             'auth_method': 'basic',
-            'password': (
-                'TZULjwxS3K5MPZv8P4qz3KfsEnxjCsZgd7HNWFXkhcutEDMxzcU5HyEv2'
-                'VVm9okEaF5tjDfpoqyZrYwVfbQicrvNQrpjqxYexihKVUvJxN23LJxAvf'
-                'vbbAsU2mbUw67b'
-            ),
+            'password': 'TZULjwxS3K5MPZv8P4qz3KfsEnxjCsZgd7HNWFXkhcutEDMxzcU5HyEv2',
             'private': False,
         }
         cls.user9 = {
@@ -102,11 +98,7 @@ class UsersTestCase(unittest.TestCase):
             'last_name': 'Smart',
             'email': 'peter@smart.com',
             'auth_method': 'basic',
-            'password': (
-                '>Q`CV"%3c9naU3(fj@eX~N,7+Qx~_t[+Nt9R4~7m(YRK/r)n!T;onA,^G7F'
-                '+7]<uqy#xGmWkoaN4.JhxK!}u-S4#y^aC"dfBThL^w\'Y2M(qPyr(prX[Vc'
-                'r_P~:v]Vbc;'
-            ),
+            'password': '>Q`CV"%3c9naU3(fj@eX~N,7+Qx~_t[+Nt9R4~7m(YRK/r)n!T;onA,^G7F',
             'private': False,
         }
         cls.user10 = {
