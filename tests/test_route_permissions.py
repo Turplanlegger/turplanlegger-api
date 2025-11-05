@@ -157,8 +157,8 @@ class RoutesPermissionTestCase(unittest.TestCase):
         cls.headers_user3 = {'Authorization': f'Bearer {data["token"]}'}
 
     def tearDown(self):
-        db.truncate_table('notes')
-        db.truncate_table('note_permissions')
+        db.truncate_table('routes')
+        db.truncate_table('route_permissions')
 
     @classmethod
     def tearDownClass(cls):
@@ -177,7 +177,7 @@ class RoutesPermissionTestCase(unittest.TestCase):
 
 
     def test_get_route(self):
-        response = self.client.post('/routes', data=json.dumps(self.route), headers=self.headers_json_user1)
+        response = self.client.post('/routes', data=json.dumps(self.route_modify), headers=self.headers_json_user1)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
         route_id = data['id']
@@ -189,15 +189,15 @@ class RoutesPermissionTestCase(unittest.TestCase):
         response = self.client.get(f'/routes/{route_id}', headers=self.headers_user1)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(len(data['permissions']), 1)
-        self.assertEqual(data['permissions'][0]['subject_id'], str(self.user2.id))
+        self.assertEqual(len(data['route']['permissions']), 1)
+        self.assertEqual(data['route']['permissions'][0]['subject_id'], str(self.user2.id))
 
         # User 2 - ok
         response = self.client.get(f'/routes/{route_id}', headers=self.headers_user2)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(len(data['note']['permissions']), 1)
-        self.assertEqual(data['note']['permissions'][0]['subject_id'], str(self.user2.id))
+        self.assertEqual(len(data['route']['permissions']), 1)
+        self.assertEqual(data['route']['permissions'][0]['subject_id'], str(self.user2.id))
 
         # User 3 - not ok
         response = self.client.get(f'/routes/{route_id}', headers=self.headers_user3)
@@ -210,7 +210,7 @@ class RoutesPermissionTestCase(unittest.TestCase):
         self.assertEqual(data['instance'], f'http://localhost/routes/{route_id}')
 
     def test_change_route_owner(self):
-        response = self.client.post('/routes', data=json.dumps(self.route), headers=self.headers_json_user1)
+        response = self.client.post('/routes', data=json.dumps(self.route_modify), headers=self.headers_json_user1)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
         route_id = data['id']
@@ -247,10 +247,10 @@ class RoutesPermissionTestCase(unittest.TestCase):
         response = self.client.get(f'/routes/{route_id}', headers=self.headers_user2)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(len(data['note']['permissions']), 1)
-        self.assertEqual(data['note']['permissions'][0]['access_level'], 'MODIFY')
-        self.assertEqual(data['note']['permissions'][0]['object_id'], data['note']['id'])
-        self.assertEqual(data['note']['permissions'][0]['subject_id'], str(self.user2.id))
+        self.assertEqual(len(data['route']['permissions']), 1)
+        self.assertEqual(data['route']['permissions'][0]['access_level'], 'MODIFY')
+        self.assertEqual(data['route']['permissions'][0]['object_id'], data['route']['id'])
+        self.assertEqual(data['route']['permissions'][0]['subject_id'], str(self.user2.id))
         # Not ok
         response = self.client.get(f'/routes/{route_id}', headers=self.headers_user3)
         self.assertEqual(response.status_code, 404)
