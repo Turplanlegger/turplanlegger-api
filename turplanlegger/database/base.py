@@ -88,6 +88,7 @@ class Database:
                 'lists_items',
                 'users',
                 'routes',
+                'route_permissions',
                 'notes',
                 'note_permissions',
                 'trip_permissions',
