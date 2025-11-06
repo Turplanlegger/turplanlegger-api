@@ -259,3 +259,46 @@ class RoutesPermissionTestCase(unittest.TestCase):
             f'/routes/{route_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user3
         )
         self.assertEqual(response.status_code, 404)
+
+    def test_delete_route(self):
+        response = self.client.post('/routes', data=json.dumps(self.route_delete), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        route_id = json.loads(response.data.decode('utf-8'))['id']
+
+        # Not ok
+        response = self.client.delete(f'/routes/{route_id}', headers=self.headers_json_user3)
+        self.assertEqual(response.status_code, 404)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Route not found')
+        self.assertEqual(data['detail'], 'The requested route was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/routes/{route_id}')
+
+        # OK
+        response = self.client.delete(f'/routes/{route_id}', headers=self.headers_json_user2)
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(f'/routes/{route_id}', headers=self.headers_json_user2)
+        self.assertEqual(response.status_code, 404)
+
+    def test_delete_route_modify(self):
+        response = self.client.post('/routes', data=json.dumps(self.route_modify), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        route_id = json.loads(response.data.decode('utf-8'))['id']
+
+        # Not ok
+        response = self.client.delete(f'/routes/{route_id}', headers=self.headers_json_user3)
+        self.assertEqual(response.status_code, 404)
+
+        # Not ok
+        response = self.client.delete(f'/routes/{route_id}', headers=self.headers_json_user2)
+        self.assertEqual(response.status_code, 403)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Insufficient permissions')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to delete the route')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/routes/{route_id}')
+
+        response = self.client.delete(f'/routes/{route_id}', headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(f'/routes/{route_id}', headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 404)
