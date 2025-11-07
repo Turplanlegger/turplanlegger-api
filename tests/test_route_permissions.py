@@ -51,7 +51,6 @@ class RoutesPermissionTestCase(unittest.TestCase):
             )
         )
 
-
         routeGeometry = {
             'type': 'LineString',
             'coordinates': [
@@ -175,7 +174,6 @@ class RoutesPermissionTestCase(unittest.TestCase):
         self.assertEqual(data['permissions'][0]['access_level'], 'READ')
         self.assertEqual(data['permissions'][0]['object_id'], data['id'])
         self.assertEqual(data['permissions'][0]['subject_id'], str(self.user2.id))
-
 
     def test_get_route(self):
         response = self.client.post('/routes', data=json.dumps(self.route_modify), headers=self.headers_json_user1)
