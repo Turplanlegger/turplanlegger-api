@@ -56,13 +56,22 @@ class ExceptionHandlers:
         app.register_error_handler(Exception, handle_exception)
 
 
-def handle_http_error(error: HTTPException) -> Tuple[Response, int]:
-    error.code = error.code or 500
-    if error.code >= 500:
-        current_app.logger.exception(error)
-    return jsonify(
-        {'status': 'error', 'message': str(error), 'code': error.code, 'errors': [error.description]}
-    ), error.code
+def handle_http_error(problem: HTTPException) -> Tuple[Response, int]:
+    if problem.code >= 500:
+        current_app.logger.exception(problem)
+    return (
+        jsonify(
+            {
+                'type': f'https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/{problem.code}',
+                'status': problem.code,
+                'title': str(problem),
+                'detail': problem.description,
+                'instance': request.url,
+            }
+        ),
+        problem.code,
+        {'Content-Type': 'application/problem+json'},
+    )
 
 
 def handle_auth_error(error: AuthError) -> Tuple[Response, int, Dict[str, Any]]:
