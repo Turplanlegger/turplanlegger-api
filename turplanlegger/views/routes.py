@@ -183,7 +183,7 @@ def delete_route_permissions(route_id, user_id):
     return ('', 204)
 
 
-@api.route('/route/<route_id>/permissions/<user_id>', methods=['PATCH'])
+@api.route('/routes/<route_id>/permissions/<user_id>', methods=['PATCH'])
 @auth
 def change_route_permissions(route_id, user_id):
     route = Route.find_route(route_id)
