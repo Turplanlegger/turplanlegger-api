@@ -54,7 +54,7 @@ class RoutesPermissionTestCase(unittest.TestCase):
 
         routeGeometry = {
             'type': 'LineString',
-            'coordinates': (
+            'coordinates': [
                 [11.615295, 60.603483],
                 [11.638641, 60.612921],
                 [11.6819, 60.613258],
@@ -64,11 +64,11 @@ class RoutesPermissionTestCase(unittest.TestCase):
                 [11.67984, 60.568064],
                 [11.640015, 60.576838],
                 [11.611862, 60.587296],
-            ),
+            ],
         }
         routeGeometry2 = {
             'type': 'LineString',
-            'coordinates': (
+            'coordinates': [
                 [11.615296, 60.603482],
                 [11.638641, 60.612921],
                 [11.6819, 60.613258],
@@ -78,9 +78,10 @@ class RoutesPermissionTestCase(unittest.TestCase):
                 [11.67984, 60.568064],
                 [11.640015, 60.576838],
                 [11.611862, 60.587296],
-            ),
+            ],
         }
         cls.route = {'route': routeGeometry}
+        cls.route2 = {'route': routeGeometry2}
         cls.route_no_geometry = {}
 
         cls.route_read = {
@@ -301,4 +302,395 @@ class RoutesPermissionTestCase(unittest.TestCase):
         response = self.client.delete(f'/routes/{route_id}', headers=self.headers_json_user1)
         self.assertEqual(response.status_code, 200)
         response = self.client.get(f'/routes/{route_id}', headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 404)
+
+    def test_change_route_owner_modify(self):
+        response = self.client.post('/routes', data=json.dumps(self.route_modify), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        route_id = json.loads(response.data.decode('utf-8'))['id']
+
+        # Ok
+        response = self.client.get(f'/routes/{route_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 200)
+        # Ok
+        response = self.client.get(f'/routes/{route_id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+        # Not ok
+        response = self.client.patch(
+            f'/routes/{route_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user2
+        )
+        self.assertEqual(response.status_code, 403)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Insufficient permissions')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to change owner the route')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/routes/{route_id}/owner')
+        # Not ok
+        response = self.client.get(f'/routes/{route_id}', headers=self.headers_user3)
+        self.assertEqual(response.status_code, 404)
+        # Not ok
+        response = self.client.patch(
+            f'/routes/{route_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user3
+        )
+        self.assertEqual(response.status_code, 404)
+
+        # Change owner
+        response = self.client.patch(
+            f'/routes/{route_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user1
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Not ok
+        response = self.client.get(f'/routes/{route_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 404)
+        # Ok
+        response = self.client.get(f'/routes/{route_id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(len(data['route']['permissions']), 1)
+        self.assertEqual(data['route']['permissions'][0]['access_level'], 'MODIFY')
+        self.assertEqual(data['route']['permissions'][0]['object_id'], data['route']['id'])
+        self.assertEqual(data['route']['permissions'][0]['subject_id'], str(self.user2.id))
+        # Not ok
+        response = self.client.get(f'/routes/{route_id}', headers=self.headers_user3)
+        self.assertEqual(response.status_code, 404)
+        # Not ok
+        response = self.client.patch(
+            f'/routes/{route_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user3
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_change_route_owner_delete(self):
+        response = self.client.post('/routes', data=json.dumps(self.route_delete), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        route_id = json.loads(response.data.decode('utf-8'))['id']
+
+        # Ok
+        response = self.client.get(f'/routes/{route_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 200)
+        # Ok
+        response = self.client.get(f'/routes/{route_id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+        # Not ok
+        response = self.client.patch(
+            f'/routes/{route_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user2
+        )
+        self.assertEqual(response.status_code, 403)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Insufficient permissions')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to change owner the route')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/routes/{route_id}/owner')
+        # Not ok
+        response = self.client.get(f'/routes/{route_id}', headers=self.headers_user3)
+        self.assertEqual(response.status_code, 404)
+        # Not ok
+        response = self.client.patch(
+            f'/routes/{route_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user3
+        )
+        self.assertEqual(response.status_code, 404)
+
+        # Change owner
+        response = self.client.patch(
+            f'/routes/{route_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user1
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Not ok
+        response = self.client.get(f'/routes/{route_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 404)
+        # Ok
+        response = self.client.get(f'/routes/{route_id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(len(data['route']['permissions']), 1)
+        self.assertEqual(data['route']['permissions'][0]['access_level'], 'DELETE')
+        self.assertEqual(data['route']['permissions'][0]['object_id'], data['route']['id'])
+        self.assertEqual(data['route']['permissions'][0]['subject_id'], str(self.user2.id))
+        # Not ok
+        response = self.client.get(f'/routes/{route_id}', headers=self.headers_user3)
+        self.assertEqual(response.status_code, 404)
+        # Not ok
+        response = self.client.patch(
+            f'/routes/{route_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user3
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_add_permissions(self):
+        response = self.client.post('/routes', data=json.dumps(self.route_read), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        route_id = json.loads(response.data.decode('utf-8'))['id']
+
+        # Not ok
+        response = self.client.patch(
+            f'/routes/{route_id}/permissions',
+            data=json.dumps(
+                {
+                    'permissions': [
+                        {
+                            'subject_id': str(self.user3.id),
+                            'access_level': 'READ',
+                        },
+                    ]
+                }
+            ),
+            headers=self.headers_json_user2,
+        )
+
+        self.assertEqual(response.status_code, 403)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Insufficient permissions')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to add route permissions')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/routes/{route_id}/permissions')
+
+        for user in (self.headers_json_user1, self.headers_json_user2):
+            response = self.client.get(f'/routes/{route_id}', headers=user)
+            self.assertEqual(response.status_code, 200)
+            data = json.loads(response.data.decode('utf-8'))
+            self.assertEqual(data['route']['owner'], str(self.user1.id))
+            self.assertEqual(data['route']['route'], self.route_read['route'])
+            self.assertEqual(len(data['route']['permissions']), 1)
+            self.assertEqual(data['route']['permissions'][0]['access_level'], 'READ')
+            self.assertEqual(data['route']['permissions'][0]['object_id'], route_id)
+            self.assertEqual(data['route']['permissions'][0]['subject_id'], str(self.user2.id))
+
+        response = self.client.get(f'/routes/{route_id}', headers=self.headers_json_user3)
+        self.assertEqual(response.status_code, 404)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['title'], 'Route not found')
+        self.assertEqual(data['detail'], 'The requested route was not found')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/routes/{route_id}')
+
+        # Ok
+        response = self.client.patch(
+            f'/routes/{route_id}/permissions',
+            data=json.dumps(
+                {
+                    'permissions': [
+                        {
+                            'subject_id': str(self.user3.id),
+                            'access_level': 'READ',
+                        },
+                    ]
+                }
+            ),
+            headers=self.headers_json_user1,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(len(data['permissions']), 1)
+        self.assertEqual(data['permissions'][0]['access_level'], 'READ')
+        self.assertEqual(data['permissions'][0]['object_id'], route_id)
+        self.assertEqual(data['permissions'][0]['subject_id'], str(self.user3.id))
+
+        for user in (self.headers_json_user1, self.headers_json_user2, self.headers_json_user3):
+            response = self.client.get(f'/routes/{route_id}', headers=user)
+            self.assertEqual(response.status_code, 200)
+            data = json.loads(response.data.decode('utf-8'))
+            self.assertEqual(data['route']['owner'], str(self.user1.id))
+            self.assertEqual(data['route']['route'], self.route_read['route'])
+            self.assertEqual(len(data['route']['permissions']), 2)
+            self.assertEqual(data['route']['permissions'][0]['access_level'], 'READ')
+            self.assertEqual(data['route']['permissions'][0]['object_id'], route_id)
+            self.assertEqual(data['route']['permissions'][0]['subject_id'], str(self.user2.id))
+            self.assertEqual(data['route']['permissions'][1]['access_level'], 'READ')
+            self.assertEqual(data['route']['permissions'][1]['object_id'], route_id)
+            self.assertEqual(data['route']['permissions'][1]['subject_id'], str(self.user3.id))
+
+    def test_add_existing_permissions(self):
+        response = self.client.post('/routes', data=json.dumps(self.route_read), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        route_id = json.loads(response.data.decode('utf-8'))['id']
+
+        # Not ok
+        response = self.client.patch(
+            f'/routes/{route_id}/permissions',
+            data=json.dumps(
+                {
+                    'permissions': [
+                        {
+                            'subject_id': str(self.user2.id),
+                            'access_level': 'READ',
+                        },
+                    ]
+                }
+            ),
+            headers=self.headers_json_user1,
+        )
+
+        self.assertEqual(response.status_code, 409)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['title'], 'Failed to add permissions')
+        self.assertEqual(data['detail'], 'The permission already exists')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/routes/{route_id}/permissions')
+
+    def test_delete_permissions(self):
+        response = self.client.post('/routes', data=json.dumps(self.route_read), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        route_id = json.loads(response.data.decode('utf-8'))['id']
+
+        # Not ok
+        response = self.client.delete(
+            f'/routes/{route_id}/permissions/{str(self.user2.id)}',
+            headers=self.headers_json_user3,
+        )
+        self.assertEqual(response.status_code, 404)
+
+        # Ok - Delete own permissions
+        response = self.client.delete(
+            f'/routes/{route_id}/permissions/{str(self.user2.id)}',
+            headers=self.headers_json_user2,
+        )
+        self.assertEqual(response.status_code, 204)
+        response = self.client.get(
+            f'/routes/{route_id}',
+            headers=self.headers_json_user2,
+        )
+        self.assertEqual(response.status_code, 404)
+
+        # Re-create permission
+        response = self.client.patch(
+            f'/routes/{route_id}/permissions',
+            data=json.dumps(
+                {
+                    'permissions': [
+                        {
+                            'subject_id': str(self.user2.id),
+                            'access_level': 'READ',
+                        },
+                        {
+                            'subject_id': str(self.user3.id),
+                            'access_level': 'DELETE',
+                        },
+                    ]
+                }
+            ),
+            headers=self.headers_json_user1,
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Not ok - Delete other users permissions
+        response = self.client.delete(
+            f'/routes/{route_id}/permissions/{str(self.user2.id)}',
+            headers=self.headers_json_user3,
+        )
+        self.assertEqual(response.status_code, 403)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['title'], 'Insufficient permissions')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to remove route permissions')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/routes/{route_id}/permissions/{str(self.user2.id)}')
+
+        response = self.client.get(
+            f'/routes/{route_id}',
+            headers=self.headers_json_user2,
+        )
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(
+            f'/routes/{route_id}',
+            headers=self.headers_json_user3,
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Ok - Delete users permissions
+        response = self.client.delete(
+            f'/routes/{route_id}/permissions/{str(self.user2.id)}',
+            headers=self.headers_json_user1,
+        )
+        self.assertEqual(response.status_code, 204)
+        response = self.client.get(
+            f'/routes/{route_id}',
+            headers=self.headers_json_user2,
+        )
+        self.assertEqual(response.status_code, 404)
+
+        # Not ok - Delete non existing permissions
+        response = self.client.delete(
+            f'/routes/{route_id}/permissions/{str(self.user2.id)}',
+            headers=self.headers_json_user1,
+        )
+        self.assertEqual(response.status_code, 400)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Failed to delete permissions')
+        self.assertEqual(data['detail'], 'User not found in permissions')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/routes/{route_id}/permissions/{str(self.user2.id)}')
+        response = self.client.get(
+            f'/routes/{route_id}',
+            headers=self.headers_json_user2,
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_update_permissions(self):
+        response = self.client.post('/routes', data=json.dumps(self.route_read), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        route_id = json.loads(response.data.decode('utf-8'))['id']
+
+        # Not ok
+        response = self.client.patch(
+            f'/routes/{route_id}/permissions/{str(self.user2.id)}',
+            data=json.dumps({'access_level': 'MODIFY'}),
+            headers=self.headers_json_user2,
+        )
+        self.assertEqual(response.status_code, 403)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Insufficient permissions')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to change permissions')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/routes/{route_id}/permissions/{str(self.user2.id)}')
+
+        # Ok
+        response = self.client.patch(
+            f'/routes/{route_id}/permissions/{str(self.user2.id)}',
+            data=json.dumps({'access_level': 'MODIFY'}),
+            headers=self.headers_json_user1,
+        )
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['permission']['access_level'], 'MODIFY')
+        self.assertEqual(data['permission']['object_id'], route_id)
+        self.assertEqual(data['permission']['subject_id'], str(self.user2.id))
+
+        response = self.client.get(
+            f'/routes/{route_id}',
+            headers=self.headers_json_user2,
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Not ok - non-existing access level
+        response = self.client.patch(
+            f'/routes/{route_id}/permissions/{str(self.user2.id)}',
+            data=json.dumps({'access_level': 'MODEFY'}),
+            headers=self.headers_json_user1,
+        )
+
+        self.assertEqual(response.status_code, 400)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Failed to update permissions')
+        self.assertEqual(data['detail'], 'Ensure access level is one of READ, MODIFY, OR DELETE')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/routes/{route_id}/permissions/{str(self.user2.id)}')
+
+        # Ok
+        response = self.client.patch(
+            f'/routes/{route_id}/permissions/{str(self.user2.id)}',
+            data=json.dumps({'access_level': 'DELETE'}),
+            headers=self.headers_json_user1,
+        )
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['permission']['access_level'], 'DELETE')
+        self.assertEqual(data['permission']['object_id'], route_id)
+        self.assertEqual(data['permission']['subject_id'], str(self.user2.id))
+
+        response = self.client.delete(f'/routes/{route_id}', headers=self.headers_json_user2)
+        self.assertEqual(response.status_code, 200)
+        response = self.client.delete(f'/routes/{route_id}', headers=self.headers_json_user2)
         self.assertEqual(response.status_code, 404)
