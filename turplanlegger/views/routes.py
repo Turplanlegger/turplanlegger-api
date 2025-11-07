@@ -1,4 +1,5 @@
 from uuid import UUID
+
 from flask import g, jsonify, request
 
 from turplanlegger.auth.decorators import auth

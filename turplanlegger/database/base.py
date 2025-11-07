@@ -3,7 +3,7 @@ from uuid import UUID
 
 import psycopg
 import ujson
-from psycopg.rows import namedtuple_row, TupleRow
+from psycopg.rows import TupleRow, namedtuple_row
 from psycopg.types.enum import EnumInfo, register_enum
 from psycopg.types.json import Jsonb, set_json_dumps, set_json_loads
 
@@ -307,7 +307,7 @@ class Database:
             RETURNING *
         """
         return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
-    
+
     # Route permission
     def get_route_all_permissions(self, object_id: int) -> list[TupleRow]:
         "Select all route permissions based on route id"
