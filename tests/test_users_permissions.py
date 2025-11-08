@@ -201,3 +201,51 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(data['user']['email'], self.user_public.email)
         self.assertEqual(data['user']['auth_method'], self.user_public.auth_method)
         self.assertEqual(data['user']['private'], self.user_public.private)
+
+
+    def test_privacy_user(self):
+        # Not ok
+        response = self.client.patch(
+            f'/users/{str(self.user_private.id)}/private',
+            headers=self.headers_json_user_public,
+        )
+        self.assertEqual(response.status_code, 404)
+
+        # Not ok
+        response = self.client.patch(
+            f'/users/{str(self.user_public.id)}/private',
+            headers=self.headers_json_user_private,
+        )
+        self.assertEqual(response.status_code, 403)
+
+        # Ok
+        response = self.client.patch(
+            f'/users/{str(self.user_private.id)}/private',
+            headers=self.headers_json_user_private,
+        )
+        self.assertEqual(response.status_code, 200)
+    
+        response = self.client.get(
+            f'/users/{str(self.user_private.id)}',
+            headers=self.headers_user_public,
+        )
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(UUID(data['user']['id']), self.user_private.id)
+        self.assertEqual(data['user']['name'], self.user_private.name)
+        self.assertEqual(data['user']['last_name'], self.user_private.last_name)
+        self.assertEqual(data['user']['email'], self.user_private.email)
+        self.assertEqual(data['user']['auth_method'], self.user_private.auth_method)
+        self.assertEqual(data['user']['private'], not self.user_private.private)
+    
+        # Ok
+        response = self.client.patch(
+            f'/users/{str(self.user_public.id)}/private',
+            headers=self.headers_json_user_public,
+        )
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(
+            f'/users/{str(self.user_public.id)}',
+            headers=self.headers_user_private,
+        )
+        self.assertEqual(response.status_code, 404)
