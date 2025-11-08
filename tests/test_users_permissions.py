@@ -136,3 +136,21 @@ class UsersTestCase(unittest.TestCase):
         # Not ok
         response = self.client.get('/users', query_string={'email': self.user_private.email}, headers=self.headers_user_public)
         self.assertEqual(response.status_code, 404)
+
+
+    def test_delete_user(self):
+        # Not ok
+        response = self.client.delete(f'/users/{str(self.user_public.id)}', headers=self.headers_user_private)
+        self.assertEqual(response.status_code, 403)
+
+        # Not ok
+        response = self.client.delete(f'/users/{str(self.user_private.id)}', headers=self.headers_user_public)
+        self.assertEqual(response.status_code, 404)
+    
+        # Ok
+        response = self.client.delete(f'/users/{str(self.user_private.id)}', headers=self.headers_user_private)
+        self.assertEqual(response.status_code, 200)
+
+        # Ok
+        response = self.client.delete(f'/users/{str(self.user_public.id)}', headers=self.headers_user_public)
+        self.assertEqual(response.status_code, 200)
