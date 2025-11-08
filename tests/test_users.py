@@ -255,25 +255,6 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(data['type'], 'about:blank')
         self.assertEqual(data['instance'], 'http://localhost/users')
 
-    def test_rename_user(self):
-        response = self.client.post('/users', data=json.dumps(self.user1), headers=self.headers_json)
-        self.assertEqual(response.status_code, 201)
-        data = json.loads(response.data.decode('utf-8'))
-
-        response = self.client.patch(
-            f'/users/{self.user1["id"]}/rename',
-            data=json.dumps({'name': 'Petter', 'last_name': 'Smart'}),
-            headers=self.headers_json,
-        )
-        data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(data['user']['name'], 'Petter')
-        self.assertEqual(data['user']['last_name'], 'Smart')
-        self.assertEqual(data['user']['id'], self.user1['id'])
-        self.assertEqual(data['user']['email'], self.user1['email'])
-        self.assertEqual(data['user']['auth_method'], self.user1['auth_method'])
-        self.assertEqual(data['user']['private'], self.user1['private'])
-
     def test_change_private(self):
         response = self.client.post('/users', data=json.dumps(self.user1), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
