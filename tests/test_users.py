@@ -210,31 +210,6 @@ class UsersTestCase(unittest.TestCase):
         response = self.client.get(f'/users/{self.user11["id"]}', headers={'Authorization': f'Bearer {data["token"]}'})
         self.assertEqual(response.status_code, 200)
 
-    def test_delete_user(self):
-        response = self.client.post('/users', data=json.dumps(self.user1), headers=self.headers_json)
-        self.assertEqual(response.status_code, 201)
-        data = json.loads(response.data.decode('utf-8'))
-        id = data['id']
-
-        response = self.client.delete(f'/users/{id}', headers=self.headers)
-        self.assertEqual(response.status_code, 200)
-
-        response = self.client.get(f'/users/{id}', headers=self.headers)
-        self.assertEqual(response.status_code, 404)
-
-        data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['title'], 'User not found')
-        self.assertEqual(data['detail'], 'The requested user was not found')
-        self.assertEqual(data['type'], 'about:blank')
-        self.assertEqual(data['instance'], f'http://localhost/users/{id}')
-
-        response = self.client.post(
-            '/login',
-            data=json.dumps({'email': self.user1['email'], 'password': self.user1['password']}),
-            headers={'Content-type': 'application/json'},
-        )
-        self.assertEqual(response.status_code, 401)
-
     def test_create_user_no_last_name(self):
         response = self.client.post('/users', data=json.dumps(self.user2), headers=self.headers_json)
         self.assertEqual(response.status_code, 400)

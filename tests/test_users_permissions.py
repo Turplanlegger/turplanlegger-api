@@ -158,11 +158,19 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
         # Ok
-        response = self.client.delete(f'/users/{str(self.user_private.id)}', headers=self.headers_user_private)
+        response = self.client.delete(f'/users/{str(self.user_public.id)}', headers=self.headers_user_public)
         self.assertEqual(response.status_code, 200)
+        response = self.client.get(f'/users/{str(self.user_public.id)}', headers=self.headers_user_private)
+        self.assertEqual(response.status_code, 404)
+        response = self.client.post(
+            '/login',
+            data=json.dumps({'email': self.user_public.email, 'password': 'test'}),
+            headers={'Content-type': 'application/json'},
+        )
+        self.assertEqual(response.status_code, 401)
 
         # Ok
-        response = self.client.delete(f'/users/{str(self.user_public.id)}', headers=self.headers_user_public)
+        response = self.client.delete(f'/users/{str(self.user_private.id)}', headers=self.headers_user_private)
         self.assertEqual(response.status_code, 200)
 
     def test_rename_user(self):
