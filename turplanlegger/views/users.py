@@ -16,13 +16,10 @@ def get_user(user_id):
     except (ValueError, TypeError) as e:
         raise ApiProblem('Failed to find user', str(e), 400)
 
-    if user.id != g.user.id and user.private:
+    if not user or (user.id != g.user.id and user.private):
         raise ApiProblem('User not found', 'The requested user was not found', 404)
 
-    if user:
-        return jsonify(status='ok', count=1, user=user.serialize)
-    else:
-        raise ApiProblem('User not found', 'The requested user was not found', 404)
+    return jsonify(status='ok', count=1, user=user.serialize)
 
 
 @api.route('/users', methods=['GET'])
