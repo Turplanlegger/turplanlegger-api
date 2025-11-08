@@ -16,6 +16,9 @@ def get_user(user_id):
     except (ValueError, TypeError) as e:
         raise ApiProblem('Failed to find user', str(e), 400)
 
+    if user.id != g.user.id and user.private:
+        raise ApiProblem('User not found', 'The requested user was not found', 404)
+
     if user:
         return jsonify(status='ok', count=1, user=user.serialize)
     else:
@@ -37,6 +40,9 @@ def lookup_user():
         user = User.find_by_email(email)
     except ValueError as e:
         raise ApiProblem('Failed to get user', str(e), 400)
+
+    if user.id != g.user.id and user.private:
+        raise ApiProblem('User not found', 'The requested user was not found', 404)
 
     if user:
         return jsonify(status='ok', count=1, user=user.serialize)
@@ -71,6 +77,12 @@ def delete_user(user_id: str):
     if not user:
         raise ApiProblem('User not found', 'The requested user was not found', 404)
 
+    if user.id != g.user.id and user.private:
+        raise ApiProblem('User not found', 'The requested user was not found', 404)
+
+    if user.id != g.user.id and not user.private:
+        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to delete user', 403)
+
     try:
         user.delete()
     except Exception as e:
@@ -86,6 +98,13 @@ def rename_user(user_id: str):
 
     if not user:
         raise ApiProblem('User not found', 'The requested user was not found', 404)
+
+    if user.id != g.user.id and user.private:
+        raise ApiProblem('User not found', 'The requested user was not found', 404)
+
+    if user.id != g.user.id and not user.private:
+        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to update user', 403)
+
 
     user.name = request.json.get('name', user.name)
     user.last_name = request.json.get('last_name', user.last_name)
@@ -103,6 +122,12 @@ def toggle_private_user(user_id: str):
 
     if not user:
         raise ApiProblem('User not found', 'The requested user was not found', 404)
+
+    if user.id != g.user.id and user.private:
+        raise ApiProblem('User not found', 'The requested user was not found', 404)
+
+    if user.id != g.user.id and not user.private:
+        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to update user', 403)
 
     try:
         user.toggle_private()
