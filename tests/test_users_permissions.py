@@ -144,7 +144,7 @@ class UsersTestCase(unittest.TestCase):
 
         # Not ok
         response = self.client.get(
-            '/users', query_string={'email': self.user_private.email}, headers=self.headers_user_publi
+            '/users', query_string={'email': self.user_private.email}, headers=self.headers_user_public
         )
         self.assertEqual(response.status_code, 404)
 
