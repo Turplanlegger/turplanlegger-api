@@ -154,3 +154,50 @@ class UsersTestCase(unittest.TestCase):
         # Ok
         response = self.client.delete(f'/users/{str(self.user_public.id)}', headers=self.headers_user_public)
         self.assertEqual(response.status_code, 200)
+
+    def test_rename_user(self):
+        # Not ok
+        response = self.client.patch(
+            f'/users/{str(self.user_private.id)}/rename',
+            data=json.dumps({'name': "DJ2",}),
+            headers=self.headers_json_user_public,
+        )
+        self.assertEqual(response.status_code, 404)
+
+        # Ok
+        response = self.client.patch(
+            f'/users/{str(self.user_private.id)}/rename',
+            data=json.dumps({'name': "DJ",}),
+            headers=self.headers_json_user_private,
+        )
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(UUID(data['user']['id']), self.user_private.id)
+        self.assertEqual(data['user']['name'], "DJ")
+        self.assertEqual(data['user']['last_name'], self.user_private.last_name)
+        self.assertEqual(data['user']['email'], self.user_private.email)
+        self.assertEqual(data['user']['auth_method'], self.user_private.auth_method)
+        self.assertEqual(data['user']['private'], self.user_private.private)
+
+        # Not ok
+        response = self.client.patch(
+            f'/users/{str(self.user_public.id)}/rename',
+            data=json.dumps({'name': "DJ3",}),
+            headers=self.headers_json_user_private,
+        )
+        self.assertEqual(response.status_code, 403)
+    
+        # Ok
+        response = self.client.patch(
+            f'/users/{str(self.user_public.id)}/rename',
+            data=json.dumps({'last_name': "DJ4",}),
+            headers=self.headers_json_user_public,
+        )
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(UUID(data['user']['id']), self.user_public.id)
+        self.assertEqual(data['user']['name'], self.user_public.name)
+        self.assertEqual(data['user']['last_name'], "DJ4")
+        self.assertEqual(data['user']['email'], self.user_public.email)
+        self.assertEqual(data['user']['auth_method'], self.user_public.auth_method)
+        self.assertEqual(data['user']['private'], self.user_public.private)

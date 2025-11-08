@@ -105,7 +105,6 @@ def rename_user(user_id: str):
     if user.id != g.user.id and not user.private:
         raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to update user', 403)
 
-
     user.name = request.json.get('name', user.name)
     user.last_name = request.json.get('last_name', user.last_name)
 
