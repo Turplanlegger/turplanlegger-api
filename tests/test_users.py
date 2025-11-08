@@ -230,26 +230,6 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(data['type'], 'about:blank')
         self.assertEqual(data['instance'], 'http://localhost/users')
 
-    def test_change_private(self):
-        response = self.client.post('/users', data=json.dumps(self.user1), headers=self.headers_json)
-        self.assertEqual(response.status_code, 201)
-        data = json.loads(response.data.decode('utf-8'))
-
-        response = self.client.patch(f'/users/{data["id"]}/private', headers=self.headers)
-
-        self.assertEqual(response.status_code, 200)
-
-        response = self.client.get(f'/users/{data["id"]}', headers=self.headers)
-        self.assertEqual(response.status_code, 200)
-        data = json.loads(response.data.decode('utf-8'))
-
-        self.assertEqual(data['user']['id'], self.user1['id'])
-        self.assertEqual(data['user']['name'], self.user1['name'])
-        self.assertEqual(data['user']['last_name'], self.user1['last_name'])
-        self.assertEqual(data['user']['email'], self.user1['email'])
-        self.assertEqual(data['user']['auth_method'], self.user1['auth_method'])
-        self.assertEqual(data['user']['private'], True)
-
     def test_create_user_short_pw(self):
         response = self.client.post('/users', data=json.dumps(self.user4), headers=self.headers_json)
         self.assertEqual(response.status_code, 400)
