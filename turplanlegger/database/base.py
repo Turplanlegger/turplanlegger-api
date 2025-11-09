@@ -3,7 +3,7 @@ from uuid import UUID
 
 import psycopg
 import ujson
-from psycopg.rows import namedtuple_row
+from psycopg.rows import TupleRow, namedtuple_row
 from psycopg.types.enum import EnumInfo, register_enum
 from psycopg.types.json import Jsonb, set_json_dumps, set_json_loads
 
@@ -88,6 +88,7 @@ class Database:
                 'lists_items',
                 'users',
                 'routes',
+                'route_permissions',
                 'notes',
                 'note_permissions',
                 'trip_permissions',
@@ -306,6 +307,35 @@ class Database:
             RETURNING *
         """
         return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
+
+    # Route permission
+    def get_route_all_permissions(self, object_id: int) -> list[TupleRow]:
+        "Select all route permissions based on route id"
+        select = 'SELECT object_id, access_level, subject_id FROM route_permissions WHERE object_id = %s'
+        return self._fetchall(select, (object_id,))
+
+    def create_route_permissions(self, permission) -> TupleRow:
+        insert = """
+            INSERT INTO route_permissions (object_id, subject_id, access_level)
+            VALUES (%(object_id)s, %(subject_id)s, %(access_level)s)
+            RETURNING *
+        """
+        return self._insert(insert, vars(permission))
+
+    def delete_route_permissions(self, object_id: int, subject_id: UUID) -> None:
+        """Delete route permission by primary key"""
+        del_perms = 'DELETE FROM route_permissions WHERE object_id = %(object_id)s AND subject_id = %(subject_id)s'
+        return self._deleteone(del_perms, {'object_id': object_id, 'subject_id': subject_id})
+
+    def update_route_permission(self, route_permission) -> TupleRow:
+        """Update route permission"""
+        update = """
+            UPDATE route_permissions
+                SET access_level = %(access_level)s
+                WHERE object_id = %(object_id)s AND subject_id = %(subject_id)s
+            RETURNING *
+        """
+        return self._updateone(update, vars(route_permission), returning=True)
 
     # Note
     def get_note(self, id: int, deleted: bool = False):
