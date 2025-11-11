@@ -54,7 +54,7 @@ def update_trip(trip_id):
         if trip.private is True:
             raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
         raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the trip', 403)
-    if perms is PermissionResult.INSUFFICIENT_PERMISSIONS :
+    if perms is PermissionResult.INSUFFICIENT_PERMISSIONS:
         raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the trip', 403)
 
     errors = []
