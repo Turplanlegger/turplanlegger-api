@@ -318,11 +318,11 @@ class TripsPermissionsTestCase(unittest.TestCase):
         trip = json.loads(response.data.decode('utf-8'))
 
         response = self.client.delete(f'/trips/{trip["id"]}', headers=self.headers_user3)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 403)
         data = json.loads(response.data.decode('utf-8'))
 
-        self.assertEqual(data['title'], 'Trip not found')
-        self.assertEqual(data['detail'], 'The requested trip was not found')
+        self.assertEqual(data['title'], 'Insufficient permissions')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to delete the trip')
         self.assertEqual(data['type'], 'about:blank')
         self.assertEqual(data['instance'], f'http://localhost/trips/{trip["id"]}')
 
@@ -457,7 +457,7 @@ class TripsPermissionsTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(response.status_code, 404)
 
-    def test_delete_trip(self):
+    def test_delete_trip_read(self):
         response = self.client.post('/trips', data=json.dumps(self.trip_read), headers=self.headers_json_user1)
 
         self.assertEqual(response.status_code, 201)
@@ -529,4 +529,3 @@ class TripsPermissionsTestCase(unittest.TestCase):
 
         response = self.client.delete(f'/trips/{trip_id}', headers=self.headers_user2)
         self.assertEqual(response.status_code, 200)
-

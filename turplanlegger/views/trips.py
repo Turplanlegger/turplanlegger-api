@@ -171,7 +171,10 @@ def add_item_list_to_trip(trip_id):
     if not item_list:
         raise ApiProblem('Failed to add item list to trip', 'Item list was not found', 404)
 
-    if Permission.verify(item_list.owner, item_list.permissions, g.user.id, AccessLevel.READ) is PermissionResult.NOT_FOUND:
+    if (
+        Permission.verify(item_list.owner, item_list.permissions, g.user.id, AccessLevel.READ)
+        is PermissionResult.NOT_FOUND
+    ):
         raise ApiProblem('Failed to add item list to trip', 'Item list was not found', 404)
     try:
         trip.add_item_list_reference(item_list.id)
@@ -230,9 +233,9 @@ def delete_trip(trip_id):
     if perms is PermissionResult.NOT_FOUND:
         if trip.private is True:
             raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
-        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the trip', 403)
+        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to delete the trip', 403)
     elif perms is PermissionResult.INSUFFICIENT_PERMISSIONS:
-        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the trip', 403)
+        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to delete the trip', 403)
 
     try:
         trip.delete()
