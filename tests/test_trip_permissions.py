@@ -496,3 +496,37 @@ class TripsPermissionsTestCase(unittest.TestCase):
         for user in (self.headers_user1, self.headers_user2, self.headers_user3):
             response = self.client.delete(f'/trips/{trip_id}', headers=user)
             self.assertEqual(response.status_code, 404)
+
+    def test_delete_trip_modify(self):
+        response = self.client.post('/trips', data=json.dumps(self.trip_modify), headers=self.headers_json_user1)
+
+        self.assertEqual(response.status_code, 201)
+
+        data = json.loads(response.data.decode('utf-8'))
+        trip_id = data['id']
+
+        for user in (self.headers_user2, self.headers_user3):
+            response = self.client.delete(f'/trips/{trip_id}', headers=user)
+            self.assertEqual(response.status_code, 403)
+
+        response = self.client.delete(f'/trips/{trip_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 200)
+
+        for user in (self.headers_user1, self.headers_user2, self.headers_user3):
+            response = self.client.delete(f'/trips/{trip_id}', headers=user)
+            self.assertEqual(response.status_code, 404)
+
+    def test_delete_trip_delete(self):
+        response = self.client.post('/trips', data=json.dumps(self.trip_delete), headers=self.headers_json_user1)
+
+        self.assertEqual(response.status_code, 201)
+
+        data = json.loads(response.data.decode('utf-8'))
+        trip_id = data['id']
+
+        response = self.client.delete(f'/trips/{trip_id}', headers=self.headers_user3)
+        self.assertEqual(response.status_code, 403)
+
+        response = self.client.delete(f'/trips/{trip_id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+
