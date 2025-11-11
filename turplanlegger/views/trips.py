@@ -94,16 +94,33 @@ def update_trip(trip_id):
     return jsonify(status='ok', count=1, trip=trip.serialize, errors=errors)
 
 
-@api.route('/trips/notes', methods=['PATCH'])
+@api.route('/trips/<trip_id>/notes', methods=['PATCH'])
 @auth
-def add_note_to_trip():
-    trip = Trip.find_trip(request.json.get('trip_id', None))
+def add_note_to_trip(trip_id):
+    trip = Trip.find_trip(trip_id)
     if not trip:
         raise ApiProblem('Failed to add note to trip', 'Trip was not found', 404)
+
+    perms = Permission.verify(trip.owner, trip.permissions, g.user.id, AccessLevel.MODIFY)
+    if perms is PermissionResult.NOT_FOUND:
+        if trip.private is True:
+            raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
+        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the trip', 403)
+    if perms is PermissionResult.INSUFFICIENT_PERMISSIONS:
+        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the trip', 403)
 
     note = Note.find_note(request.json.get('note_id', None))
     if not note:
         raise ApiProblem('Failed to add note to trip', 'Note was not found', 404)
+
+    if Permission.verify(note.owner, note.permissions, g.user.id, AccessLevel.READ) is PermissionResult.NOT_FOUND:
+        raise ApiProblem('Failed to add note to trip', 'Note was not found', 404)
+
+    # I'm lazy, so I'm keeping this here until I fix private attribute for Note
+    # if note.private is True:
+    #     note_perms = Permission.verify(note.owner, note.permissions, g.user.id, AccessLevel.READ)
+    #     if note_perms is PermissionResult.NOT_FOUND:
+    #         raise ApiProblem('Failed to add note to trip', 'Note was not found', 404)
 
     try:
         trip.add_note_reference(note.id)
@@ -113,15 +130,26 @@ def add_note_to_trip():
     return jsonify(trip.serialize), 201
 
 
-@api.route('/trips/routes', methods=['PATCH'])
+@api.route('/trips/<trip_id>/routes', methods=['PATCH'])
 @auth
-def add_route_to_trip():
-    trip = Trip.find_trip(request.json.get('trip_id', None))
+def add_route_to_trip(trip_id):
+    trip = Trip.find_trip(trip_id)
     if not trip:
-        raise ApiProblem('Failed to add route to trip', 'Trip was not found', 404)
+        raise ApiProblem('Failed to add note to trip', 'Trip was not found', 404)
+
+    perms = Permission.verify(trip.owner, trip.permissions, g.user.id, AccessLevel.MODIFY)
+    if perms is PermissionResult.NOT_FOUND:
+        if trip.private is True:
+            raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
+        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the trip', 403)
+    if perms is PermissionResult.INSUFFICIENT_PERMISSIONS:
+        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the trip', 403)
 
     route = Route.find_route(request.json.get('route_id', None))
     if not route:
+        raise ApiProblem('Failed to add route to trip', 'Route was not found', 404)
+
+    if Permission.verify(route.owner, route.permissions, g.user.id, AccessLevel.READ) is PermissionResult.NOT_FOUND:
         raise ApiProblem('Failed to add route to trip', 'Route was not found', 404)
 
     try:
@@ -132,9 +160,9 @@ def add_route_to_trip():
     return jsonify(trip.serialize), 201
 
 
-@api.route('/trips/item_lists', methods=['PATCH'])
+@api.route('/trips/<trip_id>/item_lists', methods=['PATCH'])
 @auth
-def add_item_list_to_trip():
+def add_item_list_to_trip(trip_id):
     trip = Trip.find_trip(request.json.get('trip_id', None))
     if not trip:
         raise ApiProblem('Failed to add item list to trip', 'Trip was not found', 404)
@@ -143,6 +171,8 @@ def add_item_list_to_trip():
     if not item_list:
         raise ApiProblem('Failed to add item list to trip', 'Item list was not found', 404)
 
+    if Permission.verify(item_list.owner, item_list.permissions, g.user.id, AccessLevel.READ) is PermissionResult.NOT_FOUND:
+        raise ApiProblem('Failed to add item list to trip', 'Item list was not found', 404)
     try:
         trip.add_item_list_reference(item_list.id)
     except Exception as e:
