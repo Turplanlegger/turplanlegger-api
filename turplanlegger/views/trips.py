@@ -19,7 +19,7 @@ def get_trip(trip_id):
     trip = Trip.find_trip(trip_id)
     if trip and (
         trip.private is False
-        and Permission.verify(trip.owner, trip.permissions, g.user.id, AccessLevel.READ) is PermissionResult.ALLOWED
+        or Permission.verify(trip.owner, trip.permissions, g.user.id, AccessLevel.READ) is PermissionResult.ALLOWED
     ):
         return jsonify(status='ok', count=1, trip=trip.serialize)
     else:
