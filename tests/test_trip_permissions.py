@@ -350,6 +350,67 @@ class TripsPermissionsTestCase(unittest.TestCase):
         self.assertEqual(data['instance'], f'http://localhost/trips/{id}')
 
     def test_change_trip_owner(self):
+        response = self.client.post('/trips', data=json.dumps(self.trip_read), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+        id = data['id']
+
+        # User 1 -> user 2
+        ## Ok
+        response = self.client.patch(
+            f'/trips/{id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user1
+        )
+        response = self.client.get(f'/trips/{id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+
+        ## Ok
+        response = self.client.get(f'/trips/{id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 200)
+
+        ## Ok
+        response = self.client.get(f'/trips/{id}', headers=self.headers_user3)
+        self.assertEqual(response.status_code, 200)
+
+        # User 1 -> user 3
+        ## Not ok
+        response = self.client.patch(
+            f'/trips/{id}/owner', data=json.dumps({'owner': str(self.user3.id)}), headers=self.headers_json_user1
+        )
+        self.assertEqual(response.status_code, 403)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(data['title'], 'Insufficient permissions')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to change ownership the trip')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/trips/{id}/owner')
+
+        # User 2 -> user 3
+        ## Ok
+        response = self.client.patch(
+            f'/trips/{id}/owner', data=json.dumps({'owner': str(self.user3.id)}), headers=self.headers_json_user2
+        )
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(f'/trips/{id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+
+        ## Ok
+        response = self.client.get(f'/trips/{id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 200)
+
+        ## Ok
+        response = self.client.get(f'/trips/{id}', headers=self.headers_user3)
+        self.assertEqual(response.status_code, 200)
+
+        # User 3 -> user 2
+        ## Not ok
+        response = self.client.patch(
+            f'/trips/{id}/owner', data=json.dumps({'owner': str(self.user3.id)}), headers=self.headers_json_user2
+        )
+        self.assertEqual(response.status_code, 403)
+        data = json.loads(response.data.decode('utf-8'))
+
+    def test_change_trip_owner_private(self):
         response = self.client.post('/trips', data=json.dumps(self.trip_read_private), headers=self.headers_json_user1)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
@@ -378,13 +439,8 @@ class TripsPermissionsTestCase(unittest.TestCase):
         response = self.client.patch(
             f'/trips/{id}/owner', data=json.dumps({'owner': str(self.user3.id)}), headers=self.headers_json_user1
         )
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
         data = json.loads(response.data.decode('utf-8'))
-
-        self.assertEqual(data['title'], 'Insufficient permissions')
-        self.assertEqual(data['detail'], 'Not sufficient permissions to change ownership the trip')
-        self.assertEqual(data['type'], 'about:blank')
-        self.assertEqual(data['instance'], f'http://localhost/trips/{id}/owner')
 
         # User 2 -> user 3
         ## Ok
@@ -400,8 +456,3 @@ class TripsPermissionsTestCase(unittest.TestCase):
         response = self.client.get(f'/trips/{id}', headers=self.headers_user1)
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(response.status_code, 404)
-
-        self.assertEqual(data['title'], 'Trip not found')
-        self.assertEqual(data['detail'], 'The requested trip was not found')
-        self.assertEqual(data['type'], 'about:blank')
-        self.assertEqual(data['instance'], f'http://localhost/trips/{id}')

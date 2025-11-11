@@ -189,6 +189,8 @@ def change_trip_owner(trip_id):
         raise ApiProblem('Failed to change owner of trip', 'The requested trip was not found', 404)
 
     if g.user.id != trip.owner:
+        if trip.private is True:
+            raise ApiProblem('Failed to change owner of trip', 'The requested trip was not found', 404)
         raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to change ownership the trip', 403)
 
     owner = request.json.get('owner', None)
