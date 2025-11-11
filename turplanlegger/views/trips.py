@@ -68,8 +68,8 @@ def update_trip(trip_id):
             trip_changed = True
         errors.extend(date_status.errors)
 
-    name = request.json.get('name', None)
-    private = request.json.get('private', None)
+    name = request.json.get('name', trip.name)
+    private = request.json.get('private', trip.private)
     updated_fields = []
     if name != trip.name:
         updated_fields.append('name')
