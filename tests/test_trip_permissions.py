@@ -456,3 +456,43 @@ class TripsPermissionsTestCase(unittest.TestCase):
         response = self.client.get(f'/trips/{id}', headers=self.headers_user1)
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(response.status_code, 404)
+
+    def test_delete_trip(self):
+        response = self.client.post('/trips', data=json.dumps(self.trip_read), headers=self.headers_json_user1)
+
+        self.assertEqual(response.status_code, 201)
+
+        data = json.loads(response.data.decode('utf-8'))
+        trip_id = data['id']
+
+        for user in (self.headers_user2, self.headers_user3):
+            response = self.client.delete(f'/trips/{trip_id}', headers=user)
+            self.assertEqual(response.status_code, 403)
+
+        response = self.client.delete(f'/trips/{trip_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 200)
+
+        for user in (self.headers_user1, self.headers_user2, self.headers_user3):
+            response = self.client.delete(f'/trips/{trip_id}', headers=user)
+            self.assertEqual(response.status_code, 404)
+
+    def test_delete_trip_private(self):
+        response = self.client.post('/trips', data=json.dumps(self.trip_read_private), headers=self.headers_json_user1)
+
+        self.assertEqual(response.status_code, 201)
+
+        data = json.loads(response.data.decode('utf-8'))
+        trip_id = data['id']
+
+        response = self.client.delete(f'/trips/{trip_id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 403)
+
+        response = self.client.delete(f'/trips/{trip_id}', headers=self.headers_user3)
+        self.assertEqual(response.status_code, 404)
+
+        response = self.client.delete(f'/trips/{trip_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 200)
+
+        for user in (self.headers_user1, self.headers_user2, self.headers_user3):
+            response = self.client.delete(f'/trips/{trip_id}', headers=user)
+            self.assertEqual(response.status_code, 404)
