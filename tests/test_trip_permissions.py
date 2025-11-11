@@ -57,8 +57,28 @@ class TripsPermissionsTestCase(unittest.TestCase):
                 },
             ],
         }
+        cls.trip_read_private = {
+            'name': 'trippin pete perms',
+            'private': True,
+            'permissions': [
+                {
+                    'subject_id': str(cls.user2.id),
+                    'access_level': 'READ',
+                },
+            ],
+        }
         cls.trip_modify = {
             'name': 'trippin pete perms',
+            'permissions': [
+                {
+                    'subject_id': str(cls.user2.id),
+                    'access_level': 'MODIFY',
+                },
+            ],
+        }
+        cls.trip_modify_private = {
+            'name': 'trippin pete perms',
+            'private': True,
             'permissions': [
                 {
                     'subject_id': str(cls.user2.id),
@@ -159,6 +179,29 @@ class TripsPermissionsTestCase(unittest.TestCase):
         self.assertEqual(len(data['trip']['permissions']), 1)
         self.assertEqual(data['trip']['permissions'][0]['subject_id'], str(self.user2.id))
 
+        # User 3 - ok
+        response = self.client.get(f'/trips/{trip_id}', headers=self.headers_user3)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_private_trip(self):
+        response = self.client.post('/trips', data=json.dumps(self.trip_read_private), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+        trip_id = data['id']
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(len(data['permissions']), 1)
+        self.assertEqual(data['permissions'][0]['subject_id'], str(self.user2.id))
+
+        # User 2 - ok
+        response = self.client.get(f'/trips/{trip_id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        self.assertEqual(len(data['trip']['permissions']), 1)
+        self.assertEqual(data['trip']['permissions'][0]['subject_id'], str(self.user2.id))
+
         # User 3 - not ok
         response = self.client.get(f'/trips/{trip_id}', headers=self.headers_user3)
         self.assertEqual(response.status_code, 404)
@@ -171,6 +214,48 @@ class TripsPermissionsTestCase(unittest.TestCase):
 
     def test_update_trip(self):
         response = self.client.post('/trips', data=json.dumps(self.trip_modify), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+        trip = json.loads(response.data.decode('utf-8'))
+        trip['name'] = 'Tripper'
+        response = self.client.put(
+            f'/trips/{trip["id"]}', data=json.dumps({'name': trip.get('name')}), headers=self.headers_json_user1
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data.get('trip'), trip)
+
+        # User 2 - ok
+        response = self.client.get(f'/trips/{trip["id"]}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        trip['name'] = 'Tripper2'
+        response = self.client.put(
+            f'/trips/{trip["id"]}', data=json.dumps({'name': trip.get('name')}), headers=self.headers_json_user2
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data.get('trip'), trip)
+
+        response = self.client.get(f'/trips/{trip["id"]}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+
+        # User 3 - not ok
+        response = self.client.put(
+            f'/trips/{trip["id"]}', data=json.dumps({'name': 'poopy'}), headers=self.headers_json_user3
+        )
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(response.status_code, 403)
+
+        self.assertEqual(data['title'], 'Insufficient permissions')
+        self.assertEqual(data['detail'], 'Not sufficient permissions to modify the trip')
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/trips/{trip["id"]}')
+
+    def test_update_private_trip(self):
+        response = self.client.post('/trips', data=json.dumps(self.trip_modify_private), headers=self.headers_json_user1)
         self.assertEqual(response.status_code, 201)
         trip = json.loads(response.data.decode('utf-8'))
         trip['name'] = 'Tripper'
@@ -263,7 +348,7 @@ class TripsPermissionsTestCase(unittest.TestCase):
         self.assertEqual(data['instance'], f'http://localhost/trips/{id}')
 
     def test_change_trip_owner(self):
-        response = self.client.post('/trips', data=json.dumps(self.trip_read), headers=self.headers_json_user1)
+        response = self.client.post('/trips', data=json.dumps(self.trip_read_private), headers=self.headers_json_user1)
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
         id = data['id']
