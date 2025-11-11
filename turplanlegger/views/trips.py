@@ -226,11 +226,13 @@ def delete_trip(trip_id):
     if not trip:
         raise ApiProblem('Failed to delete trip', 'The requested trip was not found', 404)
 
-    if g.user.id != trip.owner:
-        perms = Permission.verify(trip.owner, trip.permissions, g.user.id, AccessLevel.MODIFY)
-        if trip.private is True and perms is PermissionResult.NOT_FOUND:
-            raise ApiProblem('Failed to delete trip', 'The requested trip was not found', 404)
-        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to delete the trip', 403)
+    perms = Permission.verify(trip.owner, trip.permissions, g.user.id, AccessLevel.DELETE)
+    if perms is PermissionResult.NOT_FOUND:
+        if trip.private is True:
+            raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
+        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the trip', 403)
+    elif perms is PermissionResult.INSUFFICIENT_PERMISSIONS:
+        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the trip', 403)
 
     try:
         trip.delete()
