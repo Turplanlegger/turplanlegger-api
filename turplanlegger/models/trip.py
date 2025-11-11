@@ -100,7 +100,12 @@ class Trip:
         permissions[:] = [Permission.parse(permission) for permission in permissions]
 
         return Trip(
-            id=json.get('id', None), owner=g.user.id, name=json.get('name', None), dates=dates, permissions=permissions
+            owner=g.user.id,
+            name=json.get('name', None),
+            id=json.get('id', None),
+            private=json.get('private', False),
+            dates=dates,
+            permissions=permissions,
         )
 
     @property

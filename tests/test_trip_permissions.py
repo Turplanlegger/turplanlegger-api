@@ -255,7 +255,9 @@ class TripsPermissionsTestCase(unittest.TestCase):
         self.assertEqual(data['instance'], f'http://localhost/trips/{trip["id"]}')
 
     def test_update_private_trip(self):
-        response = self.client.post('/trips', data=json.dumps(self.trip_modify_private), headers=self.headers_json_user1)
+        response = self.client.post(
+            '/trips', data=json.dumps(self.trip_modify_private), headers=self.headers_json_user1
+        )
         self.assertEqual(response.status_code, 201)
         trip = json.loads(response.data.decode('utf-8'))
         trip['name'] = 'Tripper'
