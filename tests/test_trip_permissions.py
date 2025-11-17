@@ -1,5 +1,6 @@
 import json
 import unittest
+from datetime import datetime, timedelta
 
 from turplanlegger.app import create_app, db
 from turplanlegger.auth.utils import hash_password
@@ -529,3 +530,81 @@ class TripsPermissionsTestCase(unittest.TestCase):
 
         response = self.client.delete(f'/trips/{trip_id}', headers=self.headers_user2)
         self.assertEqual(response.status_code, 200)
+
+
+    def test_add_date_to_trip(self):
+        response = self.client.post('/trips', data=json.dumps(self.trip_read_private), headers=self.headers_json_user1)
+        self.assertEqual(response.status_code, 201)
+
+        data = json.loads(response.data.decode('utf-8'))
+        trip_id = data['id']
+
+        start_time = (datetime.now() + timedelta(days=7)).isoformat()
+        end_time = (datetime.now() + timedelta(days=14)).isoformat()
+
+        # User 2
+        # Ok
+        response = self.client.get(f'/trips/{trip_id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(len(data['trip']['dates']), 0)
+
+        # Not ok
+        response = self.client.patch(
+            f'/trips/{trip_id}/dates',
+            data=json.dumps(
+                {
+                    'start_time': start_time,
+                    'end_time': end_time,
+                }
+            ),
+            headers=self.headers_json_user2,
+        )
+        self.assertEqual(response.status_code, 403)
+
+        # Ok
+        # User 3
+        response = self.client.get(f'/trips/{trip_id}', headers=self.headers_user3)
+        self.assertEqual(response.status_code, 404)
+
+        # Not ok
+        response = self.client.patch(
+            f'/trips/{trip_id}/dates',
+            data=json.dumps(
+                {
+                    'start_time': start_time,
+                    'end_time': end_time,
+                }
+            ),
+            headers=self.headers_json_user3,
+        )
+
+        # Not ok
+        self.assertEqual(response.status_code, 404)
+
+        response = self.client.get(f'/trips/{id}', headers=self.headers_user1)
+
+        # User 1
+        response = self.client.get(f'/trips/{trip_id}', headers=self.headers_user1)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(len(data['trip']['dates']), 0)
+
+        response = self.client.patch(
+            f'/trips/{trip_id}/dates',
+            data=json.dumps(
+                {
+                    'start_time': start_time,
+                    'end_time': end_time,
+                }
+            ),
+            headers=self.headers_json_user1,
+        )
+        self.assertEqual(response.status_code, 201)
+
+        # User 2
+        # Ok
+        response = self.client.get(f'/trips/{trip_id}', headers=self.headers_user2)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(len(data['trip']['dates']), 1)
