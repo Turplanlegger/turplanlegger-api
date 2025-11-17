@@ -16,7 +16,11 @@ from . import api
 @api.route('/trips/<trip_id>', methods=['GET'])
 @auth
 def get_trip(trip_id):
-    trip = Trip.find_trip(trip_id)
+    try:
+        trip = Trip.find_trip(trip_id)
+    except (ValueError, TypeError):
+        raise ApiProblem('Failed to look up trip', 'Unknown error', 400)
+
     if trip and (
         trip.private is False
         or Permission.verify(trip.owner, trip.permissions, g.user.id, AccessLevel.READ) is PermissionResult.ALLOWED

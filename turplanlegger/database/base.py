@@ -576,14 +576,15 @@ class Database:
         """
         return self._insert(insert_ref, {'trip_id': trip_id, 'route_id': route_id})
 
-    def get_trip(self, id, deleted=False):
+    def get_trip(self, trip_id: int, deleted=False):
         select = 'SELECT * FROM trips WHERE id = %s'
 
         if deleted:
             select += ' AND deleted = TRUE'
         else:
             select += ' AND deleted = FALSE'
-        return self._fetchone(select, (id,))
+
+        return self._fetchone(select, (trip_id,))
 
     def get_trips_by_owner(self, owner_id: str, deleted=False):
         select = 'SELECT * FROM trips WHERE owner = %s'
