@@ -256,6 +256,14 @@ def add_trip_date(trip_id):
     if not trip:
         raise ApiProblem('Failed to add date to trip', 'The requested trip was not found', 404)
 
+    perms = Permission.verify(trip.owner, trip.permissions, g.user.id, AccessLevel.MODIFY)
+    if perms is PermissionResult.NOT_FOUND:
+        if trip.private is True:
+            raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
+        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the trip', 403)
+    if perms is PermissionResult.INSUFFICIENT_PERMISSIONS:
+        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the trip', 403)
+
     request.json['trip_id'] = trip_id
 
     try:
