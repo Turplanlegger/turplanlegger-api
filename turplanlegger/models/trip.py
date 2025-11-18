@@ -6,6 +6,7 @@ from uuid import UUID
 from flask import g
 
 from turplanlegger.app import db
+from turplanlegger.models.permission import Permission
 from turplanlegger.models.trip_date import TripDate
 
 JSON = Dict[str, any]
@@ -35,9 +36,10 @@ class Trip:
         routes (list): List of route ids that are related to the trip
         item_list (list): List of item list ids that are related to
                           the trip
+        permissions (list): List of permissions that are related to the trip
         create_time (datetime): Time of creation,
                                 Default: datetime.now()
-        update_time (datetime): Time of update,
+        update_time (datetime): Time of update
 
     """
 
@@ -62,6 +64,7 @@ class Trip:
         self.notes = kwargs.get('notes', [])
         self.routes = kwargs.get('routes', [])
         self.item_lists = kwargs.get('item_lists', [])
+        self.permissions = kwargs.get('permissions', None)
         self.create_time = kwargs.get('create_time', None) or datetime.now()
         self.update_time = kwargs.get('update_time', None)
 
@@ -71,7 +74,8 @@ class Trip:
             f'private={self.private}, dates={self.dates}, '
             f'notes={self.notes}, routes={self.routes}, '
             f'item_lists={self.item_lists}, '
-            f'create_time={self.create_time})'
+            f'create_time={self.create_time}, '
+            f'permission={self.permissions})'
         )
 
     @classmethod
@@ -89,11 +93,19 @@ class Trip:
         if not isinstance(dates, list):
             raise TypeError('dates has to be a list of objects with start and end dates')
         dates[:] = [TripDate.parse(date) for date in dates]
+
+        permissions = json.get('permissions', [])
+        if not isinstance(permissions, list):
+            raise TypeError('permissions has to be a list of permission objects')
+        permissions[:] = [Permission.parse(permission) for permission in permissions]
+
         return Trip(
-            id=json.get('id', None),
             owner=g.user.id,
             name=json.get('name', None),
+            id=json.get('id', None),
+            private=json.get('private', False),
             dates=dates,
+            permissions=permissions,
         )
 
     @property
@@ -109,6 +121,7 @@ class Trip:
             'routes': self.routes,
             'item_lists': self.item_lists,
             'create_time': self.create_time.isoformat(),
+            'permissions': [permission.serialize for permission in self.permissions],
         }
 
     def create(self) -> 'Trip':
@@ -120,6 +133,12 @@ class Trip:
                 date.trip_id = trip.id
                 dates.append(date.create())
             trip.dates = dates
+        if self.permissions:
+            permissions = []
+            for permission in self.permissions:
+                permission.object_id = trip.id
+                permissions.append(permission.create_trip())
+            trip.permissions = permissions
         return trip
 
     def delete(self) -> bool:
@@ -230,7 +249,7 @@ class Trip:
         return TRIP_DATE_UPDATE_STATUS(trip_changed, errors)
 
     @staticmethod
-    def find_trip(id: int) -> 'Trip':
+    def find_trip(trip_id: int) -> 'Trip':
         """Looks up an trip based on id
 
         Args:
@@ -239,10 +258,10 @@ class Trip:
         Returns:
             An Trip
         """
-        return Trip.get_trip(db.get_trip(id))
+        return Trip.get_trip(db.get_trip(int(trip_id)))
 
     @staticmethod
-    def find_trips_by_owner(owner_id: str) -> '[Trip]':
+    def find_trips_by_owner(owner_id: str) -> 'list[Trip]':
         """Looks up Trips by owner
 
         Args:
@@ -281,6 +300,7 @@ class Trip:
             return None
 
         trip = Trip(id=rec.id, owner=rec.owner, name=rec.name, private=rec.private, create_time=rec.create_time)
+        trip.permissions = Permission.find_trip_all_permissions(trip.id)
         trip.dates = TripDate.find_by_trip_id(trip.id)
         trip.notes = [item.note_id for item in db.get_trip_notes(trip.id)]
         trip.routes = [item.route_id for item in db.get_trip_routes(trip.id)]

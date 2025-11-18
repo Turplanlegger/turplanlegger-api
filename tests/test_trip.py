@@ -115,6 +115,15 @@ class TripsTestCase(unittest.TestCase):
                 }
             ],
         }
+        cls.trip_with_permissions = {
+            'name': 'trippin pete perms',
+            'permissions': [
+                {
+                    'subject_id': str(cls.user2.id),
+                    'access_level': 'read',
+                },
+            ],
+        }
 
         response = cls.client.post(
             '/login',
@@ -129,6 +138,20 @@ class TripsTestCase(unittest.TestCase):
 
         cls.headers_json = {'Content-type': 'application/json', 'Authorization': f'Bearer {data["token"]}'}
         cls.headers = {'Authorization': f'Bearer {data["token"]}'}
+
+        response = cls.client.post(
+            '/login',
+            data=json.dumps({'email': cls.user2.email, 'password': 'test'}),
+            headers={'Content-type': 'application/json'},
+        )
+
+        if response.status_code != 200:
+            raise RuntimeError('Failed to login')
+
+        data = json.loads(response.data.decode('utf-8'))
+
+        cls.headers_json2 = {'Content-type': 'application/json', 'Authorization': f'Bearer {data["token"]}'}
+        cls.headers2 = {'Authorization': f'Bearer {data["token"]}'}
 
     def tearDown(self):
         db.truncate_table('trips')
@@ -187,7 +210,7 @@ class TripsTestCase(unittest.TestCase):
 
         # Add note to trip
         response = self.client.patch(
-            '/trips/notes', data=json.dumps({'trip_id': trip_id, 'note_id': note_id}), headers=self.headers_json
+            f'/trips/{trip_id}/notes', data=json.dumps({'note_id': note_id}), headers=self.headers_json
         )
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
@@ -212,7 +235,7 @@ class TripsTestCase(unittest.TestCase):
 
         # Add route to trip
         response = self.client.patch(
-            '/trips/routes', data=json.dumps({'trip_id': trip_id, 'route_id': route_id}), headers=self.headers_json
+            f'/trips/{trip_id}/routes', data=json.dumps({'route_id': route_id}), headers=self.headers_json
         )
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
@@ -238,8 +261,8 @@ class TripsTestCase(unittest.TestCase):
 
         # Add item_list to trip
         response = self.client.patch(
-            '/trips/item_lists',
-            data=json.dumps({'trip_id': trip_id, 'item_list_id': item_list_id}),
+            f'/trips/{trip_id}/item_lists',
+            data=json.dumps({'item_list_id': item_list_id}),
             headers=self.headers_json,
         )
         self.assertEqual(response.status_code, 201)
@@ -261,7 +284,7 @@ class TripsTestCase(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get(f'/trips/{data["id"]}', headers=self.headers)
+        response = self.client.get(f'/trips/{data["id"]}', headers=self.headers2)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['trip']['owner'], str(self.user2.id))

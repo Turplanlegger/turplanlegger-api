@@ -1,9 +1,13 @@
 import time
+from uuid import UUID
 
 import psycopg
 import ujson
-from psycopg.rows import namedtuple_row
+from psycopg.rows import TupleRow, namedtuple_row
+from psycopg.types.enum import EnumInfo, register_enum
 from psycopg.types.json import Jsonb, set_json_dumps, set_json_loads
+
+from turplanlegger.models.access_level import AccessLevel
 
 
 class Database:
@@ -23,16 +27,20 @@ class Database:
         set_json_loads(ujson.loads)
 
         self.conn = self.connect()
-        self.cur = self.conn.cursor()
         self.logger.debug('Database connection opened')
 
         with app.open_resource('database/schema.sql') as schema:
             try:
                 with self.conn.transaction():
-                    self.cur.execute(schema.read())
+                    self.conn.execute(schema.read())
             except Exception as e:
                 self.logger.exception(e)
                 raise
+
+        info = EnumInfo.fetch(self.conn, 'access_level')
+        register_enum(info, self.conn, AccessLevel)
+        # Create cursor with ENUM
+        self.cur = self.conn.cursor()
 
         if app.config.get('CREATE_ADMIN_USER', False) and not self.check_admin_user(app.config.get('ADMIN_EMAIL')):
             self.logger.debug('Did not find admin user, creating one')
@@ -76,15 +84,20 @@ class Database:
                 'trips',
                 'trip_dates',
                 'item_lists',
+                'item_list_permissions',
                 'lists_items',
                 'users',
                 'routes',
+                'route_permissions',
                 'notes',
+                'note_permissions',
+                'trip_permissions',
                 'trips_notes_references',
                 'trips_routes_references',
                 'trips_item_lists_references',
             ]:
                 self.cur.execute(psycopg.sql.SQL('DROP TABLE IF EXISTS {} CASCADE'.format(table)))
+            self.cur.execute('DROP TYPE access_level CASCADE')
 
     def truncate_table(self, table: str):
         with self.conn.transaction():
@@ -215,6 +228,42 @@ class Database:
 
         return self._fetchall(select, [item_list_id])
 
+    # Item list permissions
+    def get_item_list_subject_permissions(self, object_id: int, subject_id: UUID):
+        select = """
+            SELECT access_level FROM item_list_permissions
+            WHERE object_id = %(object_id)s AND subject_id = %(subject_id)s
+        """
+        return self._fetchone(select, {'object_id': object_id, 'owner_id': subject_id})
+
+    def get_item_list_all_permissions(self, object_id: int):
+        "Select all note permissions based on note id"
+        select = 'SELECT object_id, access_level, subject_id FROM item_list_permissions WHERE object_id = %s'
+        return self._fetchall(select, (object_id,))
+
+    def create_item_list_permissions(self, permission):
+        insert = """
+            INSERT INTO item_list_permissions (object_id, subject_id, access_level)
+            VALUES (%(object_id)s, %(subject_id)s, %(access_level)s)
+            RETURNING *
+        """
+        return self._insert(insert, vars(permission))
+
+    def delete_item_list_permissions(self, object_id: int, subject_id: UUID):
+        """Delete permission by primary key"""
+        del_perms = 'DELETE FROM item_list_permissions WHERE object_id = %(object_id)s AND subject_id = %(subject_id)s'
+        return self._deleteone(del_perms, {'object_id': object_id, 'subject_id': subject_id})
+
+    def update_item_list_permission(self, permission):
+        """Update permission"""
+        update = """
+            UPDATE item_list_permissions
+                SET access_level = %(access_level)s
+                WHERE object_id = %(object_id)s AND subject_id = %(subject_id)s
+            RETURNING *
+        """
+        return self._updateone(update, vars(permission), returning=True)
+
     # Route
     def get_route(self, id, deleted=False):
         select = 'SELECT * FROM routes WHERE id = %s'
@@ -259,8 +308,37 @@ class Database:
         """
         return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
 
+    # Route permission
+    def get_route_all_permissions(self, object_id: int) -> list[TupleRow]:
+        "Select all route permissions based on route id"
+        select = 'SELECT object_id, access_level, subject_id FROM route_permissions WHERE object_id = %s'
+        return self._fetchall(select, (object_id,))
+
+    def create_route_permissions(self, permission) -> TupleRow:
+        insert = """
+            INSERT INTO route_permissions (object_id, subject_id, access_level)
+            VALUES (%(object_id)s, %(subject_id)s, %(access_level)s)
+            RETURNING *
+        """
+        return self._insert(insert, vars(permission))
+
+    def delete_route_permissions(self, object_id: int, subject_id: UUID) -> None:
+        """Delete route permission by primary key"""
+        del_perms = 'DELETE FROM route_permissions WHERE object_id = %(object_id)s AND subject_id = %(subject_id)s'
+        return self._deleteone(del_perms, {'object_id': object_id, 'subject_id': subject_id})
+
+    def update_route_permission(self, route_permission) -> TupleRow:
+        """Update route permission"""
+        update = """
+            UPDATE route_permissions
+                SET access_level = %(access_level)s
+                WHERE object_id = %(object_id)s AND subject_id = %(subject_id)s
+            RETURNING *
+        """
+        return self._updateone(update, vars(route_permission), returning=True)
+
     # Note
-    def get_note(self, id, deleted=False):
+    def get_note(self, id: int, deleted: bool = False):
         select = """
             SELECT * FROM notes WHERE id = %s
         """
@@ -287,19 +365,15 @@ class Database:
         """
         return self._insert(insert, vars(note))
 
-    def update_note(self, note, updated_fields=None):
-        update = 'UPDATE notes SET update_time=CURRENT_TIMESTAMP'
-        if 'name' in updated_fields:
-            if note.name is None:
-                update += ', name=NULL'
-            else:
-                update += ', name=%(name)s'
-
-        if 'content' in updated_fields:
-            update += ', content=%(content)s'
-
-        update += ' WHERE id=%(id)s RETURNING *'
-        return self._updateone(update, vars(note), returning=True)
+    def update_note(self, note):
+        update = """
+            UPDATE notes SET
+                update_time=CURRENT_TIMESTAMP,
+                name=%(name)s, content=%(content)s
+                WHERE id = %(id)s
+            RETURNING *
+        """
+        return self._updateone(update, {'name': note.name, 'content': note.content, 'id': note.id}, returning=True)
 
     def delete_note(self, id):
         update = """
@@ -336,6 +410,39 @@ class Database:
             RETURNING *
         """
         return self._updateone(update, {'id': id, 'content': content}, returning=True)
+
+    # Note permissions
+    def get_note_subject_permissions(self, note_id: int, owner_id: UUID):
+        select = 'SELECT access_level FROM note_permissions WHERE trip_id =%(note_id)s AND user_id = %(owner_id)s'
+        return self._fetchone(select, {'object_id': note_id, 'owner_id': owner_id})
+
+    def get_note_all_permissions(self, note_id: int):
+        "Select all note permissions based on note id"
+        select = 'SELECT object_id, access_level, subject_id FROM note_permissions WHERE object_id = %s'
+        return self._fetchall(select, (note_id,))
+
+    def create_note_permissions(self, note_permission):
+        insert_note_permission = """
+            INSERT INTO note_permissions (object_id, subject_id, access_level)
+            VALUES (%(object_id)s, %(subject_id)s, %(access_level)s)
+            RETURNING *
+        """
+        return self._insert(insert_note_permission, vars(note_permission))
+
+    def delete_note_permissions(self, object_id: int, subject_id: UUID):
+        """Delete permission by primary key"""
+        del_perms = 'DELETE FROM note_permissions WHERE object_id = %(object_id)s AND subject_id = %(subject_id)s'
+        return self._deleteone(del_perms, {'object_id': object_id, 'subject_id': subject_id})
+
+    def update_note_permission(self, note_permission):
+        """Update permission"""
+        update = """
+            UPDATE note_permissions
+                SET access_level = %(access_level)s
+                WHERE object_id = %(object_id)s AND subject_id = %(subject_id)s
+            RETURNING *
+        """
+        return self._updateone(update, vars(note_permission), returning=True)
 
     # User
     def get_user(self, id, deleted=False):
@@ -469,14 +576,15 @@ class Database:
         """
         return self._insert(insert_ref, {'trip_id': trip_id, 'route_id': route_id})
 
-    def get_trip(self, id, deleted=False):
+    def get_trip(self, trip_id: int, deleted=False):
         select = 'SELECT * FROM trips WHERE id = %s'
 
         if deleted:
             select += ' AND deleted = TRUE'
         else:
             select += ' AND deleted = FALSE'
-        return self._fetchone(select, (id,))
+
+        return self._fetchone(select, (trip_id,))
 
     def get_trips_by_owner(self, owner_id: str, deleted=False):
         select = 'SELECT * FROM trips WHERE owner = %s'
@@ -486,6 +594,23 @@ class Database:
         else:
             select += ' AND deleted = FALSE'
         return self._fetchall(select, (owner_id,))
+
+    # Trip permissions
+    def get_trip_subject_permissions(self, trip_id: int, owner_id: UUID):
+        select = 'SELECT access_level FROM trip_permissions WHERE object_id=%(trip_id)s AND user_id = %(owner_id)s'
+        return self._fetchone(select, {'object_id': trip_id, 'owner_id': owner_id})
+
+    def get_trip_all_permissions(self, trip_id: int):
+        select = 'SELECT object_id, access_level, subject_id FROM trip_permissions WHERE object_id = %s'
+        return self._fetchall(select, (trip_id,))
+
+    def create_trip_permissions(self, trip_permission):
+        insert_trip_permission = """
+            INSERT INTO trip_permissions (object_id, subject_id, access_level)
+            VALUES (%(object_id)s, %(subject_id)s, %(access_level)s)
+            RETURNING *
+        """
+        return self._insert(insert_trip_permission, vars(trip_permission))
 
     def get_trip_notes(self, id):
         select = 'SELECT note_id FROM trips_notes_references WHERE trip_id = %s'
@@ -614,7 +739,7 @@ class Database:
         """
         Delete, with optional return.
         """
-        self._log('_updateone', query, vars)
+        self._log('_deleteone', query, vars)
         with self.conn.transaction():
             self.cur.execute(query, vars)
             return self.cur.fetchone() if returning else None

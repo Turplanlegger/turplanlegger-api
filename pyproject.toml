@@ -43,6 +43,9 @@ dev = [
     "ruff==v0.14.3",
     "wheel==0.45.1"
 ]
+debug = [
+    "IPython==9.0.2"
+]
 prod = [
     "gunicorn[gthread]==23.0.0",
     "psycopg[c]==3.2.12"

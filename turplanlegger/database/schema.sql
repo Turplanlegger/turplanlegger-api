@@ -1,3 +1,10 @@
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'access_level') THEN
+        CREATE TYPE access_level AS ENUM ('READ', 'MODIFY', 'DELETE');
+    END IF;
+END$$;
+
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY,
     name text NOT NULL,
@@ -23,6 +30,13 @@ CREATE TABLE IF NOT EXISTS routes (
     delete_time timestamp without time zone
 );
 
+CREATE TABLE IF NOT EXISTS route_permissions (
+    object_id int NOT NULL REFERENCES routes (id) ON DELETE CASCADE,
+    subject_id UUID NOT NULL REFERENCES users (id),
+    access_level access_level NOT NULL,
+    PRIMARY KEY (object_id, subject_id)
+);
+
 CREATE TABLE IF NOT EXISTS item_lists (
     id serial PRIMARY KEY,
     name text,
@@ -31,6 +45,13 @@ CREATE TABLE IF NOT EXISTS item_lists (
     create_time timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted boolean DEFAULT FALSE,
     delete_time timestamp without time zone
+);
+
+CREATE TABLE IF NOT EXISTS item_list_permissions (
+    object_id int NOT NULL REFERENCES item_lists (id) ON DELETE CASCADE,
+    subject_id UUID NOT NULL REFERENCES users (id),
+    access_level access_level NOT NULL,
+    PRIMARY KEY (object_id, subject_id)
 );
 
 CREATE TABLE IF NOT EXISTS lists_items (
@@ -55,6 +76,13 @@ CREATE TABLE IF NOT EXISTS notes (
     delete_time timestamp without time zone
 );
 
+CREATE TABLE IF NOT EXISTS note_permissions (
+    object_id int NOT NULL REFERENCES notes (id) ON DELETE CASCADE,
+    subject_id UUID NOT NULL REFERENCES users (id),
+    access_level access_level NOT NULL,
+    PRIMARY KEY (object_id, subject_id)
+);
+
 CREATE TABLE IF NOT EXISTS trips (
     id serial PRIMARY KEY,
     name text NOT NULL,
@@ -64,6 +92,13 @@ CREATE TABLE IF NOT EXISTS trips (
     update_time timestamp without time zone,
     deleted boolean DEFAULT FALSE,
     delete_time timestamp without time zone
+);
+
+CREATE TABLE IF NOT EXISTS trip_permissions (
+    object_id int NOT NULL REFERENCES trips (id) ON DELETE CASCADE,
+    subject_id UUID NOT NULL REFERENCES users (id),
+    access_level access_level NOT NULL,
+    PRIMARY KEY (object_id, subject_id)
 );
 
 CREATE TABLE IF NOT EXISTS trip_dates (
@@ -79,7 +114,7 @@ CREATE TABLE IF NOT EXISTS trip_dates (
 );
 
 CREATE TABLE IF NOT EXISTS trips_notes_references (
-    trip_id int NOT NULL REFERENCES trips (id)ON DELETE CASCADE,
+    trip_id int NOT NULL REFERENCES trips (id) ON DELETE CASCADE,
     note_id int NOT NULL REFERENCES trips (id) ON DELETE CASCADE,
     PRIMARY KEY (trip_id, note_id)
 );

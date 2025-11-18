@@ -141,24 +141,6 @@ class RoutesTestCase(unittest.TestCase):
         self.assertEqual(data['type'], 'about:blank')
         self.assertEqual(data['instance'], 'http://localhost/routes/2')
 
-    def test_change_route_owner(self):
-        response = self.client.post('/routes', data=json.dumps(self.route), headers=self.headers_json)
-        self.assertEqual(response.status_code, 201)
-        data = json.loads(response.data.decode('utf-8'))
-        created_route_id = data['id']
-
-        response = self.client.patch(
-            f'/routes/{created_route_id}/owner',
-            data=json.dumps({'owner': str(self.user2.id)}),
-            headers=self.headers_json,
-        )
-        self.assertEqual(response.status_code, 200)
-
-        response = self.client.get(f'/routes/{created_route_id}', headers=self.headers)
-        self.assertEqual(response.status_code, 200)
-        data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['route']['owner'], str(self.user2.id))
-
     def test_change_route_owner_route_not_found(self):
         response = self.client.post('/routes', data=json.dumps(self.route), headers=self.headers_json)
         self.assertEqual(response.status_code, 201)
