@@ -38,6 +38,8 @@ class Note:
             raise ValueError("Missing mandatory field 'content'")
         if not isinstance(content, str):
             raise TypeError("'content' must be string")
+        if not content.strip():
+            raise ValueError("'content' must not be blank")
 
         self.owner = owner
         self.content = content
