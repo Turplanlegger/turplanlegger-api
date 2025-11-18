@@ -316,6 +316,14 @@ def select_trip_date(trip_id: int, trip_date_id: int):
     if not trip:
         raise ApiProblem('Failed to select trip date', 'The requested trip was not found', 404)
 
+    perms = Permission.verify(trip.owner, trip.permissions, g.user.id, AccessLevel.MODIFY)
+    if perms is PermissionResult.NOT_FOUND:
+        if trip.private is True:
+            raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
+        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the trip', 403)
+    if perms is PermissionResult.INSUFFICIENT_PERMISSIONS:
+        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the trip', 403)
+
     new_selected_date = None
     old_selected_date = None
     for date in trip.dates:
