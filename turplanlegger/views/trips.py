@@ -286,7 +286,7 @@ def remove_trip_date(trip_id, trip_date_id):
     if not trip:
         raise ApiProblem('Failed to remove date from trip', 'The requested trip was not found', 404)
 
-    perms = Permission.verify(trip.owner, trip.permissions, g.user.id, AccessLevel.DELETE)
+    perms = Permission.verify(trip.owner, trip.permissions, g.user.id, AccessLevel.MODIFY)
     if perms is PermissionResult.NOT_FOUND:
         raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
     if perms is PermissionResult.INSUFFICIENT_PERMISSIONS:
