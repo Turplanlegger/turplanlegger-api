@@ -210,7 +210,7 @@ class TripsTestCase(unittest.TestCase):
 
         # Add note to trip
         response = self.client.patch(
-            '/trips/notes', data=json.dumps({'trip_id': trip_id, 'note_id': note_id}), headers=self.headers_json
+            f'/trips/{trip_id}/notes', data=json.dumps({'note_id': note_id}), headers=self.headers_json
         )
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
@@ -235,7 +235,7 @@ class TripsTestCase(unittest.TestCase):
 
         # Add route to trip
         response = self.client.patch(
-            '/trips/routes', data=json.dumps({'trip_id': trip_id, 'route_id': route_id}), headers=self.headers_json
+            f'/trips/{trip_id}/routes', data=json.dumps({'route_id': route_id}), headers=self.headers_json
         )
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
@@ -261,8 +261,8 @@ class TripsTestCase(unittest.TestCase):
 
         # Add item_list to trip
         response = self.client.patch(
-            '/trips/item_lists',
-            data=json.dumps({'trip_id': trip_id, 'item_list_id': item_list_id}),
+            f'/trips/{trip_id}/item_lists',
+            data=json.dumps({'item_list_id': item_list_id}),
             headers=self.headers_json,
         )
         self.assertEqual(response.status_code, 201)
