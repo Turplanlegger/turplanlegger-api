@@ -531,7 +531,6 @@ class TripsPermissionsTestCase(unittest.TestCase):
         response = self.client.delete(f'/trips/{trip_id}', headers=self.headers_user2)
         self.assertEqual(response.status_code, 200)
 
-
     def test_add_date_to_trip(self):
         response = self.client.post('/trips', data=json.dumps(self.trip_read_private), headers=self.headers_json_user1)
         self.assertEqual(response.status_code, 201)
