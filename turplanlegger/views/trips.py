@@ -47,7 +47,7 @@ def add_trip():
 
 @api.route('/trips/<trip_id>', methods=['PUT'])
 @auth
-def update_trip(trip_id):
+def update_trip(trip_id: int):
     trip = Trip.find_trip(trip_id)
 
     if not trip:
@@ -100,7 +100,7 @@ def update_trip(trip_id):
 
 @api.route('/trips/<trip_id>/notes', methods=['PATCH'])
 @auth
-def add_note_to_trip(trip_id):
+def add_note_to_trip(trip_id: int):
     trip = Trip.find_trip(trip_id)
     if not trip:
         raise ApiProblem('Failed to add note to trip', 'Trip was not found', 404)
@@ -136,7 +136,7 @@ def add_note_to_trip(trip_id):
 
 @api.route('/trips/<trip_id>/routes', methods=['PATCH'])
 @auth
-def add_route_to_trip(trip_id):
+def add_route_to_trip(trip_id: int):
     trip = Trip.find_trip(trip_id)
     if not trip:
         raise ApiProblem('Failed to add note to trip', 'Trip was not found', 404)
@@ -166,8 +166,8 @@ def add_route_to_trip(trip_id):
 
 @api.route('/trips/<trip_id>/item_lists', methods=['PATCH'])
 @auth
-def add_item_list_to_trip(trip_id):
-    trip = Trip.find_trip(request.json.get('trip_id', None))
+def add_item_list_to_trip(trip_id: int):
+    trip = Trip.find_trip(trip_id)
     if not trip:
         raise ApiProblem('Failed to add item list to trip', 'Trip was not found', 404)
 
