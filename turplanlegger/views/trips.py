@@ -139,7 +139,7 @@ def add_note_to_trip(trip_id: int):
 def add_route_to_trip(trip_id: int):
     trip = Trip.find_trip(trip_id)
     if not trip:
-        raise ApiProblem('Failed to add note to trip', 'Trip was not found', 404)
+        raise ApiProblem('Failed to add route to trip', 'Trip was not found', 404)
 
     perms = Permission.verify(trip.owner, trip.permissions, g.user.id, AccessLevel.MODIFY)
     if perms is PermissionResult.NOT_FOUND:
