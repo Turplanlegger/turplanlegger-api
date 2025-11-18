@@ -44,12 +44,9 @@ class NotesTestCase(unittest.TestCase):
 
         cls.note_full = {'content': 'Are er kul', 'name': 'Best note ever'}
         cls.note_full2 = {'content': 'Petter er kul', 'name': 'Best note ever'}
-        cls.note_no_name = {
-            'content': 'Are er kul',
-        }
-        cls.note_no_content = {
-            'name': 'Best note ever',
-        }
+        cls.note_no_name = {'content': 'Are er kul'}
+        cls.note_no_content = {'name': 'Best note ever'}
+        cls.note_blank_content = {'content': '   ', 'name': 'Best note ever'}
 
         # User 1
         response = cls.client.post(
@@ -94,6 +91,16 @@ class NotesTestCase(unittest.TestCase):
         self.assertEqual(data['owner'], str(self.user1.id))
         self.assertEqual(data['content'], 'Are er kul')
         self.assertEqual(data['name'], 'Best note ever')
+
+    def test_add_note_blank_content(self):
+        response = self.client.post('/notes', data=json.dumps(self.note_blank_content), headers=self.headers_json)
+        self.assertEqual(response.status_code, 400)
+
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Failed to parse note')
+        self.assertEqual(data['detail'], "'content' must not be blank")
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], 'http://localhost/notes')
 
     def test_get_note(self):
         response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
@@ -304,6 +311,25 @@ class NotesTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['note']['name'], self.note_full['name'])
         self.assertEqual(data['note']['content'], 'It now has new content')
+
+    def test_update_note_blank_content(self):
+        response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+        note_id = data['id']
+
+        response = self.client.put(
+            f'/notes/{note_id}',
+            data=json.dumps(self.note_blank_content),
+            headers=self.headers_json,
+        )
+
+        self.assertEqual(response.status_code, 400)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['title'], 'Failed to parse note update')
+        self.assertEqual(data['detail'], "'content' must not be blank")
+        self.assertEqual(data['type'], 'about:blank')
+        self.assertEqual(data['instance'], f'http://localhost/notes/{note_id}')
 
     def test_get_my_note(self):
         response = self.client.post('/notes', data=json.dumps(self.note_full), headers=self.headers_json)
