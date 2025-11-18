@@ -100,7 +100,12 @@ class Trip:
         permissions[:] = [Permission.parse(permission) for permission in permissions]
 
         return Trip(
-            id=json.get('id', None), owner=g.user.id, name=json.get('name', None), dates=dates, permissions=permissions
+            owner=g.user.id,
+            name=json.get('name', None),
+            id=json.get('id', None),
+            private=json.get('private', False),
+            dates=dates,
+            permissions=permissions,
         )
 
     @property
@@ -244,7 +249,7 @@ class Trip:
         return TRIP_DATE_UPDATE_STATUS(trip_changed, errors)
 
     @staticmethod
-    def find_trip(id: int) -> 'Trip':
+    def find_trip(trip_id: int) -> 'Trip':
         """Looks up an trip based on id
 
         Args:
@@ -253,7 +258,7 @@ class Trip:
         Returns:
             An Trip
         """
-        return Trip.get_trip(db.get_trip(id))
+        return Trip.get_trip(db.get_trip(int(trip_id)))
 
     @staticmethod
     def find_trips_by_owner(owner_id: str) -> 'list[Trip]':
