@@ -758,3 +758,40 @@ class TripsTestCase(unittest.TestCase):
         response = self.client.put(f'/trips/{trip["id"]}', data=json.dumps(trip), headers=self.headers_json)
 
         self.assertEqual(response.status_code, 409)
+
+    def test_add_date_wrong_trip(self):
+        response = self.client.post('/trips', data=json.dumps(self.trip_with_date), headers=self.headers_json)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+        trip_id1 = data['id']
+
+        response = self.client.post('/trips', data=json.dumps(self.trip), headers=self.headers_json)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+        trip_id2 = data['id']
+
+        start_time = (datetime.now() + timedelta(days=7)).isoformat()
+        end_time = (datetime.now() + timedelta(days=14)).isoformat()
+        response = self.client.patch(
+            f'/trips/{trip_id1}/dates',
+            data=json.dumps(
+                {
+                    'start_time': start_time,
+                    'end_time': end_time,
+                    'trip_id': trip_id2,
+                }
+            ),
+            headers=self.headers_json,
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        response = self.client.get(f'/trips/{trip_id1}', headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(len(data['trip']['dates']), 2)
+
+        response = self.client.get(f'/trips/{trip_id2}', headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(len(data['trip']['dates']), 0)
