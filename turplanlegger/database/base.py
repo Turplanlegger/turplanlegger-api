@@ -543,14 +543,14 @@ class Database:
         update += ' WHERE id=%(id)s'
         return self._updateone(update, vars, returning=False)
 
-    def change_trip_owner(self, id, owner):
+    def change_trip_owner(self, id: int, owner_id: UUID):
         update = """
             UPDATE trips
-                SET owner=%(owner)s
+                SET owner=%(owner_id)s
                 WHERE id = %(id)s
             RETURNING *
         """
-        return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
+        return self._updateone(update, {'id': id, 'owner_id': owner_id}, returning=True)
 
     def add_trip_note_reference(self, trip_id, note_id):
         insert_ref = """

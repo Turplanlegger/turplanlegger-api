@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from flask import g, jsonify, request
 
 from turplanlegger.auth.decorators import auth
@@ -9,6 +11,7 @@ from turplanlegger.models.permission import Permission, PermissionResult
 from turplanlegger.models.route import Route
 from turplanlegger.models.trip import Trip
 from turplanlegger.models.trip_date import TripDate
+from turplanlegger.models.user import User
 
 from . import api
 
@@ -201,12 +204,18 @@ def change_trip_owner(trip_id):
             raise ApiProblem('Failed to change owner of trip', 'The requested trip was not found', 404)
         raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to change ownership the trip', 403)
 
-    owner = request.json.get('owner', None)
-    if not owner:
+    try:
+        owner_id = UUID(request.json.get('owner', None))
+    except ValueError:
         raise ApiProblem('Failed to change owner', 'The requested owner was not found', 404)
 
+    if not owner_id:
+        raise ApiProblem('Failed to change owner', 'The requested owner was not found', 404)
+
+    owner = User.find_user(owner_id)
+
     try:
-        trip.change_owner(owner)
+        trip.change_owner(owner.id)
     except ValueError as e:
         raise ApiProblem('Failed to change owner', str(e), 400)
     except Exception as e:
