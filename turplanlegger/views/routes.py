@@ -7,6 +7,7 @@ from turplanlegger.exceptions import ApiProblem
 from turplanlegger.models.access_level import AccessLevel
 from turplanlegger.models.permission import Permission, PermissionResult
 from turplanlegger.models.route import Route
+from turplanlegger.models.user import User
 
 from . import api
 
@@ -66,7 +67,6 @@ def add_route():
 @auth
 def change_route_owner(route_id):
     route = Route.find_route(route_id)
-
     if not route:
         raise ApiProblem('Route not found', 'The requested route was not found', 404)
 
@@ -77,13 +77,18 @@ def change_route_owner(route_id):
     if route.owner != g.user.id:
         raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to change owner the route', 403)
 
-    owner = request.json.get('owner', None)
+    try:
+        owner_id = UUID(request.json.get('owner', None))
+    except (ValueError, TypeError):
+        raise ApiProblem('Failed to change owner', 'Owner id must be passed as an UUID', 400)
 
-    if not owner:
-        raise ApiProblem('Owner is not int', 'Owner must be passed as an int', 400)
+    if not owner_id:
+        raise ApiProblem('Failed to change owner', 'The requested owner was not found', 404)
+
+    owner = User.find_user(owner_id)
 
     try:
-        route.change_owner(owner)
+        route.change_owner(owner.id)
     except ValueError as e:
         raise ApiProblem('Failed to change owner of route', str(e), 400)
     except Exception as e:

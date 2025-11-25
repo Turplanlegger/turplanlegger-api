@@ -206,8 +206,8 @@ def change_trip_owner(trip_id):
 
     try:
         owner_id = UUID(request.json.get('owner', None))
-    except ValueError:
-        raise ApiProblem('Failed to change owner', 'The requested owner was not found', 404)
+    except (ValueError, TypeError):
+        raise ApiProblem('Failed to change owner', 'Owner id must be passed as an UUID', 400)
 
     if not owner_id:
         raise ApiProblem('Failed to change owner', 'The requested owner was not found', 404)
