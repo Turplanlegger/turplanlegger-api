@@ -384,14 +384,13 @@ class Database:
         """
         return self._updateone(update, {'id': id}, returning=True)
 
-    def change_note_owner(self, id, owner):
+    def change_note_owner(self, note_id: int, owner_id: UUID):
         update = """
             UPDATE notes
-                SET owner=%(owner)s
-                WHERE id = %(id)s
-            RETURNING *
+                SET owner=%(owner_id)s
+                WHERE id=%(note_id)s
         """
-        return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
+        return self._updateone(update, {'id': note_id, 'owner': owner_id})
 
     def rename_note(self, id, name):
         update = """

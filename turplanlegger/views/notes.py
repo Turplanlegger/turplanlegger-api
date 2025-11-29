@@ -7,6 +7,7 @@ from turplanlegger.exceptions import ApiProblem
 from turplanlegger.models.access_level import AccessLevel
 from turplanlegger.models.note import Note
 from turplanlegger.models.permission import Permission, PermissionResult
+from turplanlegger.models.user import User
 
 from . import api
 
@@ -102,7 +103,7 @@ def update_note(note_id):
 
 @api.route('/notes/<note_id>/owner', methods=['PATCH'])
 @auth
-def change_note_owner(note_id):
+def change_note_owner(note_id: int):
     note = Note.find_note(note_id)
 
     if not note:
@@ -115,19 +116,24 @@ def change_note_owner(note_id):
     if note.owner != g.user.id:
         raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to change owner the note', 403)
 
-    owner = request.json.get('owner', None)
+    try:
+        owner_id = UUID(request.json.get('owner', None))
+    except (ValueError, TypeError):
+        raise ApiProblem('Failed to change owner', 'Owner id must be passed as an UUID', 400)
+
+    owner = User.find_user(owner_id)
 
     if not owner:
-        raise ApiProblem('Owner is not int', 'Owner must be passed as an str', 400)
+        raise ApiProblem('Failed to change owner', 'Requested owner not found', 404)
 
     try:
         note.change_owner(owner)
     except ValueError as e:
         raise ApiProblem('Failed to change owner of note', str(e), 400)
-    except Exception as e:
-        raise ApiProblem('Failed to change owner of note', str(e), 500)
+    except Exception:
+        raise ApiProblem('Failed to change owner of note', 'Unknown error', 500)
 
-    return jsonify(status='ok')
+    return (None, 204)
 
 
 @api.route('/notes/<note_id>/rename', methods=['PATCH'])
