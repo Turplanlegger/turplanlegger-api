@@ -272,19 +272,28 @@ class Trip:
         """
         return [Trip.get_trip(trip) for trip in db.get_trips_by_owner(owner_id)]
 
-    def change_owner(self, owner: str) -> 'Trip':
+    def change_owner(self, owner_id: UUID) -> bool:
         """Change owner of the Trip
-        Won't change name if new name is the same as current
+        Won't change owner if new owner is the same as current
 
         Args:
-            owner (str): id (uuid4) of the new owner
+            owner_id (UUID): id of the new owner
+
+        Raises:
+            ValueError if new owner is the same as old
+            Exception from database
 
         Returns:
             The updated Trip object
         """
-        if self.owner == owner:
+        if self.owner == owner_id:
             raise ValueError('new owner is same as old')
-        return Trip.get_trip(db.change_trip_owner(self.id, owner))
+
+        try:
+            db.change_trip_owner(self.id, owner_id)
+        except Exception:
+            raise
+        return True
 
     @classmethod
     def get_trip(cls, rec: NamedTuple) -> 'Trip':

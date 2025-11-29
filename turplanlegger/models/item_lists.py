@@ -194,9 +194,28 @@ class ItemList:
         """
         return [ItemList.get_item_list(item_list) for item_list in db.get_public_item_lists()]
 
-    def change_owner(self) -> 'ItemList':
-        """Changes owner of the ItemList"""
-        return ItemList.get_item_list(db.change_item_list_owner(self.id, self.owner))
+    def change_owner(self, owner_id: UUID) -> bool:
+        """Change owner of the item list
+        Won't change owner if new owner is the same as current
+
+        Args:
+            owner (UUID): id of the new owner
+
+        Raises:
+            ValueError if new owner is the same as old
+            Exception from database
+
+        Returns:
+            True if changed
+        """
+        if self.owner == owner_id:
+            raise ValueError('new owner is same as old')
+
+        try:
+            db.change_item_list_owner(self.id, owner_id)
+        except Exception:
+            raise
+        return True
 
     @staticmethod
     def add_permissions(permissions: tuple[Permission]) -> tuple[Permission]:
