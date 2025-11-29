@@ -299,14 +299,9 @@ class Database:
         """
         return self._updateone(update, {'id': id}, returning=True)
 
-    def change_route_owner(self, route_id: str, owner_id: UUID):
-        update = """
-            UPDATE routes
-                SET owner=%(owner_id)s
-                WHERE id=%(route_id)s
-            RETURNING *
-        """
-        return self._updateone(update, {'route_id': route_id, 'owner_id': owner_id}, returning=True)
+    def change_route_owner(self, route_id: int, owner_id: UUID) -> None:
+        update = 'UPDATE routes SET owner=%(owner_id)s WHERE id=%(route_id)s'
+        return self._updateone(update, {'route_id': route_id, 'owner_id': owner_id})
 
     # Route permission
     def get_route_all_permissions(self, object_id: int) -> list[TupleRow]:

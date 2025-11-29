@@ -87,14 +87,17 @@ def change_route_owner(route_id):
 
     owner = User.find_user(owner_id)
 
+    if not owner:
+        raise ApiProblem('Failed to change owner', 'Requested owner not found', 404)
+
     try:
         route.change_owner(owner.id)
     except ValueError as e:
         raise ApiProblem('Failed to change owner of route', str(e), 400)
-    except Exception as e:
-        raise ApiProblem('Failed to change owner of route', str(e), 500)
+    except Exception:
+        raise ApiProblem('Failed to change owner of note', 'Unknown error', 500)
 
-    return jsonify(status='ok')
+    return (None, 204)
 
 
 @api.route('/routes/mine', methods=['GET'])

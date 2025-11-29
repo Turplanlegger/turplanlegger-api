@@ -138,19 +138,29 @@ class Route:
         """
         return [Route.get_route(route) for route in db.get_routes_by_owner(owner_id)]
 
-    def change_owner(self, owner_id: UUID) -> 'Route':
+    def change_owner(self, owner_id: UUID) -> bool:
         """Change owner of the Route
         Won't change name if new name is the same as current
 
         Args:
             owner (UUID): id of the new owner
 
+        Raises:
+            ValueError if new owner is the same as old
+            Exception from database
+
         Returns:
             The updated Route object
         """
         if self.owner == owner_id:
             raise ValueError('new owner is same as old')
-        return Route.get_route(db.change_route_owner(self.id, owner_id))
+
+        try:
+            db.change_route_owner(self.id, owner_id)
+        except Exception:
+            raise
+        return True
+
 
     @staticmethod
     def add_permissions(permissions: tuple[Permission]) -> tuple[Permission]:
