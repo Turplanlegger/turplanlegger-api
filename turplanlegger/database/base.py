@@ -159,14 +159,9 @@ class Database:
         """
         return self._updateone(update, {'id': id, 'name': name}, returning=True)
 
-    def change_item_list_owner(self, id, owner):
-        update = """
-            UPDATE item_lists
-                SET owner=%(owner)s
-                WHERE id = %(id)s
-            RETURNING *
-        """
-        return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
+    def change_item_list_owner(self, item_list_id: int, owner_id: UUID) -> None:
+        update = 'UPDATE item_lists SET owner=%(owner_id)s WHERE id=%(item_list_id)s'
+        return self._updateone(update, {'item_list_id': item_list_id, 'owner': owner_id})
 
     def create_list_item(self, item_list_item):
         insert = """

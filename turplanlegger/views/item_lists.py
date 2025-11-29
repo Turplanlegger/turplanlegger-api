@@ -8,6 +8,7 @@ from turplanlegger.models.access_level import AccessLevel
 from turplanlegger.models.item_lists import ItemList
 from turplanlegger.models.list_items import ListItem
 from turplanlegger.models.permission import Permission, PermissionResult
+from turplanlegger.models.user import User
 
 from . import api
 
@@ -187,7 +188,7 @@ def toggle_list_item_check(item_list_id):
 
 @api.route('/item_lists/<item_list_id>/owner', methods=['PATCH'])
 @auth
-def change_item_list_owner(item_list_id):
+def change_item_list_owner(item_list_id: int):
     item_list = ItemList.find_item_list(item_list_id)
 
     if not item_list:
@@ -200,19 +201,24 @@ def change_item_list_owner(item_list_id):
     if item_list.owner != g.user.id:
         raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to change owner of the item list', 403)
 
-    if item_list.owner == request.json.get('owner', None):
-        raise ApiProblem('Failed to change owner of item list', 'New owner is the same as old', 400)
-    item_list.owner = request.json.get('owner', None)
+    try:
+        owner_id = UUID(request.json.get('owner', None))
+    except (ValueError, TypeError):
+        raise ApiProblem('Failed to change owner', 'Owner id must be passed as an UUID', 400)
 
-    if not item_list.owner:
-        raise ApiProblem('Owner is not str', 'Owner must be passed as an str', 400)
+    owner = User.find_user(owner_id)
+
+    if not owner:
+        raise ApiProblem('Failed to change owner', 'Requested owner not found', 404)
 
     try:
-        item_list.change_owner()
-    except Exception as e:
-        raise ApiProblem('Failed to change owner of item list', str(e), 500)
+        item_list.change_owner(owner)
+    except ValueError as e:
+        raise ApiProblem('Failed to change owner of item list', str(e), 400)
+    except Exception:
+        raise ApiProblem('Failed to change owner of item list', 'Unknown error', 500)
 
-    return jsonify(status='ok')
+    return (None, 204)
 
 
 @api.route('/item_lists/mine', methods=['GET'])
