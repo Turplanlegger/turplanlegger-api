@@ -123,6 +123,10 @@ class Note:
         Args:
             owner (UUID): id of the new owner
 
+        Raises:
+            ValueError if new owner is the same as old
+            Exception from database
+
         Returns:
             True if changed
         """
