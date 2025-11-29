@@ -274,7 +274,7 @@ class Trip:
 
     def change_owner(self, owner_id: UUID) -> bool:
         """Change owner of the Trip
-        Won't change name if new name is the same as current
+        Won't change owner if new owner is the same as current
 
         Args:
             owner_id (UUID): id of the new owner

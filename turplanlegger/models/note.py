@@ -118,7 +118,7 @@ class Note:
 
     def change_owner(self, owner_id: UUID) -> bool:
         """Change owner of the note
-        Won't change name if new name is the same as current
+        Won't change owner if new owner is the same as current
 
         Args:
             owner (UUID): id of the new owner

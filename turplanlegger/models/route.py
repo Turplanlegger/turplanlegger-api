@@ -140,7 +140,7 @@ class Route:
 
     def change_owner(self, owner_id: UUID) -> bool:
         """Change owner of the Route
-        Won't change name if new name is the same as current
+        Won't change owner if new owner is the same as current
 
         Args:
             owner (UUID): id of the new owner
@@ -160,7 +160,6 @@ class Route:
         except Exception:
             raise
         return True
-
 
     @staticmethod
     def add_permissions(permissions: tuple[Permission]) -> tuple[Permission]:
