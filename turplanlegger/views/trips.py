@@ -193,7 +193,7 @@ def add_item_list_to_trip(trip_id: int):
 
 @api.route('/trips/<trip_id>/owner', methods=['PATCH'])
 @auth
-def change_trip_owner(trip_id):
+def change_trip_owner(trip_id: int):
     trip = Trip.find_trip(trip_id)
     if not trip:
         raise ApiProblem('Failed to change owner of trip', 'The requested trip was not found', 404)
@@ -214,14 +214,17 @@ def change_trip_owner(trip_id):
 
     owner = User.find_user(owner_id)
 
+    if not owner:
+        raise ApiProblem('Failed to change owner', 'Requested owner not found', 404)
+
     try:
         trip.change_owner(owner.id)
     except ValueError as e:
         raise ApiProblem('Failed to change owner', str(e), 400)
-    except Exception as e:
-        raise ApiProblem('Failed to change owner', str(e), 500)
+    except Exception:
+        raise ApiProblem('Failed to change owner of note', 'Unknown error', 500)
 
-    return jsonify(status='ok')
+    return (None, 204)
 
 
 @api.route('/trips/mine', methods=['GET'])
