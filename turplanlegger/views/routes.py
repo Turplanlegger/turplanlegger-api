@@ -97,7 +97,7 @@ def change_route_owner(route_id):
     except Exception:
         raise ApiProblem('Failed to change owner of note', 'Unknown error', 500)
 
-    return (None, 204)
+    return ('', 204)
 
 
 @api.route('/routes/mine', methods=['GET'])

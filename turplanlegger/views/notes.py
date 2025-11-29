@@ -127,13 +127,13 @@ def change_note_owner(note_id: int):
         raise ApiProblem('Failed to change owner', 'Requested owner not found', 404)
 
     try:
-        note.change_owner(owner)
+        note.change_owner(owner.id)
     except ValueError as e:
         raise ApiProblem('Failed to change owner of note', str(e), 400)
     except Exception:
         raise ApiProblem('Failed to change owner of note', 'Unknown error', 500)
 
-    return (None, 204)
+    return ('', 204)
 
 
 @api.route('/notes/<note_id>/rename', methods=['PATCH'])

@@ -218,7 +218,7 @@ def change_item_list_owner(item_list_id: int):
     except Exception:
         raise ApiProblem('Failed to change owner of item list', 'Unknown error', 500)
 
-    return (None, 204)
+    return ('', 204)
 
 
 @api.route('/item_lists/mine', methods=['GET'])

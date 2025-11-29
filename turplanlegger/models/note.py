@@ -114,7 +114,7 @@ class Note:
 
     @staticmethod
     def find_note_by_owner(owner_id: str) -> tuple['Note']:
-        return (Note.get_note(note) for note in db.get_note_by_owner(owner_id))
+        return tuple(Note.get_note(note) for note in db.get_note_by_owner(owner_id))
 
     def change_owner(self, owner_id: UUID) -> bool:
         """Change owner of the note

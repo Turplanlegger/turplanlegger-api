@@ -376,7 +376,7 @@ class Database:
 
     def change_note_owner(self, note_id: int, owner_id: UUID) -> None:
         update = 'UPDATE notes SET owner=%(owner_id)s  WHERE id=%(note_id)s'
-        return self._updateone(update, {'note_id': note_id, 'owner': owner_id})
+        return self._updateone(update, {'note_id': note_id, 'owner_id': owner_id})
 
     def rename_note(self, id, name):
         update = """

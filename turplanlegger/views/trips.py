@@ -224,7 +224,7 @@ def change_trip_owner(trip_id: int):
     except Exception:
         raise ApiProblem('Failed to change owner of note', 'Unknown error', 500)
 
-    return (None, 204)
+    return ('', 204)
 
 
 @api.route('/trips/mine', methods=['GET'])
