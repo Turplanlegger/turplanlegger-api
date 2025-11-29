@@ -212,7 +212,7 @@ def change_item_list_owner(item_list_id: int):
         raise ApiProblem('Failed to change owner', 'Requested owner not found', 404)
 
     try:
-        item_list.change_owner(owner)
+        item_list.change_owner(owner.id)
     except ValueError as e:
         raise ApiProblem('Failed to change owner of item list', str(e), 400)
     except Exception:
