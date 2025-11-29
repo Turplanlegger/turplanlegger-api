@@ -282,7 +282,7 @@ class TripsTestCase(unittest.TestCase):
         response = self.client.patch(
             f'/trips/{data["id"]}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 204)
 
         response = self.client.get(f'/trips/{data["id"]}', headers=self.headers2)
         self.assertEqual(response.status_code, 200)
@@ -297,7 +297,7 @@ class TripsTestCase(unittest.TestCase):
         response = self.client.patch(
             f'/trips/{data["id"]}/owner', data=json.dumps({'owner': 'thisisnotanuuid123'}), headers=self.headers_json
         )
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
 
     def test_get_my_trips(self):
         response = self.client.post('/trips', data=json.dumps(self.trip), headers=self.headers_json)
