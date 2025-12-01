@@ -40,7 +40,7 @@ dev = [
     "hatch==1.15.1",
     "pytest==8.4.2",
     "pytest-cov==7.0.0",
-    "ruff==v0.14.3",
+    "ruff==v0.14.7",
     "wheel==0.45.1"
 ]
 debug = [
