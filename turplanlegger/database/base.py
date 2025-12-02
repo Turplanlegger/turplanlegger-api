@@ -160,14 +160,9 @@ class Database:
         """
         return self._updateone(update, {'id': id, 'name': name}, returning=True)
 
-    def change_item_list_owner(self, id, owner):
-        update = """
-            UPDATE item_lists
-                SET owner=%(owner)s
-                WHERE id = %(id)s
-            RETURNING *
-        """
-        return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
+    def change_item_list_owner(self, item_list_id: int, owner_id: UUID) -> None:
+        update = 'UPDATE item_lists SET owner=%(owner_id)s WHERE id=%(item_list_id)s'
+        return self._updateone(update, {'item_list_id': item_list_id, 'owner_id': owner_id})
 
     def create_list_item(self, item_list_item):
         insert = """
@@ -300,14 +295,9 @@ class Database:
         """
         return self._updateone(update, {'id': id}, returning=True)
 
-    def change_route_owner(self, id, owner):
-        update = """
-            UPDATE routes
-                SET owner=%(owner)s
-                WHERE id = %(id)s
-            RETURNING *
-        """
-        return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
+    def change_route_owner(self, route_id: int, owner_id: UUID) -> None:
+        update = 'UPDATE routes SET owner=%(owner_id)s WHERE id=%(route_id)s'
+        return self._updateone(update, {'route_id': route_id, 'owner_id': owner_id})
 
     # Route permission
     def get_route_all_permissions(self, object_id: int) -> list[TupleRow]:
@@ -385,14 +375,9 @@ class Database:
         """
         return self._updateone(update, {'id': id}, returning=True)
 
-    def change_note_owner(self, id, owner):
-        update = """
-            UPDATE notes
-                SET owner=%(owner)s
-                WHERE id = %(id)s
-            RETURNING *
-        """
-        return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
+    def change_note_owner(self, note_id: int, owner_id: UUID) -> None:
+        update = 'UPDATE notes SET owner=%(owner_id)s  WHERE id=%(note_id)s'
+        return self._updateone(update, {'note_id': note_id, 'owner_id': owner_id})
 
     def rename_note(self, id, name):
         update = """
@@ -544,14 +529,9 @@ class Database:
         update += ' WHERE id=%(id)s'
         return self._updateone(update, vars, returning=False)
 
-    def change_trip_owner(self, id, owner):
-        update = """
-            UPDATE trips
-                SET owner=%(owner)s
-                WHERE id = %(id)s
-            RETURNING *
-        """
-        return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
+    def change_trip_owner(self, trip_id: int, owner_id: UUID) -> None:
+        update = 'UPDATE trips SET owner=%(owner_id)s WHERE id=%(trip_id)s'
+        return self._updateone(update, {'trip_id': trip_id, 'owner_id': owner_id})
 
     def add_trip_note_reference(self, trip_id, note_id):
         insert_ref = """

@@ -279,7 +279,7 @@ class ItemListsTestCase(unittest.TestCase):
         response = self.client.patch(
             f'/item_lists/{list_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 204)
 
         response = self.client.get(f'/item_lists/{list_id}', headers=self.headers)
         self.assertEqual(response.status_code, 404)
