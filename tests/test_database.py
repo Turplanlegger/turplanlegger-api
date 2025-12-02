@@ -10,15 +10,7 @@ from turplanlegger.auth.utils import hash_password
 class UsersTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        config = {
-            'TESTING': True,
-            'SECRET_KEY': 'test',
-            'SECRET_KEY_ID': 'test',
-            'LOG_LEVEL': 'INFO',
-            'CREATE_ADMIN_USER': False,
-        }
-
-        cls.app = create_app(config)
+        cls.app = create_app()
         cls.client = cls.app.test_client()
         cls.hashed_password = hash_password('test')
         cls.user_id = uuid4()

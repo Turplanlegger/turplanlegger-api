@@ -9,15 +9,7 @@ from turplanlegger.models.user import User
 class ItemListsTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        config = {
-            'TESTING': True,
-            'SECRET_KEY': 'test',
-            'SECRET_KEY_ID': 'test',
-            'LOG_LEVEL': 'INFO',
-            'CREATE_ADMIN_USER': True,
-        }
-
-        cls.app = create_app(config)
+        cls.app = create_app()
         cls.client = cls.app.test_client()
 
         cls.user1 = User.create(
