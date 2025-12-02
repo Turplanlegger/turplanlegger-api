@@ -7,6 +7,7 @@ from httpx import HTTPError
 from jwt import DecodeError, ExpiredSignatureError, InvalidAudienceError
 
 from turplanlegger.models.user import User
+from turplanlegger.utils.config import config
 
 JSON = dict[str, Any]
 dt = datetime.datetime
@@ -30,7 +31,7 @@ class JWT:
 
         try:
             jsonRes = jwt.decode(
-                token, key, algorithms=[unverified_header['alg']], audience=current_app.config['AUDIENCE']
+                token, key, algorithms=[unverified_header['alg']], audience=config.audience
             )
         except (DecodeError, ExpiredSignatureError, InvalidAudienceError):
             raise
@@ -53,7 +54,7 @@ class JWT:
 
         try:
             jsonRes = jwt.decode(
-                token, key, algorithms=[unverified_header['alg']], audience=current_app.config['AUDIENCE']
+                token, key, algorithms=[unverified_header['alg']], audience=config.audience
             )
         except (DecodeError, ExpiredSignatureError, InvalidAudienceError):
             raise
@@ -69,7 +70,7 @@ class JWT:
 
     def find_correct_key(self, unverified_header: str) -> str:
         try:
-            response = current_app.http_client.get(current_app.config['AZURE_AD_B2C_KEY_URL'])
+            response = current_app.http_client.get(config.azure_ad_b2c_key_url)
             response.raise_for_status()
         except HTTPError:
             raise
@@ -86,8 +87,8 @@ class JWT:
 
         if rsa_key:
             key = rsa_key
-        elif unverified_header['kid'] == current_app.config['SECRET_KEY_ID']:
-            key = current_app.config['SECRET_KEY']
+        elif unverified_header['kid'] == config.secret_key_id:
+            key = config.secret_key
         else:
             key = ''
 
@@ -109,9 +110,9 @@ class JWT:
     def tokenize(self, algorithm: str = 'HS256') -> str:
         return jwt.encode(
             self.serialize,
-            key=current_app.config['SECRET_KEY'],
+            key=config.secret_key,
             algorithm=algorithm,
-            headers={'kid': current_app.config['SECRET_KEY_ID']},
+            headers={'kid': config.secret_key_id},
         )
 
     def __repr__(self) -> str:

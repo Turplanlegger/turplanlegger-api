@@ -7,6 +7,7 @@ from psycopg.rows import TupleRow, namedtuple_row
 from psycopg.types.enum import EnumInfo, register_enum
 from psycopg.types.json import Jsonb, set_json_dumps, set_json_loads
 
+from turplanlegger.utils.config import config
 from turplanlegger.models.access_level import AccessLevel
 
 
@@ -18,9 +19,9 @@ class Database:
 
     def init_db(self, app):
         self.logger = app.logger
-        self.uri = app.config.get('DATABASE_URI')
-        self.max_retries = app.config.get('DATABASE_MAX_RETRIES', 5)
-        self.timeout = app.config.get('DATABASE_TIMEOUT', 10)
+        self.uri = config.database_uri
+        self.max_retries = config.database_max_retries
+        self.timeout = config.database_timeout
 
         # Use a faster dump function
         set_json_dumps(ujson.dumps)
@@ -42,11 +43,11 @@ class Database:
         # Create cursor with ENUM
         self.cur = self.conn.cursor()
 
-        if app.config.get('CREATE_ADMIN_USER', False) and not self.check_admin_user(app.config.get('ADMIN_EMAIL')):
+        if config.create_admin_user is True and not self.check_admin_user(config.admin_email):
             self.logger.debug('Did not find admin user, creating one')
             from turplanlegger.utils.admin_user import create_admin_user
 
-            create_admin_user(email=app.config.get('ADMIN_EMAIL'), password=app.config.get('ADMIN_PASSWORD'))
+            create_admin_user(email=config.admin_email, password=config.admin_password)
 
     def connect(self):
         retry = 0
