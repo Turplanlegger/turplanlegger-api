@@ -95,7 +95,7 @@ def change_route_owner(route_id):
     except ValueError as e:
         raise ApiProblem('Failed to change owner of route', str(e), 400)
     except Exception:
-        raise ApiProblem('Failed to change owner of note', 'Unknown error', 500)
+        raise ApiProblem('Failed to change owner of route', 'Unknown error', 500)
 
     return ('', 204)
 

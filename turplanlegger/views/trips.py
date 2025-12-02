@@ -222,7 +222,7 @@ def change_trip_owner(trip_id: int):
     except ValueError as e:
         raise ApiProblem('Failed to change owner', str(e), 400)
     except Exception:
-        raise ApiProblem('Failed to change owner of note', 'Unknown error', 500)
+        raise ApiProblem('Failed to change owner of trip', 'Unknown error', 500)
 
     return ('', 204)
 
