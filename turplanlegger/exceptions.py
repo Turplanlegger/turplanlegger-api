@@ -1,9 +1,11 @@
 import traceback
 from typing import Any, Dict, Optional, Tuple, Union
 
-from flask import Response, current_app, jsonify, request
+from flask import Response, jsonify, request
 from werkzeug.exceptions import HTTPException
 from werkzeug.routing import RoutingException
+
+from turplanlegger.utils.logger import log
 
 
 class ApiProblem(Exception):
@@ -58,7 +60,7 @@ class ExceptionHandlers:
 
 def handle_http_error(problem: HTTPException) -> Tuple[Response, int]:
     if problem.code >= 500:
-        current_app.logger.exception(problem)
+        log.exception(problem)
     return (
         jsonify(
             {
@@ -84,7 +86,7 @@ def handle_auth_error(error: AuthError) -> Tuple[Response, int, Dict[str, Any]]:
 
 def handle_api_problem(problem: ApiProblem) -> Tuple[Response, int, Dict[str, Any]]:
     if problem.status >= 500:
-        current_app.logger.exception(problem)
+        log.exception(problem)
     return (
         jsonify(
             {
@@ -102,7 +104,7 @@ def handle_api_problem(problem: ApiProblem) -> Tuple[Response, int, Dict[str, An
 
 def handle_api_error(error: ApiError) -> Tuple[Response, int]:
     if error.code >= 500:
-        current_app.logger.exception(error)
+        log.exception(error)
     return jsonify(
         {'status': 'error', 'message': error.message, 'code': error.code, 'errors': error.errors}
     ), error.code
@@ -114,5 +116,5 @@ def handle_exception(error: Exception) -> Union[Tuple[Response, int], Exception]
     if isinstance(error, RoutingException):
         return error
 
-    current_app.logger.exception(error)
+    log.exception(error)
     return jsonify({'status': 'error', 'message': str(error), 'code': 500, 'errors': [traceback.format_exc()]}), 500
