@@ -30,9 +30,7 @@ class JWT:
         key = cls.find_correct_key(token, unverified_header)
 
         try:
-            jsonRes = jwt.decode(
-                token, key, algorithms=[unverified_header['alg']], audience=config.audience
-            )
+            jsonRes = jwt.decode(token, key, algorithms=[unverified_header['alg']], audience=config.audience)
         except (DecodeError, ExpiredSignatureError, InvalidAudienceError):
             raise
 
@@ -53,9 +51,7 @@ class JWT:
         key = cls.find_correct_key(token, unverified_header)
 
         try:
-            jsonRes = jwt.decode(
-                token, key, algorithms=[unverified_header['alg']], audience=config.audience
-            )
+            jsonRes = jwt.decode(token, key, algorithms=[unverified_header['alg']], audience=config.audience)
         except (DecodeError, ExpiredSignatureError, InvalidAudienceError):
             raise
 

@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from os import environ
-from typing import Any, Dict
 
 
 @dataclass(frozen=True, repr=False)
@@ -24,13 +23,17 @@ class Config:
 
     @classmethod
     def from_env(cls) -> 'Config':
-
         return cls(
             debug=Config.get_config_val('DEBUG', bool, False),
             secret_key=Config.get_config_val('SECRET_KEY', str, required=True),
             secret_key_id=Config.get_config_val('SECRET_KEY_ID', str, required=True),
             audience=Config.get_config_val('AUDIENCE', str, '0149fc65-259e-4895-9034-e144c242f733', required=True),
-            azure_ad_b2c_key_url=Config.get_config_val('AZURE_AD_B2C_KEY_URL', str, 'https://turplanlegger.b2clogin.com/turplanlegger.onmicrosoft.com/discovery/v2.0/keys?p=b2c_1_signin', required=True),
+            azure_ad_b2c_key_url=Config.get_config_val(
+                'AZURE_AD_B2C_KEY_URL',
+                str,
+                'https://turplanlegger.b2clogin.com/turplanlegger.onmicrosoft.com/discovery/v2.0/keys?p=b2c_1_signin',
+                required=True,
+            ),
             token_expire_time=Config.get_config_val('TOKEN_EXPIRE_TIME', int, 86400, required=True),
             create_admin_user=Config.get_config_val('CREATE_ADMIN_USER', bool, False),
             admin_email=Config.get_config_val('ADMIN_EMAIL', str),
@@ -41,7 +44,7 @@ class Config:
             log_level=Config.get_config_val('LOG_LEVEL', str, 'WARNING', required=True).upper(),
             log_to_file=Config.get_config_val('LOG_TO_FILE', bool, False),
             log_file_path=Config.get_config_val('LOG_FILE_PATH', bool),
-            cors_origins=Config.get_config_val('CORS_ORIGINS', tuple, tuple('http://localhost:3000'), required=True)
+            cors_origins=Config.get_config_val('CORS_ORIGINS', tuple, tuple('http://localhost:3000'), required=True),
         )
 
     @staticmethod

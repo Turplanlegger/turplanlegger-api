@@ -7,8 +7,8 @@ from psycopg.rows import TupleRow, namedtuple_row
 from psycopg.types.enum import EnumInfo, register_enum
 from psycopg.types.json import Jsonb, set_json_dumps, set_json_loads
 
-from turplanlegger.utils.config import config
 from turplanlegger.models.access_level import AccessLevel
+from turplanlegger.utils.config import config
 
 
 class Database:
