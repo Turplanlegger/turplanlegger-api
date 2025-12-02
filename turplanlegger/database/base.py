@@ -19,7 +19,6 @@ class Database:
             self.init_db
 
     def init_db(self, app):
-        log_db
         self.uri = config.database_uri
         self.max_retries = config.database_max_retries
         self.timeout = config.database_timeout
