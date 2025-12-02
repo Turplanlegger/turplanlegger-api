@@ -113,14 +113,28 @@ class Note:
         return Note.get_note(db.get_note(id))
 
     @staticmethod
-    def find_note_by_owner(owner_id: str) -> 'Note':
-        return [Note.get_note(note) for note in db.get_note_by_owner(owner_id)]
+    def find_note_by_owner(owner_id: str) -> tuple['Note']:
+        return tuple(Note.get_note(note) for note in db.get_note_by_owner(owner_id))
 
-    def change_owner(self, owner: str) -> 'Note':
-        if self.owner == owner:
+    def change_owner(self, owner_id: UUID) -> bool:
+        """Change owner of the note
+        Won't change owner if new owner is the same as current
+
+        Args:
+            owner (UUID): id of the new owner
+
+        Raises:
+            ValueError if new owner is the same as old
+            Exception from database
+
+        Returns:
+            True if changed
+        """
+        if self.owner == owner_id:
             raise ValueError('new owner is same as old')
 
-        return Note.get_note(db.change_note_owner(self.id, owner))
+        db.change_note_owner(self.id, owner_id)
+        return True
 
     @staticmethod
     def add_permissions(permissions: tuple[Permission]) -> tuple[Permission]:

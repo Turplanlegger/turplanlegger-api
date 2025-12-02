@@ -369,7 +369,7 @@ class NotesPermissionTestCase(unittest.TestCase):
         response = self.client.patch(
             f'/notes/{note_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user1
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 204)
 
         # Not ok
         response = self.client.get(f'/notes/{note_id}', headers=self.headers_user1)
@@ -425,7 +425,7 @@ class NotesPermissionTestCase(unittest.TestCase):
         response = self.client.patch(
             f'/notes/{note_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user1
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 204)
 
         # Not ok
         response = self.client.get(f'/notes/{note_id}', headers=self.headers_user1)
@@ -481,7 +481,7 @@ class NotesPermissionTestCase(unittest.TestCase):
         response = self.client.patch(
             f'/notes/{note_id}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json_user1
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 204)
 
         # Not ok
         response = self.client.get(f'/notes/{note_id}', headers=self.headers_user1)
