@@ -147,7 +147,6 @@ class Route:
 
         Raises:
             ValueError if new owner is the same as old
-            Exception from database
 
         Returns:
             The updated Route object
@@ -155,10 +154,7 @@ class Route:
         if self.owner == owner_id:
             raise ValueError('new owner is same as old')
 
-        try:
-            db.change_route_owner(self.id, owner_id)
-        except Exception:
-            raise
+        db.change_route_owner(self.id, owner_id)
         return True
 
     @staticmethod

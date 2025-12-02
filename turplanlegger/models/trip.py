@@ -289,10 +289,7 @@ class Trip:
         if self.owner == owner_id:
             raise ValueError('new owner is same as old')
 
-        try:
-            db.change_trip_owner(self.id, owner_id)
-        except Exception:
-            raise
+        db.change_trip_owner(self.id, owner_id)
         return True
 
     @classmethod

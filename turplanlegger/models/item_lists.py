@@ -211,10 +211,7 @@ class ItemList:
         if self.owner == owner_id:
             raise ValueError('new owner is same as old')
 
-        try:
-            db.change_item_list_owner(self.id, owner_id)
-        except Exception:
-            raise
+        db.change_item_list_owner(self.id, owner_id)
         return True
 
     @staticmethod
