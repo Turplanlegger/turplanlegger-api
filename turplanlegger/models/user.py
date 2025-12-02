@@ -122,7 +122,7 @@ class User:
                 raise ValueError('Password too short')
         try:
             password = utils.hash_password(password)
-        except Exception as e:
+        except Exception:
             raise ValueError('Failed to create user')
 
         return User(
