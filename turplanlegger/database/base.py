@@ -9,6 +9,7 @@ from psycopg.types.json import Jsonb, set_json_dumps, set_json_loads
 
 from turplanlegger.models.access_level import AccessLevel
 from turplanlegger.utils.config import config
+from turplanlegger.utils.logger import log_db
 
 
 class Database:
@@ -18,7 +19,7 @@ class Database:
             self.init_db
 
     def init_db(self, app):
-        self.logger = app.logger
+        log_db = app.logger
         self.uri = config.database_uri
         self.max_retries = config.database_max_retries
         self.timeout = config.database_timeout
@@ -28,14 +29,14 @@ class Database:
         set_json_loads(ujson.loads)
 
         self.conn = self.connect()
-        self.logger.debug('Database connection opened')
+        log_db.debug('Database connection opened')
 
         with app.open_resource('database/schema.sql') as schema:
             try:
                 with self.conn.transaction():
                     self.conn.execute(schema.read())
             except Exception as e:
-                self.logger.exception(e)
+                log_db.exception(e)
                 raise
 
         info = EnumInfo.fetch(self.conn, 'access_level')
@@ -44,7 +45,7 @@ class Database:
         self.cur = self.conn.cursor()
 
         if config.create_admin_user is True and not self.check_admin_user(config.admin_email):
-            self.logger.debug('Did not find admin user, creating one')
+            log_db.debug('Did not find admin user, creating one')
             from turplanlegger.utils.admin_user import create_admin_user
 
             create_admin_user(email=config.admin_email, password=config.admin_password)
@@ -62,14 +63,14 @@ class Database:
                 )
                 break
             except Exception as e:
-                self.logger.exception(str(e))
+                log_db.exception(str(e))
                 retry += 1
                 if retry > self.max_retries:
                     conn = None
                     break
                 else:
                     backoff = 2**retry
-                    self.logger.warning(f'Retry attempt {retry}/{self.max_retries} (wait={backoff}s)...')
+                    log_db.warning(f'Retry database connection attempt {retry}/{self.max_retries} (wait={backoff}s)...')
                     time.sleep(backoff)
         if conn:
             return conn
@@ -726,7 +727,7 @@ class Database:
             return self.cur.fetchone() if returning else None
 
     def _log(self, func_name, query, vars):
-        self.logger.debug(
+        log_db.debug(
             '\n{stars} {func_name} {stars}\n{query}'.format(
                 stars='*' * 20, func_name=func_name, query=self.cur.mogrify(query, vars)
             )
