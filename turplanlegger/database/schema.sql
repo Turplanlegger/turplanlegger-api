@@ -69,6 +69,7 @@ CREATE TABLE IF NOT EXISTS notes (
     id serial PRIMARY KEY,
     name text,
     content text NOT NULL,
+    private boolean DEFAULT TRUE,
     owner UUID NOT NULL REFERENCES users (id),
     create_time timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time timestamp without time zone,
@@ -86,7 +87,7 @@ CREATE TABLE IF NOT EXISTS note_permissions (
 CREATE TABLE IF NOT EXISTS trips (
     id serial PRIMARY KEY,
     name text NOT NULL,
-    private boolean DEFAULT FALSE,
+    private boolean DEFAULT TRUE,
     owner UUID NOT NULL REFERENCES users (id),
     create_time timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time timestamp without time zone,
