@@ -15,13 +15,18 @@ class Note:
     Args:
         owner (UUID): The UUID4 of the owner of the note
         content (str): The main text content of the note
+        name (str): Name or title of the note
+                    Default: None
+        private (bool): Privacy of the note.
+                        Default: True
         **kwargs: Arbitrary keyword arguments
 
     Attributes:
         owner (UUID): The UUID4 of the owner of the note
         content (str): The main text content of the note
         id (int): Optional, the ID of the note
-        name (str): Optional, the name/title of the note
+        name (str): The name/title of the note
+        private (bool): Privacy of the note
         permissions (list): List of permissions related to the note
         create_time (datetime): Time of creation
         update_time (datetime): Time of last update
