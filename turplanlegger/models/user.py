@@ -31,8 +31,7 @@ class User:
         private (bool): Flag if the user should be private or public
         deleted (bool): Flag if the user has logicaly been deleted
         delete_time (datetime): Time of the deletion of the user
-        create_time (datetime): Time of creation,
-                                Default: datetime.now()
+        create_time (datetime): Optional, time of creation
     """
 
     def __init__(

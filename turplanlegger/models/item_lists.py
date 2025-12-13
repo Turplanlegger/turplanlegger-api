@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Dict, NamedTuple
 from uuid import UUID
 
@@ -34,8 +33,7 @@ class ItemList:
                       Default: empty list
         items_checked (list): list of items that are checked
         permissions (list): List of permissions related to the item list
-        create_time (datetime): Time of creation,
-                                Default: datetime.now()
+        create_time (datetime): Time of creation
     """
 
     def __init__(self, owner: UUID, private: bool = True, **kwargs) -> None:
@@ -57,7 +55,7 @@ class ItemList:
         self.items = kwargs.get('items', [])
         self.items_checked = kwargs.get('items_checked', [])
         self.permissions = kwargs.get('permissions', None)
-        self.create_time = kwargs.get('create_time', None) or datetime.now()
+        self.create_time = kwargs.get('create_time', None)
 
     def __repr__(self):
         return (

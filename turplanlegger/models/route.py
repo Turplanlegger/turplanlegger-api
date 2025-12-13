@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Dict, NamedTuple
 from uuid import UUID
 
@@ -28,8 +27,7 @@ class Route:
                                 that makes up the path/route
         route_history (list): List of routes that makes up history
         permissions (list): List of permissions related to the route
-        create_time (datetime): Time of creation,
-                                Default: datetime.now()
+        create_time (datetime): Optional, time of creation
     """
 
     def __init__(self, owner: UUID, route: JSON, **kwargs) -> None:
@@ -47,7 +45,7 @@ class Route:
         self.comment = kwargs.get('comment', None)
         self.route_history = kwargs.get('route_history', [])
         self.permissions = kwargs.get('permissions', None)
-        self.create_time = kwargs.get('create_time', None) or datetime.now()
+        self.create_time = kwargs.get('create_time', None)
 
     def __repr__(self):
         return (
