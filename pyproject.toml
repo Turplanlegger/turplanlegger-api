@@ -48,7 +48,7 @@ debug = [
 ]
 prod = [
     "gunicorn[gthread]==23.0.0",
-    "psycopg[c]==3.2.12"
+    "psycopg[c]==3.2.13"
 ]
 
 [project.urls]
