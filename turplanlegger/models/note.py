@@ -56,7 +56,7 @@ class Note:
 
     def __repr__(self):
         return (
-            f"Note(id={self.id}, owner={self.owner}, "
+            f'Note(id={self.id}, owner={self.owner}, '
             f"name='{self.name}', content='{self.content}', "
             f'private={self.private}, permissions={self.permissions},'
             f'create_time={self.create_time}, update_time={self.update_time}, '

@@ -282,11 +282,9 @@ class NotesPermissionTestCase(unittest.TestCase):
         note['content'] = 'Tripper'
         response = self.client.put(
             f'/notes/{note["id"]}',
-            data=json.dumps({
-                'name': self.note_modify['name'],
-                'content': note.get('content'),
-                'private': note.get('private')
-            }),
+            data=json.dumps(
+                {'name': self.note_modify['name'], 'content': note.get('content'), 'private': note.get('private')}
+            ),
             headers=self.headers_json_user1,
         )
 
@@ -302,11 +300,9 @@ class NotesPermissionTestCase(unittest.TestCase):
         note['content'] = 'Tripper2'
         response = self.client.put(
             f'/notes/{note["id"]}',
-            data=json.dumps({
-                'name': self.note_modify['name'],
-                'content': note.get('content'),
-                'private': note.get('private')
-            }),
+            data=json.dumps(
+                {'name': self.note_modify['name'], 'content': note.get('content'), 'private': note.get('private')}
+            ),
             headers=self.headers_json_user2,
         )
 
@@ -338,11 +334,7 @@ class NotesPermissionTestCase(unittest.TestCase):
         note['content'] = 'Tripper'
         response = self.client.put(
             f'/notes/{note["id"]}',
-            data=json.dumps({
-                'name': note.get('name'),
-                'content': note.get('content'),
-                'private': note.get('private')
-            }),
+            data=json.dumps({'name': note.get('name'), 'content': note.get('content'), 'private': note.get('private')}),
             headers=self.headers_json_user1,
         )
 

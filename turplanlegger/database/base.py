@@ -365,9 +365,7 @@ class Database:
             RETURNING *
         """
         return self._updateone(
-            update,
-            {'name': note.name, 'content': note.content, 'id': note.id, 'private': note.private},
-            returning=True
+            update, {'name': note.name, 'content': note.content, 'id': note.id, 'private': note.private}, returning=True
         )
 
     def delete_note(self, id):
