@@ -1,5 +1,4 @@
 from collections import namedtuple
-from datetime import datetime
 from typing import Dict, NamedTuple
 from uuid import UUID
 
@@ -37,8 +36,7 @@ class Trip:
         item_list (list): List of item list ids that are related to
                           the trip
         permissions (list): List of permissions that are related to the trip
-        create_time (datetime): Time of creation,
-                                Default: datetime.now()
+        create_time (datetime): Time of creation
         update_time (datetime): Time of update
 
     """
@@ -65,7 +63,7 @@ class Trip:
         self.routes = kwargs.get('routes', [])
         self.item_lists = kwargs.get('item_lists', [])
         self.permissions = kwargs.get('permissions', None)
-        self.create_time = kwargs.get('create_time', None) or datetime.now()
+        self.create_time = kwargs.get('create_time', None)
         self.update_time = kwargs.get('update_time', None)
 
     def __repr__(self):
