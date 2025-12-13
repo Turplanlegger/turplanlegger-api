@@ -1,102 +1,82 @@
-import os
-from os.path import exists
-from typing import Any, Dict
-
-from flask import Flask
+from dataclasses import dataclass
+from os import environ
 
 
+@dataclass(frozen=True, repr=False)
 class Config:
-    def __init__(self, app: Flask = None) -> None:
-        self.app = None
-        if app:
-            self.init_app(app)
+    debug: bool
+    secret_key: str
+    secret_key_id: str
+    audience: str
+    azure_ad_b2c_key_url: str
+    token_expire_time: str
+    create_admin_user: bool
+    admin_email: str
+    admin_password: str
+    database_uri: str
+    database_max_retries: int
+    database_timeout: int
+    log_level: str
+    log_to_file: bool
+    log_file_path: str
+    cors_origins: tuple
 
-    def init_app(self, app: Flask, override: Dict[str, Any]) -> None:
-        config = self.get_config(override)
-        app.config.update(config)
-
-    def get_config(self, override: Dict[str, Any]):
-        from flask import Config
-
-        self.config = Config('/')
-
-        # Load custom config file
-        config_path = os.getenv('TP_CONFIG_PATH', '/etc/turplanlegger/turplanlegger.conf')
-        if exists(config_path):
-            self.config.from_pyfile(config_path)
-
-        if override:
-            for key, value in override.items():
-                self.config[key] = value
-
-        # App
-        self.config['SECRET_KEY'] = self.conf_ent('SECRET_KEY', str)
-        self.config['SECRET_KEY_ID'] = self.conf_ent('SECRET_KEY_ID', str)
-        self.config['AUDIENCE'] = self.conf_ent('AUDIENCE', str, '0149fc65-259e-4895-9034-e144c242f733')
-        self.config['AZURE_AD_B2C_KEY_URL'] = self.conf_ent(
-            'AZURE_AD_B2C_KEY_URL',
-            str,
-            'https://turplanlegger.b2clogin.com/turplanlegger.onmicrosoft.com/discovery/v2.0/keys?p=b2c_1_signin',
+    @classmethod
+    def from_env(cls) -> 'Config':
+        return cls(
+            debug=Config.get_config_val('DEBUG', bool, False),
+            secret_key=Config.get_config_val('SECRET_KEY', str, required=True),
+            secret_key_id=Config.get_config_val('SECRET_KEY_ID', str, required=True),
+            audience=Config.get_config_val('AUDIENCE', str, '0149fc65-259e-4895-9034-e144c242f733', required=True),
+            azure_ad_b2c_key_url=Config.get_config_val(
+                'AZURE_AD_B2C_KEY_URL',
+                str,
+                'https://turplanlegger.b2clogin.com/turplanlegger.onmicrosoft.com/discovery/v2.0/keys?p=b2c_1_signin',
+                required=True,
+            ),
+            token_expire_time=Config.get_config_val('TOKEN_EXPIRE_TIME', int, 86400, required=True),
+            create_admin_user=Config.get_config_val('CREATE_ADMIN_USER', bool, False),
+            admin_email=Config.get_config_val('ADMIN_EMAIL', str),
+            admin_password=Config.get_config_val('ADMIN_PASSWORD', str),
+            database_uri=Config.get_config_val('DATABASE_URI', str, required=True),
+            database_max_retries=Config.get_config_val('DATABASE_MAX_RETRIES', int, 5, True),
+            database_timeout=Config.get_config_val('DATABASE_TIMEOUT', int, 10, True),
+            log_level=Config.get_config_val('LOG_LEVEL', str, 'WARNING', required=True).upper(),
+            log_to_file=Config.get_config_val('LOG_TO_FILE', bool, False),
+            log_file_path=Config.get_config_val('LOG_FILE_PATH', bool),
+            cors_origins=Config.get_config_val('CORS_ORIGINS', tuple, tuple('http://localhost:3000'), required=True),
         )
-        self.config['TOKEN_EXPIRE_TIME'] = self.conf_ent('TOKEN_EXPIRE_TIME', int, 86400)  # Seconds
-        self.config['CREATE_ADMIN_USER'] = self.conf_ent('CREATE_ADMIN_USER', bool, False)
-        if self.config['CREATE_ADMIN_USER']:
-            self.config['ADMIN_EMAIL'] = self.conf_ent('ADMIN_EMAIL', str, 'test@test.com')
-            self.config['ADMIN_PASSWORD'] = self.conf_ent('ADMIN_PASSWORD', str, 'admin')
 
-        # Database
-        self.config['DATABASE_URI'] = self.conf_ent('DATABASE_URI', str)
-        self.config['DATABASE_MAX_RETRIES'] = self.conf_ent('DATABASE_MAX_RETRIES', int, 5)
-
-        # Logging
-        self.config['LOG_LEVEL'] = self.conf_ent('LOG_LEVEL', str, 'INFO')
-        self.config['LOG_TO_FILE'] = self.conf_ent('LOG_TO_FILE', bool, False)
-        if self.config['LOG_TO_FILE']:
-            self.config['LOG_FILE_PATH'] = self.conf_ent('LOG_FILE_PATH', str, '/var/log/turplanlegger.log')
-
-        self.config['CORS_ORIGINS'] = self.conf_ent('CORS_ORIGINS', list, ['http://localhost:3000'])
-
-        return self.config
-
-    def conf_ent(self, key, ent_type=None, default=None):
-        """Get and check config entry
-        Looks for config entry in environment variable by
-        key prepended with 'TP_'.
-        If config entry is found in environment variable, convert from
-        string to bool, int, list or tuple.
-
-        Args:
-            key (str): Config key
-            ent_type (instance): Expected instance of config value
-                                 Default: None
-            default (Any): The default value of the config entry
-
-        Returns:
-            rv: Config value
-        """
+    @staticmethod
+    def get_config_val(
+        key: str,
+        ent_type: bool | int | list | tuple | str,
+        default: bool | int | list | tuple | str | None = None,
+        required: bool = False,
+    ):
+        """Read config entry from environment variable, prefixed with `TP_`"""
         envar = f'TP_{key}'
 
-        if envar in os.environ:
-            rv = os.environ.get(envar, default)
-            if ent_type is bool:
-                if key.lower() in ['no', 'false', 'nei', '0']:
-                    return False
-                if key.lower() in ['yes', 'true', 'ja', '1']:
-                    return True
-            if ent_type is int:
-                try:
-                    return int(rv)
-                except ValueError:
-                    raise RuntimeError(f'Config entry {key} is has to be int')
-            if ent_type in [list, tuple]:
-                rv = rv.split(',')
-            if ent_type is tuple:
-                rv = tuple(rv)
-            return rv
-        else:
-            rv = self.config.get(key, default)
+        val = environ.get(envar, default)
+        if isinstance(ent_type, bool) and not isinstance(val, bool):
+            if key.lower() in ['no', 'false', 'nei', '0']:
+                return False
+            if key.lower() in ['yes', 'true', 'ja', '1']:
+                return True
+        if ent_type is int:
+            try:
+                return int(val)
+            except ValueError:
+                raise RuntimeError(f'Config entry {key} has to be int')
+        if ent_type is tuple and not isinstance(val, tuple):
+            return tuple(val.split(','))
+        if ent_type is list and not isinstance(val, list):
+            return val.split(',')
 
-        if rv is None:
+        if required is True and not val:
             raise RuntimeError(f'Config entry {key} is required, please set it')
 
-        return rv
+        return val
+
+
+config = Config.from_env()

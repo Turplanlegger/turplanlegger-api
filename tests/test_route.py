@@ -9,15 +9,7 @@ from turplanlegger.models.user import User
 class RoutesTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        config = {
-            'TESTING': True,
-            'SECRET_KEY': 'test',
-            'SECRET_KEY_ID': 'test',
-            'LOG_LEVEL': 'INFO',
-            'CREATE_ADMIN_USER': True,
-        }
-
-        cls.app = create_app(config)
+        cls.app = create_app()
         cls.client = cls.app.test_client()
 
         cls.user1 = User.create(
@@ -166,8 +158,8 @@ class RoutesTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
 
         data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['title'], 'Owner is not int')
-        self.assertEqual(data['detail'], 'Owner must be passed as an int')
+        self.assertEqual(data['title'], 'Failed to change owner')
+        self.assertEqual(data['detail'], 'Owner id must be passed as an UUID')
         self.assertEqual(data['type'], 'about:blank')
         self.assertEqual(data['instance'], 'http://localhost/routes/1/owner')
 

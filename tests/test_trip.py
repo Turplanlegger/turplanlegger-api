@@ -10,15 +10,7 @@ from turplanlegger.models.user import User
 class TripsTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        config = {
-            'TESTING': True,
-            'SECRET_KEY': 'test',
-            'SECRET_KEY_ID': 'test',
-            'LOG_LEVEL': 'INFO',
-            'CREATE_ADMIN_USER': True,
-        }
-
-        cls.app = create_app(config)
+        cls.app = create_app()
         cls.client = cls.app.test_client()
 
         cls.user1 = User.create(
@@ -282,12 +274,22 @@ class TripsTestCase(unittest.TestCase):
         response = self.client.patch(
             f'/trips/{data["id"]}/owner', data=json.dumps({'owner': str(self.user2.id)}), headers=self.headers_json
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 204)
 
         response = self.client.get(f'/trips/{data["id"]}', headers=self.headers2)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['trip']['owner'], str(self.user2.id))
+
+    def test_change_trip_bogus_owner(self):
+        response = self.client.post('/trips', data=json.dumps(self.trip), headers=self.headers_json)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(response.status_code, 201)
+
+        response = self.client.patch(
+            f'/trips/{data["id"]}/owner', data=json.dumps({'owner': 'thisisnotanuuid123'}), headers=self.headers_json
+        )
+        self.assertEqual(response.status_code, 400)
 
     def test_get_my_trips(self):
         response = self.client.post('/trips', data=json.dumps(self.trip), headers=self.headers_json)
@@ -758,3 +760,40 @@ class TripsTestCase(unittest.TestCase):
         response = self.client.put(f'/trips/{trip["id"]}', data=json.dumps(trip), headers=self.headers_json)
 
         self.assertEqual(response.status_code, 409)
+
+    def test_add_date_wrong_trip(self):
+        response = self.client.post('/trips', data=json.dumps(self.trip_with_date), headers=self.headers_json)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+        trip_id1 = data['id']
+
+        response = self.client.post('/trips', data=json.dumps(self.trip), headers=self.headers_json)
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.data.decode('utf-8'))
+        trip_id2 = data['id']
+
+        start_time = (datetime.now() + timedelta(days=7)).isoformat()
+        end_time = (datetime.now() + timedelta(days=14)).isoformat()
+        response = self.client.patch(
+            f'/trips/{trip_id1}/dates',
+            data=json.dumps(
+                {
+                    'start_time': start_time,
+                    'end_time': end_time,
+                    'trip_id': trip_id2,
+                }
+            ),
+            headers=self.headers_json,
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        response = self.client.get(f'/trips/{trip_id1}', headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(len(data['trip']['dates']), 2)
+
+        response = self.client.get(f'/trips/{trip_id2}', headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(len(data['trip']['dates']), 0)

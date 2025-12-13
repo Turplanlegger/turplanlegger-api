@@ -2,7 +2,7 @@ import re
 from typing import Dict, NamedTuple
 from uuid import UUID, uuid4
 
-from turplanlegger.app import db, logger
+from turplanlegger.app import db
 from turplanlegger.auth import utils
 from turplanlegger.utils.types import to_uuid
 
@@ -122,8 +122,7 @@ class User:
                 raise ValueError('Password too short')
         try:
             password = utils.hash_password(password)
-        except Exception as e:
-            logger.exception(str(e))
+        except Exception:
             raise ValueError('Failed to create user')
 
         return User(

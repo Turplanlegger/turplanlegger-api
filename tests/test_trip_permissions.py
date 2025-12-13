@@ -10,15 +10,7 @@ from turplanlegger.models.user import User
 class TripsPermissionsTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        config = {
-            'TESTING': True,
-            'SECRET_KEY': 'test',
-            'SECRET_KEY_ID': 'test',
-            'LOG_LEVEL': 'INFO',
-            'CREATE_ADMIN_USER': True,
-        }
-
-        cls.app = create_app(config)
+        cls.app = create_app()
         cls.client = cls.app.test_client()
 
         cls.user1 = User.create(
@@ -390,7 +382,7 @@ class TripsPermissionsTestCase(unittest.TestCase):
         response = self.client.patch(
             f'/trips/{id}/owner', data=json.dumps({'owner': str(self.user3.id)}), headers=self.headers_json_user2
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 204)
 
         response = self.client.get(f'/trips/{id}', headers=self.headers_user2)
         self.assertEqual(response.status_code, 200)
@@ -448,7 +440,7 @@ class TripsPermissionsTestCase(unittest.TestCase):
         response = self.client.patch(
             f'/trips/{id}/owner', data=json.dumps({'owner': str(self.user3.id)}), headers=self.headers_json_user2
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 204)
 
         response = self.client.get(f'/trips/{id}', headers=self.headers_user2)
         self.assertEqual(response.status_code, 200)

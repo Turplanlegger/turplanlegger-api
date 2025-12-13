@@ -8,6 +8,8 @@ from psycopg.types.enum import EnumInfo, register_enum
 from psycopg.types.json import Jsonb, set_json_dumps, set_json_loads
 
 from turplanlegger.models.access_level import AccessLevel
+from turplanlegger.utils.config import config
+from turplanlegger.utils.logger import log_db
 
 
 class Database:
@@ -17,24 +19,23 @@ class Database:
             self.init_db
 
     def init_db(self, app):
-        self.logger = app.logger
-        self.uri = app.config.get('DATABASE_URI')
-        self.max_retries = app.config.get('DATABASE_MAX_RETRIES', 5)
-        self.timeout = app.config.get('DATABASE_TIMEOUT', 10)
+        self.uri = config.database_uri
+        self.max_retries = config.database_max_retries
+        self.timeout = config.database_timeout
 
         # Use a faster dump function
         set_json_dumps(ujson.dumps)
         set_json_loads(ujson.loads)
 
         self.conn = self.connect()
-        self.logger.debug('Database connection opened')
+        log_db.debug('Database connection opened')
 
         with app.open_resource('database/schema.sql') as schema:
             try:
                 with self.conn.transaction():
                     self.conn.execute(schema.read())
             except Exception as e:
-                self.logger.exception(e)
+                log_db.exception(e)
                 raise
 
         info = EnumInfo.fetch(self.conn, 'access_level')
@@ -42,11 +43,11 @@ class Database:
         # Create cursor with ENUM
         self.cur = self.conn.cursor()
 
-        if app.config.get('CREATE_ADMIN_USER', False) and not self.check_admin_user(app.config.get('ADMIN_EMAIL')):
-            self.logger.debug('Did not find admin user, creating one')
+        if config.create_admin_user is True and not self.check_admin_user(config.admin_email):
+            log_db.debug('Did not find admin user, creating one')
             from turplanlegger.utils.admin_user import create_admin_user
 
-            create_admin_user(email=app.config.get('ADMIN_EMAIL'), password=app.config.get('ADMIN_PASSWORD'))
+            create_admin_user(email=config.admin_email, password=config.admin_password)
 
     def connect(self):
         retry = 0
@@ -61,14 +62,14 @@ class Database:
                 )
                 break
             except Exception as e:
-                self.logger.exception(str(e))
+                log_db.exception(str(e))
                 retry += 1
                 if retry > self.max_retries:
                     conn = None
                     break
                 else:
                     backoff = 2**retry
-                    self.logger.warning(f'Retry attempt {retry}/{self.max_retries} (wait={backoff}s)...')
+                    log_db.warning(f'Retry database connection attempt {retry}/{self.max_retries} (wait={backoff}s)...')
                     time.sleep(backoff)
         if conn:
             return conn
@@ -159,14 +160,9 @@ class Database:
         """
         return self._updateone(update, {'id': id, 'name': name}, returning=True)
 
-    def change_item_list_owner(self, id, owner):
-        update = """
-            UPDATE item_lists
-                SET owner=%(owner)s
-                WHERE id = %(id)s
-            RETURNING *
-        """
-        return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
+    def change_item_list_owner(self, item_list_id: int, owner_id: UUID) -> None:
+        update = 'UPDATE item_lists SET owner=%(owner_id)s WHERE id=%(item_list_id)s'
+        return self._updateone(update, {'item_list_id': item_list_id, 'owner_id': owner_id})
 
     def create_list_item(self, item_list_item):
         insert = """
@@ -299,14 +295,9 @@ class Database:
         """
         return self._updateone(update, {'id': id}, returning=True)
 
-    def change_route_owner(self, id, owner):
-        update = """
-            UPDATE routes
-                SET owner=%(owner)s
-                WHERE id = %(id)s
-            RETURNING *
-        """
-        return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
+    def change_route_owner(self, route_id: int, owner_id: UUID) -> None:
+        update = 'UPDATE routes SET owner=%(owner_id)s WHERE id=%(route_id)s'
+        return self._updateone(update, {'route_id': route_id, 'owner_id': owner_id})
 
     # Route permission
     def get_route_all_permissions(self, object_id: int) -> list[TupleRow]:
@@ -384,14 +375,9 @@ class Database:
         """
         return self._updateone(update, {'id': id}, returning=True)
 
-    def change_note_owner(self, id, owner):
-        update = """
-            UPDATE notes
-                SET owner=%(owner)s
-                WHERE id = %(id)s
-            RETURNING *
-        """
-        return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
+    def change_note_owner(self, note_id: int, owner_id: UUID) -> None:
+        update = 'UPDATE notes SET owner=%(owner_id)s  WHERE id=%(note_id)s'
+        return self._updateone(update, {'note_id': note_id, 'owner_id': owner_id})
 
     def rename_note(self, id, name):
         update = """
@@ -543,14 +529,9 @@ class Database:
         update += ' WHERE id=%(id)s'
         return self._updateone(update, vars, returning=False)
 
-    def change_trip_owner(self, id, owner):
-        update = """
-            UPDATE trips
-                SET owner=%(owner)s
-                WHERE id = %(id)s
-            RETURNING *
-        """
-        return self._updateone(update, {'id': id, 'owner': owner}, returning=True)
+    def change_trip_owner(self, trip_id: int, owner_id: UUID) -> None:
+        update = 'UPDATE trips SET owner=%(owner_id)s WHERE id=%(trip_id)s'
+        return self._updateone(update, {'trip_id': trip_id, 'owner_id': owner_id})
 
     def add_trip_note_reference(self, trip_id, note_id):
         insert_ref = """
@@ -745,7 +726,7 @@ class Database:
             return self.cur.fetchone() if returning else None
 
     def _log(self, func_name, query, vars):
-        self.logger.debug(
+        log_db.debug(
             '\n{stars} {func_name} {stars}\n{query}'.format(
                 stars='*' * 20, func_name=func_name, query=self.cur.mogrify(query, vars)
             )

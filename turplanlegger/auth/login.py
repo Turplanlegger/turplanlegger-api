@@ -2,10 +2,11 @@ import re
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
-from flask import current_app, jsonify, request
+from flask import jsonify, request
 
 from turplanlegger.exceptions import ApiProblem
 from turplanlegger.models.token import JWT
+from turplanlegger.utils.config import config
 
 from . import auth, utils  # noqa isort:skip
 
@@ -33,8 +34,8 @@ def login():
     token = JWT(
         iss=request.url_root,
         sub=str(user.id),
-        aud=current_app.config['AUDIENCE'],
-        exp=(now + timedelta(seconds=current_app.config['TOKEN_EXPIRE_TIME'])),
+        aud=config.audience,
+        exp=(now + timedelta(seconds=config.token_expire_time)),
         nbf=now,
         iat=now,
         jti=str(uuid4()),

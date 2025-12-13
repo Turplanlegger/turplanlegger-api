@@ -1,25 +1,20 @@
 import logging
 from sys import stdout
 
-from flask import Flask
+from turplanlegger.utils.config import config
 
+log_level = config.log_level
+log_format = '%(asctime)s - %(name)s: %(levelname)s - %(message)s'
+if config.debug is True or config.log_level == 'DEBUG':
+    log_level = 'DEBUG'
+    log_format = '%(asctime)s - %(name)s[%(process)d]: %(levelname)s - %(message)s [in %(pathname)s:%(lineno)d]'
 
-class Logger:
-    def __init__(self, app: Flask = None) -> None:
-        self.app = None
-        if app:
-            self.setup_logging(app)
+handlers = [logging.StreamHandler(stdout)]
+if config.log_to_file is True:
+    handlers.append(logging.FileHandler(config.log_file_path))
 
-    def setup_logging(self, app: Flask = None) -> None:
-        log_level = app.config.get('LOG_LEVEL')
-        log_format = '%(asctime)s - %(name)s: %(levelname)s - %(message)s'
-        if app.debug:
-            log_level = 'DEBUG'
-            log_format = '%(asctime)s - %(name)s[%(process)d]: %(levelname)s - %(message)s [in %(pathname)s:%(lineno)d]'
+logging.basicConfig(level=log_level, format=log_format, handlers=handlers)
 
-        handlers = [logging.StreamHandler(stdout)]
-
-        if app.config.get('LOG_TO_FILE'):
-            handlers.append(logging.FileHandler(app.config.get('LOG_FILE_PATH')))
-
-        logging.basicConfig(level=log_level, format=log_format, handlers=handlers)
+log = logging.getLogger('turplanlegger')
+log_db = logging.getLogger('turplanlegger.database')
+log_auth = logging.getLogger('turplanlegger.auth')

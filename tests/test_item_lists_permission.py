@@ -9,15 +9,7 @@ from turplanlegger.models.user import User
 class ItemListsPermissionTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        config = {
-            'TESTING': True,
-            'SECRET_KEY': 'test',
-            'SECRET_KEY_ID': 'test',
-            'LOG_LEVEL': 'DEDBUG',
-            'CREATE_ADMIN_USER': True,
-        }
-
-        cls.app = create_app(config)
+        cls.app = create_app()
         cls.client = cls.app.test_client()
 
         cls.user1 = User.create(
@@ -818,7 +810,7 @@ class ItemListsPermissionTestCase(unittest.TestCase):
             data=json.dumps({'owner': str(self.user2.id)}),
             headers=self.headers_json_user1,
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 204)
 
         # Not ok
         response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user1)
@@ -887,7 +879,7 @@ class ItemListsPermissionTestCase(unittest.TestCase):
             data=json.dumps({'owner': str(self.user2.id)}),
             headers=self.headers_json_user1,
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 204)
 
         # Not ok
         response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user1)
@@ -953,7 +945,7 @@ class ItemListsPermissionTestCase(unittest.TestCase):
             data=json.dumps({'owner': str(self.user2.id)}),
             headers=self.headers_json_user1,
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 204)
 
         # Not ok
         response = self.client.get(f'/item_lists/{item_list_id}', headers=self.headers_user1)

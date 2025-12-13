@@ -1,12 +1,13 @@
 from functools import wraps
 from uuid import UUID
 
-from flask import current_app, g, request
+from flask import g, request
 from jwt import DecodeError, ExpiredSignatureError, InvalidAudienceError
 
 from turplanlegger.exceptions import ApiProblem, AuthError
 from turplanlegger.models.token import JWT
 from turplanlegger.models.user import User
+from turplanlegger.utils.logger import log
 
 
 def auth(func):
@@ -21,7 +22,7 @@ def auth(func):
 
         if len(auth_header) == 2 and auth_header[0] == 'Bearer' and auth_header[1]:
             token = auth_header[1]
-            current_app.logger.debug(f'Supplied API token: {token}')
+            log.debug(f'Supplied API token: {token}')
         else:
             raise AuthError('must supply token by Authorization header', 401)
 
@@ -36,7 +37,7 @@ def auth(func):
         except ValueError:
             raise AuthError('Token is invalid', 401)
         except Exception as e:
-            current_app.logger.exception(f'Auth failed:\n{str(e)}')
+            log.exception(f'Auth failed:\n{str(e)}')
             raise AuthError('Auth failed', 401)
 
         user = User.find_user(UUID(jwt.subject))
@@ -44,7 +45,7 @@ def auth(func):
             if user.deleted:
                 raise AuthError('Inactive user', 401)
 
-            current_app.logger.debug(f'user {user.id} logged in')
+            log.debug(f'user {user.id} logged in')
             g.user = user
             return func(*args, **kwargs)
 
@@ -56,7 +57,7 @@ def auth(func):
         if user is None:
             raise ApiProblem('Failed to create user', 'Try again', 500)
 
-        current_app.logger.debug(f'user {user.id} signed up')
+        log.debug(f'user {user.id} signed up')
         g.user = user
         return func(*args, **kwargs)
 

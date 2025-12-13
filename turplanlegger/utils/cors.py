@@ -1,6 +1,8 @@
 from flask import Flask
 from flask_cors import CORS
 
+from turplanlegger.utils.config import config
+
 
 class Cors:
     def __init__(self, app: Flask = None) -> None:
@@ -11,7 +13,7 @@ class Cors:
     def init_app(self, app: Flask = None) -> None:
         CORS(
             app,
-            origins=app.config.get('CORS_ORIGINS'),
+            origins=config.cors_origins,
             resources=[
                 '/item_lists/*',
                 '/item_list/*',
