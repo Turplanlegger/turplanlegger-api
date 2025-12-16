@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Dict, NamedTuple
 from uuid import UUID
 
@@ -25,8 +24,7 @@ class ListItem:
         item_list (int): The item_list the item belongs too
         checked (bool): Flag if the item is checked or not
         content (str): Optional, the content of the item
-        create_time (datetime): Time of creation,
-                                Default: datetime.now()
+        create_time (datetime): Optional, time of creation,
     """
 
     def __init__(self, owner: UUID, checked: bool, **kwargs) -> None:
@@ -47,7 +45,7 @@ class ListItem:
         self.checked = checked
 
         self.content = kwargs.get('content')
-        self.create_time = kwargs.get('create_time', None) or datetime.now()
+        self.create_time = kwargs.get('create_time', None)
 
     def __repr__(self):
         return (

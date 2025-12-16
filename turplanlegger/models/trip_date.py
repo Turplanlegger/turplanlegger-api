@@ -28,8 +28,7 @@ class TripDate:
                          for the parent.
         start_time (datetime): Datetime object as start date
         end_time (datetime): Datetime object as end date
-        create_time (datetime): Time of creation,
-                                Default: datetime.now()
+        create_time (datetime): Time of creation
         deleted (bool): Flag if the object has been logically deleted
                         Default : False
         delete_time (datetime): Datetime instance of time of deletion
@@ -53,7 +52,7 @@ class TripDate:
         self.id = kwargs.get('id', None)
         self.trip_id = kwargs.get('trip_id', None)
         self.selected = kwargs.get('selected', False)
-        self.create_time = kwargs.get('create_time', None) or datetime.now()
+        self.create_time = kwargs.get('create_time', None)
         self.deleted = kwargs.get('deleted', False)
         self.delete_time = kwargs.get('delete_time', None)
 
