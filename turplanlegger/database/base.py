@@ -350,8 +350,8 @@ class Database:
 
     def create_note(self, note):
         insert = """
-            INSERT INTO notes (owner, name, content)
-            VALUES (%(owner)s, %(name)s, %(content)s)
+            INSERT INTO notes (owner, name, content, private)
+            VALUES (%(owner)s, %(name)s, %(content)s, %(private)s)
             RETURNING *
         """
         return self._insert(insert, vars(note))
@@ -360,11 +360,13 @@ class Database:
         update = """
             UPDATE notes SET
                 update_time=CURRENT_TIMESTAMP,
-                name=%(name)s, content=%(content)s
+                name=%(name)s, content=%(content)s, private=%(private)s
                 WHERE id = %(id)s
             RETURNING *
         """
-        return self._updateone(update, {'name': note.name, 'content': note.content, 'id': note.id}, returning=True)
+        return self._updateone(
+            update, {'name': note.name, 'content': note.content, 'id': note.id, 'private': note.private}, returning=True
+        )
 
     def delete_note(self, id):
         update = """

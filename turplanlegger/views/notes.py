@@ -17,9 +17,9 @@ from . import api
 def get_note(note_id):
     note = Note.find_note(note_id)
 
-    if (
-        note
-        and Permission.verify(note.owner, note.permissions, g.user.id, AccessLevel.READ) is PermissionResult.ALLOWED
+    if note and (
+        note.private is False
+        or Permission.verify(note.owner, note.permissions, g.user.id, AccessLevel.READ) is PermissionResult.ALLOWED
     ):
         return jsonify(status='ok', count=1, note=note.serialize)
     else:
@@ -35,10 +35,14 @@ def delete_note(note_id):
         raise ApiProblem('Note not found', 'The requested note was not found', 404)
 
     perms = Permission.verify(note.owner, note.permissions, g.user.id, AccessLevel.DELETE)
-    if perms is PermissionResult.NOT_FOUND:
-        raise ApiProblem('Note not found', 'The requested note was not found', 404)
-    if perms is PermissionResult.INSUFFICIENT_PERMISSIONS:
-        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to delete the note', 403)
+    if note.private is False:
+        if perms is not PermissionResult.ALLOWED:
+            raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to delete the note', 403)
+    else:
+        if perms is PermissionResult.NOT_FOUND:
+            raise ApiProblem('Note not found', 'The requested note was not found', 404)
+        if perms is PermissionResult.INSUFFICIENT_PERMISSIONS:
+            raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to delete the note', 403)
 
     try:
         note.delete()
@@ -74,7 +78,9 @@ def update_note(note_id):
 
     perms = Permission.verify(note_existing.owner, note_existing.permissions, g.user.id, AccessLevel.MODIFY)
     if perms is PermissionResult.NOT_FOUND:
-        raise ApiProblem('Note not found', 'The requested note was not found', 404)
+        if note_existing.private is True:
+            raise ApiProblem('Note not found', 'The requested note was not found', 404)
+        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the note', 403)
     if perms is PermissionResult.INSUFFICIENT_PERMISSIONS:
         raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the note', 403)
 
@@ -85,7 +91,7 @@ def update_note(note_id):
 
     updated = False
 
-    for attribute in ('content', 'name'):
+    for attribute in ('content', 'name', 'private'):
         if note_update.__getattribute__(attribute) != note_existing.__getattribute__(attribute):
             note_existing.__setattr__(attribute, note_update.__getattribute__(attribute))
             updated = True
@@ -110,7 +116,7 @@ def change_note_owner(note_id: int):
         raise ApiProblem('Note not found', 'The requested note was not found', 404)
 
     perms = Permission.verify(note.owner, note.permissions, g.user.id, AccessLevel.READ)
-    if perms is PermissionResult.NOT_FOUND:
+    if note.private is True and perms is PermissionResult.NOT_FOUND:
         raise ApiProblem('Note not found', 'The requested note was not found', 404)
 
     if note.owner != g.user.id:
@@ -165,7 +171,7 @@ def add_note_permissions(note_id):
         raise ApiProblem('Note not found', 'The requested note was not found', 404)
 
     perms = Permission.verify(note.owner, note.permissions, g.user.id, AccessLevel.READ)
-    if perms is PermissionResult.NOT_FOUND:
+    if note.private is True and perms is PermissionResult.NOT_FOUND:
         raise ApiProblem('Note not found', 'The requested note was not found', 404)
 
     if note.owner != g.user.id:
@@ -215,7 +221,7 @@ def delete_note_permissions(note_id, user_id):
         raise ApiProblem('Note not found', 'The requested note was not found', 404)
 
     perms = Permission.verify(note.owner, note.permissions, g.user.id, AccessLevel.READ)
-    if perms is PermissionResult.NOT_FOUND:
+    if note.private is True and perms is PermissionResult.NOT_FOUND:
         raise ApiProblem('Note not found', 'The requested note was not found', 404)
 
     user_id = UUID(user_id)
@@ -246,7 +252,7 @@ def change_note_permissions(note_id, user_id):
         raise ApiProblem('Note not found', 'The requested note was not found', 404)
 
     perms = Permission.verify(note.owner, note.permissions, g.user.id, AccessLevel.READ)
-    if perms is PermissionResult.NOT_FOUND:
+    if note.private is True and perms is PermissionResult.NOT_FOUND:
         raise ApiProblem('Note not found', 'The requested note was not found', 404)
 
     if note.owner != g.user.id:

@@ -15,13 +15,18 @@ class Note:
     Args:
         owner (UUID): The UUID4 of the owner of the note
         content (str): The main text content of the note
+        name (str): Name or title of the note
+                    Default: None
+        private (bool): Privacy of the note.
+                        Default: True
         **kwargs: Arbitrary keyword arguments
 
     Attributes:
         owner (UUID): The UUID4 of the owner of the note
         content (str): The main text content of the note
         id (int): Optional, the ID of the note
-        name (str): Optional, the name/title of the note
+        name (str): The name/title of the note
+        private (bool): Privacy of the note
         permissions (list): List of permissions related to the note
         create_time (datetime): Time of creation
         update_time (datetime): Time of last update
@@ -29,7 +34,7 @@ class Note:
         delete_time (datetime): Time the note was deleted
     """
 
-    def __init__(self, owner: UUID, content: str, **kwargs) -> None:
+    def __init__(self, owner: UUID, content: str, name: str = None, private: bool = True, **kwargs) -> None:
         if not owner:
             raise ValueError("Missing mandatory field 'owner'")
         if not isinstance(owner, UUID):
@@ -40,11 +45,14 @@ class Note:
             raise TypeError("'content' must be string")
         if not content.strip():
             raise ValueError("'content' must not be blank")
+        if not isinstance(private, bool):
+            raise TypeError("'private' must be boolean")
 
         self.owner = owner
         self.content = content
+        self.name = name
+        self.private = private
         self.id = kwargs.get('id', None)
-        self.name = kwargs.get('name', None)
         self.permissions = kwargs.get('permissions', None)
         self.create_time = kwargs.get('create_time', None)
         self.update_time = kwargs.get('update_time', None)
@@ -53,9 +61,9 @@ class Note:
 
     def __repr__(self):
         return (
-            f"Note(id='{self.id}', owner='{self.owner}', "
+            f'Note(id={self.id}, owner={self.owner}, '
             f"name='{self.name}', content='{self.content}', "
-            f'permissions={self.permissions}), '
+            f'private={self.private}, permissions={self.permissions},'
             f'create_time={self.create_time}, update_time={self.update_time}, '
             f'deleted={self.deleted}, delete_time={self.delete_time})'
         )
@@ -72,6 +80,7 @@ class Note:
             owner=g.user.id,
             content=json.get('content', None),
             name=json.get('name', None),
+            private=json.get('private', True),
             permissions=permissions,
         )
 
@@ -82,6 +91,7 @@ class Note:
             'owner': self.owner,
             'name': self.name,
             'content': self.content,
+            'private': self.private,
             'create_time': self.create_time,
             'permissions': [permission.serialize for permission in self.permissions],
         }
@@ -158,6 +168,7 @@ class Note:
             owner=rec.owner,
             name=rec.name,
             content=rec.content,
+            private=rec.private,
             permissions=Permission.find_note_all_permissions(rec.id),
             create_time=rec.create_time,
             update_time=rec.update_time,
