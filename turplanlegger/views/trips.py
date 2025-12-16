@@ -123,6 +123,9 @@ def add_note_to_trip(trip_id: int):
     if Permission.verify(note.owner, note.permissions, g.user.id, AccessLevel.READ) is PermissionResult.NOT_FOUND:
         raise ApiProblem('Failed to add note to trip', 'Note was not found', 404)
 
+    if note.id in trip.notes:
+        return jsonify(status='ok', count=1, trip=trip.serialize), 200
+
     if note.private is True:
         note_perms = Permission.verify(note.owner, note.permissions, g.user.id, AccessLevel.READ)
         if note_perms is PermissionResult.NOT_FOUND:
@@ -133,7 +136,7 @@ def add_note_to_trip(trip_id: int):
     except Exception as e:
         raise ApiProblem('Failed to add note to trip', str(e), 500)
 
-    return jsonify(trip.serialize), 201
+    return jsonify(status='ok', count=1, trip=trip.serialize), 201
 
 
 @api.route('/trips/<trip_id>/routes', methods=['PATCH'])
