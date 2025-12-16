@@ -123,11 +123,10 @@ def add_note_to_trip(trip_id: int):
     if Permission.verify(note.owner, note.permissions, g.user.id, AccessLevel.READ) is PermissionResult.NOT_FOUND:
         raise ApiProblem('Failed to add note to trip', 'Note was not found', 404)
 
-    # I'm lazy, so I'm keeping this here until I fix private attribute for Note
-    # if note.private is True:
-    #     note_perms = Permission.verify(note.owner, note.permissions, g.user.id, AccessLevel.READ)
-    #     if note_perms is PermissionResult.NOT_FOUND:
-    #         raise ApiProblem('Failed to add note to trip', 'Note was not found', 404)
+    if note.private is True:
+        note_perms = Permission.verify(note.owner, note.permissions, g.user.id, AccessLevel.READ)
+        if note_perms is PermissionResult.NOT_FOUND:
+            raise ApiProblem('Failed to add note to trip', 'Note was not found', 404)
 
     try:
         trip.add_note_reference(note.id)
