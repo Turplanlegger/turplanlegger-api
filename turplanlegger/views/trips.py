@@ -193,7 +193,7 @@ def add_item_list_to_trip(trip_id: int):
         if note_perms is PermissionResult.NOT_FOUND:
             raise ApiProblem('Failed to add item list to trip', 'Item list was not found', 404)
 
-    if item_list.id in trip.routes:
+    if item_list.id in trip.item_lists:
         return jsonify(status='ok', count=1, trip=trip.serialize), 200
 
     try:
