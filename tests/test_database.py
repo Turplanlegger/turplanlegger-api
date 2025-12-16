@@ -29,7 +29,7 @@ class UsersTestCase(unittest.TestCase):
             RETURNING *
         """
 
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(datetime.UTC)
 
         faulty_vars = {
             'id': self.user_id,
