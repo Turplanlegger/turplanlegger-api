@@ -120,21 +120,20 @@ def add_note_to_trip(trip_id: int):
     if not note:
         raise ApiProblem('Failed to add note to trip', 'Note was not found', 404)
 
-    if Permission.verify(note.owner, note.permissions, g.user.id, AccessLevel.READ) is PermissionResult.NOT_FOUND:
-        raise ApiProblem('Failed to add note to trip', 'Note was not found', 404)
+    if note.id in trip.notes:
+        return jsonify(status='ok', count=1, trip=trip.serialize), 200
 
-    # I'm lazy, so I'm keeping this here until I fix private attribute for Note
-    # if note.private is True:
-    #     note_perms = Permission.verify(note.owner, note.permissions, g.user.id, AccessLevel.READ)
-    #     if note_perms is PermissionResult.NOT_FOUND:
-    #         raise ApiProblem('Failed to add note to trip', 'Note was not found', 404)
+    if note.private is True:
+        note_perms = Permission.verify(note.owner, note.permissions, g.user.id, AccessLevel.READ)
+        if note_perms is PermissionResult.NOT_FOUND:
+            raise ApiProblem('Failed to add note to trip', 'Note was not found', 404)
 
     try:
         trip.add_note_reference(note.id)
     except Exception as e:
         raise ApiProblem('Failed to add note to trip', str(e), 500)
 
-    return jsonify(trip.serialize), 201
+    return jsonify(status='ok', count=1, trip=trip.serialize), 201
 
 
 @api.route('/trips/<trip_id>/routes', methods=['PATCH'])
@@ -159,12 +158,15 @@ def add_route_to_trip(trip_id: int):
     if Permission.verify(route.owner, route.permissions, g.user.id, AccessLevel.READ) is PermissionResult.NOT_FOUND:
         raise ApiProblem('Failed to add route to trip', 'Route was not found', 404)
 
+    if route.id in trip.routes:
+        return jsonify(status='ok', count=1, trip=trip.serialize), 200
+
     try:
         trip.add_route_reference(route.id)
     except Exception as e:
         raise ApiProblem('Failed to add route to trip', str(e), 500)
 
-    return jsonify(trip.serialize), 201
+    return jsonify(status='ok', count=1, trip=trip.serialize), 201
 
 
 @api.route('/trips/<trip_id>/item_lists', methods=['PATCH'])
@@ -174,21 +176,32 @@ def add_item_list_to_trip(trip_id: int):
     if not trip:
         raise ApiProblem('Failed to add item list to trip', 'Trip was not found', 404)
 
+    perms = Permission.verify(trip.owner, trip.permissions, g.user.id, AccessLevel.MODIFY)
+    if perms is PermissionResult.NOT_FOUND:
+        if trip.private is True:
+            raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
+        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the trip', 403)
+    if perms is PermissionResult.INSUFFICIENT_PERMISSIONS:
+        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the trip', 403)
+
     item_list = ItemList.find_item_list(request.json.get('item_list_id', None))
     if not item_list:
         raise ApiProblem('Failed to add item list to trip', 'Item list was not found', 404)
 
-    if (
-        Permission.verify(item_list.owner, item_list.permissions, g.user.id, AccessLevel.READ)
-        is PermissionResult.NOT_FOUND
-    ):
-        raise ApiProblem('Failed to add item list to trip', 'Item list was not found', 404)
+    if item_list.private is True:
+        note_perms = Permission.verify(item_list.owner, item_list.permissions, g.user.id, AccessLevel.READ)
+        if note_perms is PermissionResult.NOT_FOUND:
+            raise ApiProblem('Failed to add item list to trip', 'Item list was not found', 404)
+
+    if item_list.id in trip.item_lists:
+        return jsonify(status='ok', count=1, trip=trip.serialize), 200
+
     try:
         trip.add_item_list_reference(item_list.id)
     except Exception as e:
         raise ApiProblem('Failed to add item list to trip', str(e), 500)
 
-    return jsonify(trip.serialize), 201
+    return jsonify(status='ok', count=1, trip=trip.serialize), 201
 
 
 @api.route('/trips/<trip_id>/owner', methods=['PATCH'])
