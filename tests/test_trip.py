@@ -1,6 +1,6 @@
 import json
 import unittest
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from turplanlegger.app import create_app, db
 from turplanlegger.auth.utils import hash_password
@@ -54,8 +54,8 @@ class TripsTestCase(unittest.TestCase):
             'name': 'where u trippin',
             'dates': [
                 {
-                    'start_time': datetime.now().isoformat(),
-                    'end_time': (datetime.now() + timedelta(minutes=5)).isoformat(),
+                    'start_time': datetime.now(UTC).isoformat(),
+                    'end_time': (datetime.now(UTC) + timedelta(minutes=5)).isoformat(),
                 }
             ],
         }
@@ -63,12 +63,12 @@ class TripsTestCase(unittest.TestCase):
             'name': 'trippin pete',
             'dates': [
                 {
-                    'start_time': datetime.now().isoformat(),
-                    'end_time': (datetime.now() + timedelta(minutes=10)).isoformat(),
+                    'start_time': datetime.now(UTC).isoformat(),
+                    'end_time': (datetime.now(UTC) + timedelta(minutes=10)).isoformat(),
                 },
                 {
-                    'start_time': (datetime.now() + timedelta(days=5)).isoformat(),
-                    'end_time': (datetime.now() + timedelta(days=8)).isoformat(),
+                    'start_time': (datetime.now(UTC) + timedelta(days=5)).isoformat(),
+                    'end_time': (datetime.now(UTC) + timedelta(days=8)).isoformat(),
                 },
             ],
         }
@@ -76,13 +76,13 @@ class TripsTestCase(unittest.TestCase):
             'name': 'trippin pete',
             'dates': [
                 {
-                    'start_time': datetime.now().isoformat(),
-                    'end_time': (datetime.now() + timedelta(minutes=10)).isoformat(),
+                    'start_time': datetime.now(UTC).isoformat(),
+                    'end_time': (datetime.now(UTC) + timedelta(minutes=10)).isoformat(),
                     'selected': True,
                 },
                 {
-                    'start_time': (datetime.now() + timedelta(days=5)).isoformat(),
-                    'end_time': (datetime.now() + timedelta(days=8)).isoformat(),
+                    'start_time': (datetime.now(UTC) + timedelta(days=5)).isoformat(),
+                    'end_time': (datetime.now(UTC) + timedelta(days=8)).isoformat(),
                 },
             ],
         }
@@ -90,20 +90,20 @@ class TripsTestCase(unittest.TestCase):
             'name': 'no trip for u',
             'dates': [
                 {
-                    'start_time': datetime.now().isoformat(),
-                    'end_time': (datetime.now() - timedelta(minutes=5)).isoformat(),
+                    'start_time': datetime.now(UTC).isoformat(),
+                    'end_time': (datetime.now(UTC) - timedelta(minutes=5)).isoformat(),
                 }
             ],
         }
         cls.trip_with_date_no_start = {
             'name': 'no trip for u2',
-            'dates': [{'end_time': (datetime.now() - timedelta(minutes=5)).isoformat()}],
+            'dates': [{'end_time': (datetime.now(UTC) - timedelta(minutes=5)).isoformat()}],
         }
         cls.trip_with_date_no_end = {
             'name': 'no trip for u3',
             'dates': [
                 {
-                    'start_time': datetime.now().isoformat(),
+                    'start_time': datetime.now(UTC).isoformat(),
                 }
             ],
         }
@@ -417,8 +417,8 @@ class TripsTestCase(unittest.TestCase):
         self.assertEqual(data['dates'][0]['start_time'], self.trip_with_date['dates'][0]['start_time'])
         self.assertEqual(data['dates'][0]['end_time'], self.trip_with_date['dates'][0]['end_time'])
 
-        start_time = (datetime.now() + timedelta(days=7)).isoformat()
-        end_time = (datetime.now() + timedelta(days=14)).isoformat()
+        start_time = (datetime.now(UTC) + timedelta(days=7)).isoformat()
+        end_time = (datetime.now(UTC) + timedelta(days=14)).isoformat()
         response = self.client.patch(
             f'/trips/{id}/dates',
             data=json.dumps(
@@ -647,8 +647,8 @@ class TripsTestCase(unittest.TestCase):
 
         trip['dates'].append(
             {
-                'start_time': (datetime.now() + timedelta(days=7)).isoformat(),
-                'end_time': (datetime.now() + timedelta(days=8)).isoformat(),
+                'start_time': (datetime.now(UTC) + timedelta(days=7)).isoformat(),
+                'end_time': (datetime.now(UTC) + timedelta(days=8)).isoformat(),
             }
         )
 
@@ -722,7 +722,7 @@ class TripsTestCase(unittest.TestCase):
 
         trip = json.loads(response.data.decode('utf-8'))
 
-        trip['dates'][0]['end_time'] = (datetime.now() + timedelta(days=8)).isoformat()
+        trip['dates'][0]['end_time'] = (datetime.now(UTC) + timedelta(days=8)).isoformat()
 
         response = self.client.put(f'/trips/{trip["id"]}', data=json.dumps(trip), headers=self.headers_json)
 
@@ -772,8 +772,8 @@ class TripsTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
         trip_id2 = data['id']
 
-        start_time = (datetime.now() + timedelta(days=7)).isoformat()
-        end_time = (datetime.now() + timedelta(days=14)).isoformat()
+        start_time = (datetime.now(UTC) + timedelta(days=7)).isoformat()
+        end_time = (datetime.now(UTC) + timedelta(days=14)).isoformat()
         response = self.client.patch(
             f'/trips/{trip_id1}/dates',
             data=json.dumps(

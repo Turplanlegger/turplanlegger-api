@@ -1,6 +1,6 @@
 import json
 import unittest
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from turplanlegger.app import create_app, db
 from turplanlegger.auth.utils import hash_password
@@ -530,8 +530,8 @@ class TripsPermissionsTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
         trip_id = data['id']
 
-        start_time = (datetime.now() + timedelta(days=7)).isoformat()
-        end_time = (datetime.now() + timedelta(days=14)).isoformat()
+        start_time = (datetime.now(UTC) + timedelta(days=7)).isoformat()
+        end_time = (datetime.now(UTC) + timedelta(days=14)).isoformat()
 
         # User 2
         # Ok
