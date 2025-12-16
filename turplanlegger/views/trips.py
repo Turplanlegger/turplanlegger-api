@@ -161,12 +161,15 @@ def add_route_to_trip(trip_id: int):
     if Permission.verify(route.owner, route.permissions, g.user.id, AccessLevel.READ) is PermissionResult.NOT_FOUND:
         raise ApiProblem('Failed to add route to trip', 'Route was not found', 404)
 
+    if route.id in trip.routes:
+        return jsonify(status='ok', count=1, trip=trip.serialize), 200
+
     try:
         trip.add_route_reference(route.id)
     except Exception as e:
         raise ApiProblem('Failed to add route to trip', str(e), 500)
 
-    return jsonify(trip.serialize), 201
+    return jsonify(status='ok', count=1, trip=trip.serialize), 201
 
 
 @api.route('/trips/<trip_id>/item_lists', methods=['PATCH'])
