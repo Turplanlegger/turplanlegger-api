@@ -324,10 +324,19 @@ class TripsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data.decode('utf-8'))
 
-        response = self.client.get(f'/trips/{trip_id}', headers=self.headers)
+        self.assertEqual(len(data['trip']['item_lists']), 1)
+        self.assertEqual(data['trip']['item_lists'], [item_list_id])
+
+        # Add existing item_list to trip
+        response = self.client.patch(
+            f'/trips/{trip_id}/item_lists',
+            data=json.dumps({'item_list_id': item_list_id}),
+            headers=self.headers_json,
+        )
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode('utf-8'))
 
+        self.assertEqual(len(data['trip']['item_lists']), 1)
         self.assertEqual(data['trip']['item_lists'], [item_list_id])
 
     def test_change_trip_owner(self):
