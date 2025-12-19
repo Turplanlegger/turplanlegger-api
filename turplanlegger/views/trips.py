@@ -3,6 +3,7 @@ from uuid import UUID
 from flask import g, jsonify, request
 
 from turplanlegger.auth.decorators import auth
+from turplanlegger.errors import ErrorMessage
 from turplanlegger.exceptions import ApiProblem
 from turplanlegger.models.access_level import AccessLevel
 from turplanlegger.models.item_lists import ItemList
@@ -22,7 +23,7 @@ def get_trip(trip_id):
     try:
         trip = Trip.find_trip(trip_id)
     except (ValueError, TypeError):
-        raise ApiProblem('Failed to look up trip', 'Unknown error', 400)
+        raise ApiProblem(ErrorMessage.TRIP_FAILED_LOOKUP, ErrorMessage.GENERIC_UNKNOWN, 400)
 
     if trip and (
         trip.private is False
@@ -30,7 +31,7 @@ def get_trip(trip_id):
     ):
         return jsonify(status='ok', count=1, trip=trip.serialize)
     else:
-        raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
+        raise ApiProblem(ErrorMessage.TRIP_NOT_FOUND, ErrorMessage.TRIP_NOT_FOUND_LONG, 404)
 
 
 @api.route('/trips', methods=['POST'])
@@ -54,15 +55,15 @@ def update_trip(trip_id: int):
     trip = Trip.find_trip(trip_id)
 
     if not trip:
-        raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
+        raise ApiProblem(ErrorMessage.TRIP_NOT_FOUND, ErrorMessage.TRIP_NOT_FOUND_LONG, 404)
 
     perms = Permission.verify(trip.owner, trip.permissions, g.user.id, AccessLevel.MODIFY)
     if perms is PermissionResult.NOT_FOUND:
         if trip.private is True:
-            raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
-        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the trip', 403)
+            raise ApiProblem(ErrorMessage.TRIP_NOT_FOUND, ErrorMessage.TRIP_NOT_FOUND_LONG, 404)
+        raise ApiProblem(ErrorMessage.PERMS_INSUFFICIENT, ErrorMessage.TRIP_PERMS_INSUFFICIENT_MODIFY, 403)
     if perms is PermissionResult.INSUFFICIENT_PERMISSIONS:
-        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the trip', 403)
+        raise ApiProblem(ErrorMessage.PERMS_INSUFFICIENT, ErrorMessage.TRIP_PERMS_INSUFFICIENT_MODIFY, 403)
 
     errors = []
     trip_changed = False
@@ -106,33 +107,33 @@ def update_trip(trip_id: int):
 def add_note_to_trip(trip_id: int):
     trip = Trip.find_trip(trip_id)
     if not trip:
-        raise ApiProblem('Failed to add note to trip', 'Trip was not found', 404)
+        raise ApiProblem(ErrorMessage.TRIP_FAILED_ADD_NOTE, ErrorMessage.TRIP_NOT_FOUND_LONG, 404)
 
     perms = Permission.verify(trip.owner, trip.permissions, g.user.id, AccessLevel.MODIFY)
     if perms is PermissionResult.NOT_FOUND:
         if trip.private is True:
-            raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
-        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the trip', 403)
+            raise ApiProblem(ErrorMessage.TRIP_NOT_FOUND, ErrorMessage.TRIP_NOT_FOUND_LONG, 404)
+        raise ApiProblem(ErrorMessage.PERMS_INSUFFICIENT, ErrorMessage.TRIP_PERMS_INSUFFICIENT_MODIFY, 403)
     if perms is PermissionResult.INSUFFICIENT_PERMISSIONS:
-        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the trip', 403)
+        raise ApiProblem(ErrorMessage.PERMS_INSUFFICIENT, ErrorMessage.TRIP_PERMS_INSUFFICIENT_MODIFY, 403)
 
     note = Note.find_note(request.json.get('note_id', None))
     if not note:
-        raise ApiProblem('Failed to add note to trip', 'Note was not found', 404)
+        raise ApiProblem(ErrorMessage.TRIP_FAILED_ADD_NOTE, ErrorMessage.TRIP_NOT_FOUND_LONG, 404)
 
     if Permission.verify(note.owner, note.permissions, g.user.id, AccessLevel.READ) is PermissionResult.NOT_FOUND:
-        raise ApiProblem('Failed to add note to trip', 'Note was not found', 404)
+        raise ApiProblem(ErrorMessage.TRIP_FAILED_ADD_NOTE, ErrorMessage.TRIP_NOT_FOUND_LONG, 404)
 
     # I'm lazy, so I'm keeping this here until I fix private attribute for Note
     # if note.private is True:
     #     note_perms = Permission.verify(note.owner, note.permissions, g.user.id, AccessLevel.READ)
     #     if note_perms is PermissionResult.NOT_FOUND:
-    #         raise ApiProblem('Failed to add note to trip', 'Note was not found', 404)
+    #         raise ApiProblem(ErrorMessage.TRIP_FAILED_ADD_NOTE, ErrorMessage.TRIP_NOT_FOUND_LONG, 404)
 
     try:
         trip.add_note_reference(note.id)
     except Exception as e:
-        raise ApiProblem('Failed to add note to trip', str(e), 500)
+        raise ApiProblem(ErrorMessage.TRIP_FAILED_ADD_NOTE, str(e), 500)
 
     return jsonify(trip.serialize), 201
 
@@ -142,15 +143,15 @@ def add_note_to_trip(trip_id: int):
 def add_route_to_trip(trip_id: int):
     trip = Trip.find_trip(trip_id)
     if not trip:
-        raise ApiProblem('Failed to add route to trip', 'Trip was not found', 404)
+        raise ApiProblem('Failed to add route to trip', ErrorMessage.TRIP_NOT_FOUND_LONG, 404)
 
     perms = Permission.verify(trip.owner, trip.permissions, g.user.id, AccessLevel.MODIFY)
     if perms is PermissionResult.NOT_FOUND:
         if trip.private is True:
-            raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
-        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the trip', 403)
+            raise ApiProblem(ErrorMessage.TRIP_NOT_FOUND, ErrorMessage.TRIP_NOT_FOUND_LONG, 404)
+        raise ApiProblem(ErrorMessage.PERMS_INSUFFICIENT, ErrorMessage.TRIP_PERMS_INSUFFICIENT_MODIFY, 403)
     if perms is PermissionResult.INSUFFICIENT_PERMISSIONS:
-        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the trip', 403)
+        raise ApiProblem(ErrorMessage.PERMS_INSUFFICIENT, ErrorMessage.TRIP_PERMS_INSUFFICIENT_MODIFY, 403)
 
     route = Route.find_route(request.json.get('route_id', None))
     if not route:
@@ -172,7 +173,7 @@ def add_route_to_trip(trip_id: int):
 def add_item_list_to_trip(trip_id: int):
     trip = Trip.find_trip(trip_id)
     if not trip:
-        raise ApiProblem('Failed to add item list to trip', 'Trip was not found', 404)
+        raise ApiProblem('Failed to add item list to trip', ErrorMessage.TRIP_NOT_FOUND_LONG, 404)
 
     item_list = ItemList.find_item_list(request.json.get('item_list_id', None))
     if not item_list:
@@ -196,13 +197,13 @@ def add_item_list_to_trip(trip_id: int):
 def change_trip_owner(trip_id: int):
     trip = Trip.find_trip(trip_id)
     if not trip:
-        raise ApiProblem('Failed to change owner of trip', 'The requested trip was not found', 404)
+        raise ApiProblem('Failed to change owner of trip', ErrorMessage.TRIP_NOT_FOUND_LONG, 404)
 
     if g.user.id != trip.owner:
         perms = Permission.verify(trip.owner, trip.permissions, g.user.id, AccessLevel.MODIFY)
         if trip.private is True and perms is PermissionResult.NOT_FOUND:
-            raise ApiProblem('Failed to change owner of trip', 'The requested trip was not found', 404)
-        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to change ownership the trip', 403)
+            raise ApiProblem('Failed to change owner of trip', ErrorMessage.TRIP_NOT_FOUND_LONG, 404)
+        raise ApiProblem(ErrorMessage.PERMS_INSUFFICIENT, 'Not sufficient permissions to change ownership the trip', 403)
 
     try:
         owner_id = UUID(request.json.get('owner', None))
@@ -222,7 +223,7 @@ def change_trip_owner(trip_id: int):
     except ValueError as e:
         raise ApiProblem('Failed to change owner', str(e), 400)
     except Exception:
-        raise ApiProblem('Failed to change owner of trip', 'Unknown error', 500)
+        raise ApiProblem('Failed to change owner of trip', ErrorMessage.GENERIC_UNKNOWN, 500)
 
     return ('', 204)
 
@@ -235,7 +236,7 @@ def get_my_trips():
     if trips:
         return jsonify(status='ok', count=len(trips), trip=[trip.serialize for trip in trips])
     else:
-        raise ApiProblem('Trip not found', 'No trips were found for the requested user', 404)
+        raise ApiProblem(ErrorMessage.TRIP_NOT_FOUND, 'No trips were found for the requested user', 404)
 
 
 @api.route('/trips/<trip_id>', methods=['DELETE'])
@@ -243,15 +244,15 @@ def get_my_trips():
 def delete_trip(trip_id):
     trip = Trip.find_trip(trip_id)
     if not trip:
-        raise ApiProblem('Failed to delete trip', 'The requested trip was not found', 404)
+        raise ApiProblem('Failed to delete trip', ErrorMessage.TRIP_NOT_FOUND_LONG, 404)
 
     perms = Permission.verify(trip.owner, trip.permissions, g.user.id, AccessLevel.DELETE)
     if perms is PermissionResult.NOT_FOUND:
         if trip.private is True:
-            raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
-        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to delete the trip', 403)
+            raise ApiProblem(ErrorMessage.TRIP_NOT_FOUND, ErrorMessage.TRIP_NOT_FOUND_LONG, 404)
+        raise ApiProblem(ErrorMessage.PERMS_INSUFFICIENT, 'Not sufficient permissions to delete the trip', 403)
     elif perms is PermissionResult.INSUFFICIENT_PERMISSIONS:
-        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to delete the trip', 403)
+        raise ApiProblem(ErrorMessage.PERMS_INSUFFICIENT, 'Not sufficient permissions to delete the trip', 403)
 
     try:
         trip.delete()
@@ -266,15 +267,15 @@ def delete_trip(trip_id):
 def add_trip_date(trip_id):
     trip = Trip.find_trip(trip_id)
     if not trip:
-        raise ApiProblem('Failed to add date to trip', 'The requested trip was not found', 404)
+        raise ApiProblem('Failed to add date to trip', ErrorMessage.TRIP_NOT_FOUND_LONG, 404)
 
     perms = Permission.verify(trip.owner, trip.permissions, g.user.id, AccessLevel.MODIFY)
     if perms is PermissionResult.NOT_FOUND:
         if trip.private is True:
-            raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
-        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the trip', 403)
+            raise ApiProblem(ErrorMessage.TRIP_NOT_FOUND, ErrorMessage.TRIP_NOT_FOUND_LONG, 404)
+        raise ApiProblem(ErrorMessage.PERMS_INSUFFICIENT, ErrorMessage.TRIP_PERMS_INSUFFICIENT_MODIFY, 403)
     if perms is PermissionResult.INSUFFICIENT_PERMISSIONS:
-        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the trip', 403)
+        raise ApiProblem(ErrorMessage.PERMS_INSUFFICIENT, ErrorMessage.TRIP_PERMS_INSUFFICIENT_MODIFY, 403)
 
     request.json['trip_id'] = trip_id
 
@@ -296,13 +297,13 @@ def add_trip_date(trip_id):
 def remove_trip_date(trip_id, trip_date_id):
     trip = Trip.find_trip(trip_id)
     if not trip:
-        raise ApiProblem('Failed to remove date from trip', 'The requested trip was not found', 404)
+        raise ApiProblem('Failed to remove date from trip', ErrorMessage.TRIP_NOT_FOUND_LONG, 404)
 
     perms = Permission.verify(trip.owner, trip.permissions, g.user.id, AccessLevel.MODIFY)
     if perms is PermissionResult.NOT_FOUND:
-        raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
+        raise ApiProblem(ErrorMessage.TRIP_NOT_FOUND, ErrorMessage.TRIP_NOT_FOUND_LONG, 404)
     if perms is PermissionResult.INSUFFICIENT_PERMISSIONS:
-        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to delete the trip', 403)
+        raise ApiProblem(ErrorMessage.PERMS_INSUFFICIENT, 'Not sufficient permissions to delete the trip', 403)
 
     trip_date = None
     for date in trip.dates:
@@ -326,15 +327,15 @@ def remove_trip_date(trip_id, trip_date_id):
 def select_trip_date(trip_id: int, trip_date_id: int):
     trip = Trip.find_trip(trip_id)
     if not trip:
-        raise ApiProblem('Failed to select trip date', 'The requested trip was not found', 404)
+        raise ApiProblem('Failed to select trip date', ErrorMessage.TRIP_NOT_FOUND_LONG, 404)
 
     perms = Permission.verify(trip.owner, trip.permissions, g.user.id, AccessLevel.MODIFY)
     if perms is PermissionResult.NOT_FOUND:
         if trip.private is True:
-            raise ApiProblem('Trip not found', 'The requested trip was not found', 404)
-        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the trip', 403)
+            raise ApiProblem(ErrorMessage.TRIP_NOT_FOUND, ErrorMessage.TRIP_NOT_FOUND_LONG, 404)
+        raise ApiProblem(ErrorMessage.PERMS_INSUFFICIENT, ErrorMessage.TRIP_PERMS_INSUFFICIENT_MODIFY, 403)
     if perms is PermissionResult.INSUFFICIENT_PERMISSIONS:
-        raise ApiProblem('Insufficient permissions', 'Not sufficient permissions to modify the trip', 403)
+        raise ApiProblem(ErrorMessage.PERMS_INSUFFICIENT, ErrorMessage.TRIP_PERMS_INSUFFICIENT_MODIFY, 403)
 
     new_selected_date = None
     old_selected_date = None
