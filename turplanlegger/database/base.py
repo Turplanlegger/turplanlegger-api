@@ -539,25 +539,22 @@ class Database:
         insert_ref = """
             INSERT INTO trips_notes_references (trip_id, note_id)
             VALUES (%(trip_id)s, %(note_id)s)
-            RETURNING *
         """
-        return self._insert(insert_ref, {'trip_id': trip_id, 'note_id': note_id})
+        return self._insert(insert_ref, {'trip_id': trip_id, 'note_id': note_id}, False)
 
     def add_trip_item_list_reference(self, trip_id, item_list_id):
         insert_ref = """
             INSERT INTO trips_item_lists_references (trip_id, item_list_id)
             VALUES (%(trip_id)s, %(item_list_id)s)
-            RETURNING *
         """
-        return self._insert(insert_ref, {'trip_id': trip_id, 'item_list_id': item_list_id})
+        return self._insert(insert_ref, {'trip_id': trip_id, 'item_list_id': item_list_id}, False)
 
     def add_trip_route_reference(self, trip_id, route_id):
         insert_ref = """
             INSERT INTO trips_routes_references (trip_id, route_id)
             VALUES (%(trip_id)s, %(route_id)s)
-            RETURNING *
         """
-        return self._insert(insert_ref, {'trip_id': trip_id, 'route_id': route_id})
+        return self._insert(insert_ref, {'trip_id': trip_id, 'route_id': route_id}, False)
 
     def get_trip(self, trip_id: int, deleted=False):
         select = 'SELECT * FROM trips WHERE id = %s'
@@ -682,14 +679,14 @@ class Database:
         return self._updateone(update, {'id': trip_date_id}, returning=True)
 
     # Helpers
-    def _insert(self, query, vars):
+    def _insert(self, query, vars, returning=True):
         """
         Insert, with return.
         """
         self._log('_insert', query, vars)
         with self.conn.transaction():
             self.cur.execute(query, vars)
-            return self.cur.fetchone()
+            return self.cur.fetchone() if returning else None
 
     def _fetchone(self, query, vars):
         """

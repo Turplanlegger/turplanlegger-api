@@ -147,7 +147,7 @@ class Trip:
     def update(self, updated_fields) -> None:
         return db.update_trip(self, updated_fields)
 
-    def add_note_reference(self, note_id: int) -> 'Trip':
+    def add_note_reference(self, note_id: int) -> None:
         """Adds a note to the trip instance
 
         Args:
@@ -157,9 +157,9 @@ class Trip:
             dict of notes from the database
         """
         db.add_trip_note_reference(self.id, note_id)
-        self.notes = db.get_trip_notes(self.id)
+        self.notes = [item.note_id for item in db.get_trip_notes(self.id)]
 
-    def add_route_reference(self, route_id: int) -> 'Trip':
+    def add_route_reference(self, route_id: int) -> None:
         """Adds a route to the trip instance
 
         Args:
@@ -169,11 +169,11 @@ class Trip:
             dict of routes from the database
         """
         db.add_trip_route_reference(self.id, route_id)
-        self.routes = db.get_trip_routes(self.id)
+        self.routes = [item.route_id for item in db.get_trip_routes(self.id)]
 
     def add_item_list_reference(self, item_list_id: int) -> 'Trip':
         db.add_trip_item_list_reference(self.id, item_list_id)
-        self.routes = db.get_trip_item_lists(self.id)
+        self.item_lists = [item.item_list_id for item in db.get_trip_item_lists(self.id)]
 
     @staticmethod
     def update_trip_dates(dates: JSON, trip: 'Trip') -> 'TRIP_DATE_UPDATE_STATUS':
