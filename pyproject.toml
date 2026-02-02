@@ -47,7 +47,7 @@ debug = [
     "IPython==9.0.2"
 ]
 prod = [
-    "gunicorn[gthread]==23.0.0",
+    "gunicorn[gthread]==25.0.0",
     "psycopg[c]==3.3.2"
 ]
 
